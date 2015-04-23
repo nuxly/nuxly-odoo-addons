@@ -1,6 +1,5 @@
-# Odoo---hr_holidays_multi_allocation
-Module Odoo - Adds leave allocation to one or several employees
-
+# hr_holidays_multi_allocation
+Module Odoo made by Nuxly : Adds leave allocation to one or several employees
 
 DESCRIPTION
 
