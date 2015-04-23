@@ -1,11 +1,11 @@
 # Odoo---hr_holidays_multi_allocation
-Module Odoo - Créditer des jours de congés sur un ou plusieurs employés
+Module Odoo - Adds leave allocation to one or several employees
 
 
 DESCRIPTION
 
-    Ajout d'une option dans le menu Autres Options : Attribuer des congés
-    Permet d'ajouter des congés pour tous les employés sélectionnés
-    Permet d'ajouter des congés à l'employé dont la fiche est affichée
+    Adds an option in the 'More' menu : Allocation management
+    Adds leave for all selected employees
+    Adds leave to the employee whose record is displayed
 
 
