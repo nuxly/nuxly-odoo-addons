@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="export_quadra_view" model="ir.ui.view">
+        <field name="name">account.export.view</field>
+        <field name="model">account.export</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <label for="" string="This assisant will help you to send by email the exports CVS to QUADRA. Would you like export writings ?"/>
+                </group>
+                <footer>
+                    <button name="export_quadra" string="Export" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_export_quadra" model="ir.actions.act_window">
+        <field name="name">Export QUADRA</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.export</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="export_quadra_view"/>
+        <field name="context">{}</field>
+        <field name="target">new</field>
+        <field name="help">Export writes to CSV format for QUADRA.</field>
+    </record>
+
+    <menuitem
+        name="Export QUADRA"
+        parent="account.menu_action_account_invoice_report_all"
+        action="action_export_quadra"
+        id="menu_export_quadra" />
+
+</odoo>
