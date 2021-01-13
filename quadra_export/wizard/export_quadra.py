@@ -137,13 +137,13 @@ class AccountExport(models.TransientModel):
 
                     # Libelle
                     # Si il s'agit d'un achat avec facture
-                    libelle  = ""
-                    if(line.journal_id.type in ['purchase','purchase_refund'] and line.invoice):
+                    libelle  = " "
+                    if(line.journal_id.type in ['purchase','purchase_refund'] and line.move_id):
                         # Journal d'achat
-                        if(line.invoice.origin):
-                            libelle += line.invoice.origin
-                        if(line.invoice.supplier_invoice_number):
-                            libelle += " "+line.invoice.supplier_invoice_number
+                        if(line.move_id.invoice_origin):
+                            libelle += line.move_id.invoice_origin
+                        if(line.move_id.ref):
+                            libelle += " "+line.move_id.ref
                     # Si il s'agit d'un journal de Bank
                     elif(line.journal_id.type in ['bank']):
                         if(move.ref):
@@ -158,9 +158,10 @@ class AccountExport(models.TransientModel):
                                     break
                     # Tout autre types de comptes (factures d'achats)
                     else:
-                        libelle = line.ref
+                        if line.ref:
+                            libelle += line.ref
                     s += libelle.upper().replace(';', ',') +";"
-
+		   
 
                     # Piece
                     s += format(move.name)+";"
@@ -226,7 +227,7 @@ class AccountExport(models.TransientModel):
                         file_data += line
                         if not line:
                             break
-                    attachments.append((fsname, file_data))
+                    attachments.append((fsname, file_data, 'text/plain'))
             body += "\n\n Bonne intégration dans QUADRA."
             msg = ir_mail_server.build_email(sender, recepicient, subject, body, email_bcc=recepicient_bcc ,subtype='plain', attachments=attachments)
             ir_mail_server.send_email(msg)
