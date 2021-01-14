@@ -162,7 +162,6 @@ class AccountExport(models.TransientModel):
                             libelle += line.ref
                     s += libelle.upper().replace(';', ',') +";"
 
-
                     # Piece
                     s += format(move.name)+";"
 
