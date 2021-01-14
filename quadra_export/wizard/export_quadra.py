@@ -102,12 +102,12 @@ class AccountExport(models.TransientModel):
                     # cas client
                     if (line.account_id.code[:3] == '411') and (line.partner_id):
                         # vérif sur code client saisi
-                        if(line.partner_id.quadra_customer_code is None) or (line.partner_id.quadra_customer_code =='') or (line.partner_id.quadra_customer_code ==0):
+                        if(line.partner_id.ref is None) or (line.partner_id.ref =='') or (line.partner_id.ref ==0):
                             #errors_moves.append(u"Facture {} : code client manquant pour la société {}".format(move.name, line.partner_id.name))
                             erreurs += "ERROR : 137 - Invoice " + format(move.name) + " : missing client code for the company " + format(line.partner_id.name) +"\n"
                             s += "undefined;"
                         else:
-                            s += line.partner_id.quadra_customer_code.upper().replace(';', ',') +";"
+                            s += line.partner_id.ref.upper().replace(';', ',') +";"
 
                             if (line.partner_id.parent_id):
                                 s+= line.partner_id.parent_id.name.upper().replace(';', ',') +";"
