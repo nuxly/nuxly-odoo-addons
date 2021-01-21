@@ -33,8 +33,6 @@ class AccountExport(models.TransientModel):
     """
 
     def largeur_fixe(self, string, size, patern, align):
-        string = unicode(string)
-        patern = unicode(patern)
         if align == 'r':
             return string[0:size].rjust(size, patern)
         else:
@@ -241,7 +239,7 @@ class AccountExport(models.TransientModel):
                         libelle = line.name
 
                     # Normalise en remplaçant les accents & en supprimant les caractères autre que ASCII
-                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD',unicode(libelle)).encode('ascii', 'ignore'), 32, ' ', 'l')
+                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD',libelle).encode('ascii', 'ignore'), 32, ' ', 'l')
 
                     # Numéro de pièce - 10 chars
                     ### Piece (référence : max 10 caractères)
@@ -286,7 +284,7 @@ class AccountExport(models.TransientModel):
                     s_lf += self.largeur_fixe(" ", 73, ' ', 'l')
 
                     # Si il y a des erreurs
-                    if (erreurs != unicode('')):
+                    if erreurs:
                         raise UserError(_(erreurs))
 
 
