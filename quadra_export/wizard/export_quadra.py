@@ -5,8 +5,6 @@ from odoo.exceptions import UserError
 import logging
 import tempfile
 import email, mimetypes
-from email.Header import decode_header
-from email.MIMEText import MIMEText
 import base64
 import os
 import unicodedata
