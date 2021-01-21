@@ -33,10 +33,12 @@ class AccountExport(models.TransientModel):
     """
 
     def largeur_fixe(self, string, size, patern, align):
+        if type(string) is str:
+            string = string.encode()
         if align == 'r':
-            return string[0:size].rjust(size, patern)
+            return string[0:size].rjust(size, patern.encode())
         else:
-            return string[0:size].ljust(size, patern)
+            return string[0:size].ljust(size, patern.encode())
 
     simulation = fields.Boolean('Simulate the export', help="If is true, the moves will not be checked like 'exported' but the file will be generate")
 
@@ -70,7 +72,7 @@ class AccountExport(models.TransientModel):
             #raise osv.except_osv(_('Sorry!'), _('No item to export.'))
             return
 
-        filename.append('tmp/{}_export_{}.txt'.format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), company.partner_id.name))
+        filename.append('/tmp/{}_export_{}.txt'.format(datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), company.partner_id.name))
 
         try:
             f = open(filename[0], 'w')
@@ -109,11 +111,11 @@ class AccountExport(models.TransientModel):
                 else :
 
                     # Type de compte
-                    s_lf = u"M"
+                    s_lf = b"M"
 
 
                     # Compte et Nom de comtpe
-                    compte_tmp = ""
+                    compte_tmp = b''
                     plan_comptable = {}
                     #### client_code // Compte / Alphanumérique
                     # cas client
@@ -122,7 +124,7 @@ class AccountExport(models.TransientModel):
                         if not line.partner_id.quadra_customer_code:
                             #errors_moves.append(u"Facture {} : code client manquant pour la société {}".format(move.name, line.partner_id.name))
                             erreurs += "ERROR : 137 - Invoice " + move.name + " : missing client code for the company " + line.partner_id.name +"\n"
-                            compte_tmp += "undefined"
+                            compte_tmp += b'undefined'
                         else:
                             compte_tmp += unicodedata.normalize('NFKD', line.partner_id.quadra_customer_code).encode('ASCII', 'ignore')
 
@@ -132,7 +134,7 @@ class AccountExport(models.TransientModel):
                         if not line.partner_id.quadra_supplier_code:
                             # errors_moves.append(u"Facture {} : code fournisseur manquant pour la société {}".format(move.name, line.partner_id.name))
                             erreurs += "ERROR : 146 - Invoice " + move.name + " : missing supplier code for the company " + line.partner_id.name  + "\n"
-                            compte_tmp += "undefined"
+                            compte_tmp += b'undefined'
                         else:
                             compte_tmp += unicodedata.normalize('NFKD', line.partner_id.quadra_supplier_code).encode('ASCII', 'ignore')
 
@@ -141,20 +143,20 @@ class AccountExport(models.TransientModel):
                         compte_tmp += unicodedata.normalize('NFKD', (line.account_id.code + "000")[0:8]).encode('ASCII', 'ignore')
 
                     s_lf += self.largeur_fixe(compte_tmp, 8, ' ', 'l')
-                    if not plan_comptable.has_key(compte_tmp):
+                    if not compte_tmp in plan_comptable:
                         plan_comptable[compte_tmp] = line.partner_id.name
 
                     # CJ (journal)
                     s_lf += self.largeur_fixe(line.journal_id.code, 2, '0', 'l')
 
                     # Folio
-                    s_lf += "000"
+                    s_lf += b"000"
 
                     # Date - A VALIDER
-                    s_lf += datetime.strptime(line.date, '%Y-%m-%d').strftime('%d%m%y')
+                    s_lf += line.date.strftime('%d%m%y').encode()
 
                     # Filler 1
-                    s_lf += ' '
+                    s_lf += b' '
 
                     # Libellé - 20 chars
                     s_lf += self.largeur_fixe(" ", 20, ' ', 'l')
@@ -162,62 +164,62 @@ class AccountExport(models.TransientModel):
                     # Sens de l'écriture
                     if int(line.debit*100) > 0:
                         _logger.info(format(line.debit))
-                        s_lf += 'D'
+                        s_lf += b'D'
                     elif int(line.credit*100) > 0:
                         _logger.info(format(line.credit))
-                        s_lf += 'C'
+                        s_lf += b'C'
 
                     # Signe du montant
-                    s_lf += '+'
+                    s_lf += b'+'
 
                     # Montant
                     if int(line.debit*100) > 0:
-                        s_lf += self.largeur_fixe(int(line.debit*100), 12, 0, 'r')
+                        s_lf += self.largeur_fixe(str(int(line.debit*100)), 12, '0', 'r')
                     elif int(line.credit*100) > 0:
-                        s_lf += self.largeur_fixe(int(line.credit*100), 12, 0, 'r')
+                        s_lf += self.largeur_fixe(str(int(line.credit*100)), 12, '0', 'r')
 
                     # Contrepartie
-                    s_lf += "        "
+                    s_lf += b"        "
 
                     # Date échéance
                     if line.date_maturity:
-                        s_lf += datetime.strptime(line.date_maturity, '%Y-%m-%d').strftime('%d%m%y')
+                        s_lf += line.date_maturity.strftime('%d%m%y').encode()
                     else:
-                        s_lf += "000000"
+                        s_lf += b"000000"
 
                     # Lettrage
-                    s_lf += "     "
+                    s_lf += b"     "
 
                     # Numéro de pièce - 5 char
-                    s_lf += "     "
+                    s_lf += b"     "
 
                     # Filler
                     s_lf += self.largeur_fixe(" ", 20, ' ', 'l')
 
                     # Numéro de pièce - 8 char
-                    s_lf += "        "
+                    s_lf += b"        "
 
                     # Devise
-                    s_lf += "EUR"
+                    s_lf += b"EUR"
 
                     # Code journal 2
                     s_lf += self.largeur_fixe(line.journal_id.code[:2], 3, ' ', 'l')
 
                     # Filler 2 - 3 char
-                    s_lf += "   "
+                    s_lf += b"   "
 
                     #### Libelle - 32 chars
                     # Si il s'agit d'un achat avec facture
-                    libelle = ""
-                    if(line.journal_id.type in ['sale', 'sale_refund'] and line.invoice):
+                    libelle = b""
+                    if(line.journal_id.type in ['sale', 'sale_refund'] and line.move_id):
                         # Journal de vente // update 05/10/2015 Ajouter au début le numéro de réf devant le libellé
                         libelle = move.name + ' ' + line.ref
-                    elif(line.journal_id.type in ['purchase','purchase_refund'] and line.invoice):
+                    elif(line.journal_id.type in ['purchase','purchase_refund'] and line.move_id):
                         # Journal d'achat // update fd ud 05/07/2015 : 'name' à la place de 'origin'
-                        if(line.invoice.name):
-                            libelle += line.invoice.name
-                        if(line.invoice.supplier_invoice_number):
-                            libelle += " "+line.invoice.supplier_invoice_number
+                        if(line.move_id.name):
+                            libelle += line.move_id.name
+                        if(line.move_id.ref):
+                            libelle += " "+line.move_id.ref
                     # Si il s'agit d'un journal de Bank
                     elif(line.journal_id.type in ['bank']):
                         if(move.ref):
@@ -255,7 +257,7 @@ class AccountExport(models.TransientModel):
                     if(len(move.name) <= 10):
                         _logger.info("Ref <= 10 caract. alors on conserve : {}".format(move.name))
                         s_lf += self.largeur_fixe(move.name, 10, ' ', 'l')
-                    elif(line.journal_id.type in ['purchase','purchase_refund', 'sale', 'sale_refund'] and line.invoice):
+                    elif(line.journal_id.type in ['purchase','purchase_refund', 'sale', 'sale_refund'] and line.move_id):
                         _logger.info("Ref : Achat ou Vente : {}||{}".format(move.name, move.name[0]+move.name[4:13]))
                         s_lf += self.largeur_fixe(move.name[0]+move.name[4:13], 10, ' ', 'l')
                     #Si c'est une banque et que c'est la CM 302 (Nuxly) ou M 501 (SCI)
@@ -289,9 +291,9 @@ class AccountExport(models.TransientModel):
 
 
                     # Formater la chaine pour supprimer les accents car Quadra les gère pas
-                    s_lf = unicodedata.normalize('NFKD', s_lf).encode('ascii', 'ignore')
+                    # s_lf = unicodedata.normalize('NFKD', s_lf).encode('ascii', 'ignore')
                     # Ecriture de la ligne du mouv dans le fichier
-                    f.write('{}\n'.format(s_lf.encode(charset)))
+                    f.write('{}\n'.format(s_lf))
 
         # Fin des mouv, on ferme le fichier
         f.close()

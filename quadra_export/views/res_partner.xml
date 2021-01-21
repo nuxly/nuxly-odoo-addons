@@ -6,6 +6,7 @@
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='ref']" position="after">
+                <field name="quadra_customer_code"/>
                 <field name="quadra_supplier_code"/>
             </xpath>
         </field>
