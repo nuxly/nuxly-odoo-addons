@@ -5,8 +5,10 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='ref']" position="after">
+            <xpath expr="//page[@name='accounting']/group/group/field[@name='property_account_receivable_id']" position="before">
                 <field name="quadra_customer_code"/>
+            </xpath>
+            <xpath expr="//page[@name='accounting']/group/group/field[@name='property_account_payable_id']" position="before">
                 <field name="quadra_supplier_code"/>
             </xpath>
         </field>
