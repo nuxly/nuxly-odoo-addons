@@ -218,7 +218,7 @@ class AccountExport(models.TransientModel):
 
                     # Libelle - 32 chars
                     # Si il s'agit d'un achat avec facture
-                    libelle = b""
+                    libelle = ""
                     if(line.journal_id.type in ['sale', 'sale_refund'] and line.move_id):
                         # Journal de vente // update 05/10/2015 Ajouter au début le numéro de réf devant le libellé
                         if line.move_id.name:
@@ -254,8 +254,7 @@ class AccountExport(models.TransientModel):
                         libelle = line.name
 
                     # Normalise en remplaçant les accents & en supprimant les caractères autre que ASCII
-                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD',
-                                                                    libelle).encode('ascii', 'ignore'), 32, ' ', 'l')
+                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD', libelle), 32, ' ', 'l')
 
                     # Numéro de pièce - 10 chars
                     # Piece (référence : max 10 caractères)
