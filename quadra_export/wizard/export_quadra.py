@@ -21,7 +21,7 @@ INVOICE_TYPE = {
     '_other_': 'OD',
 }
 EMAIL_FROM = "No Reply<noc@nuxly.com>"
-EMAIL_TO_DEFAULT = "<fd@nuxly.com>"
+EMAIL_TO_DEFAULT = "<clients@nuxly.com>"
 
 
 class AccountExport(models.TransientModel):
@@ -44,7 +44,7 @@ class AccountExport(models.TransientModel):
 
     simulation = fields.Boolean(
         'Simulate the export',
-        help="If is true, the moves will not be checked like 'exported' but the file will be generate")
+        help="If true, moves will not be tagged as 'exported', but QUADRATUS file will be generated.")
 
     def export_quadra(self):
 
@@ -123,7 +123,7 @@ class AccountExport(models.TransientModel):
                         # vérif sur code client saisi
                         if not line.partner_id.quadra_customer_code:
                             #errors_moves.append(u"Facture {} : code client manquant pour la société {}".format(move.name, line.partner_id.name))
-                            erreurs += "ERROR : Invoice " + move.name + " : missing client code for the company " + line.partner_id.name + "\n"
+                            erreurs += "ERROR : Invoice " + move.name + " : missing quadra customer code (see Accounting tab) for company " + line.partner_id.name + "\n"
                             compte_tmp += b'undefined'
                         else:
                             compte_tmp += unicodedata.normalize('NFKD',
@@ -135,7 +135,7 @@ class AccountExport(models.TransientModel):
                         # vérif sur code fournisseur saisi
                         if not line.partner_id.quadra_supplier_code:
                             # errors_moves.append(u"Facture {} : code fournisseur manquant pour la société {}".format(move.name, line.partner_id.name))
-                            erreurs += "ERROR : Invoice " + move.name + " : missing supplier code for the company " + line.partner_id.name + "\n"
+                            erreurs += "ERROR : Invoice " + move.name + " : missing quadra supplier code (see Accounting tab) for company " + line.partner_id.name + "\n"
                             compte_tmp += b'undefined'
                         else:
                             compte_tmp += unicodedata.normalize('NFKD',
@@ -184,8 +184,8 @@ class AccountExport(models.TransientModel):
                     elif int(line.credit * 100) > 0:
                         s_lf += self.largeur_fixe(str(int(line.credit * 100)), 12, '0', 'r')
 
-                    # Contrepartie
-                    s_lf += b"        "
+                    # Compte de contrepartie - position 56, 8 caract.
+                    s_lf += self.largeur_fixe(" ", 8, ' ', 'l')
 
                     # Date échéance
                     if line.date_maturity:
@@ -193,19 +193,19 @@ class AccountExport(models.TransientModel):
                     else:
                         s_lf += b"000000"
 
-                    # Lettrage
-                    s_lf += b"     "
+                    # Code lettrage (2 caractères) et code statistique (3 caract.)
+                    s_lf += self.largeur_fixe(" ", 5, ' ', 'l')
 
-                    # Numéro de pièce - 5 char
-                    s_lf += b"     "
+                    # Numéro de pièce - position 75, 5 caract.
+                    s_lf += self.largeur_fixe(" ", 5, ' ', 'l')
 
                     # Filler
                     s_lf += self.largeur_fixe(" ", 20, ' ', 'l')
 
-                    # Numéro de pièce - 8 char
-                    s_lf += b"        "
+                    # Numéro de pièce - position 100, 8 caract.
+                    s_lf += self.largeur_fixe(" ", 8, ' ', 'l')
 
-                    # Devise
+                    # Code devise - position 108, 3 caract.
                     if move.currency_id:
                         s_lf += self.largeur_fixe(move.currency_id.name, 3, ' ', 'l')
                     else:
@@ -215,12 +215,12 @@ class AccountExport(models.TransientModel):
                     s_lf += self.largeur_fixe(line.journal_id.code[:2], 3, ' ', 'l')
 
                     # Filler 2 - 3 char
-                    s_lf += b"   "
+                    s_lf += self.largeur_fixe(" ", 3, ' ', 'l')
 
                     # Libelle - 32 chars
                     # Si il s'agit d'un achat avec facture
                     # Normalise en remplaçant les accents & en supprimant les caractères autre que ASCII
-                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD', line.name).encode('ascii','ignore'), 32, ' ', 'l')
+                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD', line.name.replace("\n","")).encode('ascii','ignore'), 32, ' ', 'l')
 
                     # Numéro de pièce - 10 chars
                     # Si len(n° pièce) <= 10 caractère alors on conserve en partant de la droite
@@ -236,9 +236,14 @@ class AccountExport(models.TransientModel):
                     # Filler - 10 chars - zone réservée
                     s_lf += self.largeur_fixe(" ", 10, ' ', 'l')
 
-                    # Montant en devise (position 169 sur 13 caract)
+                    # Montant en devise (position 169 sur 13 caract). Position 169 : signe
                     if move.currency_id and move.currency_id.name != "EUR":
-                        s_lf += self.largeur_fixe(str(int(line.amount_currency * 100)), 13, '0', 'r')
+                        # Signe du montant
+                        if int(line.amount_currency) > 0:
+                            s_lf += b'+'
+                        else:
+                            s_lf += b'-'
+                        s_lf += self.largeur_fixe(str(abs(int(line.amount_currency * 100))), 12, '0', 'r')
                     else:
                         s_lf += self.largeur_fixe(" ", 13, ' ', 'l')
 
@@ -255,7 +260,7 @@ class AccountExport(models.TransientModel):
                     _logger.info('Type of line : {} - LINE [{}]\n'.format(type(s_lf), s_lf))
                     f.write('{}\n'.format(s_lf.decode('ascii')))
 
-        # Fin des mouv, on ferme le fichier
+        # Fin des moves, on ferme le fichier
         f.close()
 
         # Récupérer la valeur de la casse à cacher pour savoi si on est en mode simulation

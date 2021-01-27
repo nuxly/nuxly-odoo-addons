@@ -1,12 +1,12 @@
 {
-    'name': 'Export QUADRA Format (CSV)',
+    'name': 'ASCII Export for QUADRATUS (fixed width)',
     'version': '13.0.3.0',
     'category': 'Accounting & Finance',
     'description': """
-This module make an export to CSV format for QUADRA.
+This module generates an ASCII export file (fixed width) for QUADRATUS.
 ======================================================================
 
-For any ask, send a mail to info@nuxly.com
+For any question, send us an email to info@nuxly.com
 
 Features:
 -----------------------------------------------------------
