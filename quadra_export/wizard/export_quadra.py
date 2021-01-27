@@ -86,8 +86,8 @@ class AccountExport(models.TransientModel):
         erreurs = ''
 
         # En-tête du fichier
-        s_lf = "MCOMPTE C  000JJMMAA LIBELLE             C+000000000000        301015                                      EURJOU   LIBELLE                         REF PIECE                                                                                                   "
-        f.write('{}\n'.format(s_lf.encode(charset)))
+        s_lf = b"MCOMPTE C  000JJMMAA LIBELLE             C+000000000000        301015                                      EURJOU   LIBELLE                         REF PIECE                                                                                                   "
+        f.write('{}\n'.format(s_lf.decode('ascii')))
 
         # Parcours des mouv
         for move in ids_move:
@@ -106,11 +106,9 @@ class AccountExport(models.TransientModel):
                 nbEcriture += 1
 
                 s = ''
-
                 # Les lignes de titres/sous-titres ne sont pas saisis dans l'export
                 if (line.debit == 0) and (line.credit == 0):
-                    _logger.info(
-                        '[nuxly-log] /// export_quadra /// ligne without debit : {} neigther  credit : {} '.format(line.debit, line.credit))
+                    _logger.info('export_quadra // line ignored because debit and credit are null')
                 else:
 
                     # Type de compte
@@ -125,7 +123,7 @@ class AccountExport(models.TransientModel):
                         # vérif sur code client saisi
                         if not line.partner_id.quadra_customer_code:
                             #errors_moves.append(u"Facture {} : code client manquant pour la société {}".format(move.name, line.partner_id.name))
-                            erreurs += "ERROR : 137 - Invoice " + move.name + " : missing client code for the company " + line.partner_id.name + "\n"
+                            erreurs += "ERROR : Invoice " + move.name + " : missing client code for the company " + line.partner_id.name + "\n"
                             compte_tmp += b'undefined'
                         else:
                             compte_tmp += unicodedata.normalize('NFKD',
@@ -137,7 +135,7 @@ class AccountExport(models.TransientModel):
                         # vérif sur code fournisseur saisi
                         if not line.partner_id.quadra_supplier_code:
                             # errors_moves.append(u"Facture {} : code fournisseur manquant pour la société {}".format(move.name, line.partner_id.name))
-                            erreurs += "ERROR : 146 - Invoice " + move.name + " : missing supplier code for the company " + line.partner_id.name + "\n"
+                            erreurs += "ERROR : Invoice " + move.name + " : missing supplier code for the company " + line.partner_id.name + "\n"
                             compte_tmp += b'undefined'
                         else:
                             compte_tmp += unicodedata.normalize('NFKD',
@@ -208,9 +206,12 @@ class AccountExport(models.TransientModel):
                     s_lf += b"        "
 
                     # Devise
-                    s_lf += b"EUR"
+                    if move.currency_id:
+                        s_lf += self.largeur_fixe(move.currency_id.name, 3, ' ', 'l')
+                    else:
+                        s_lf += b"EUR"
 
-                    # Code journal 2
+                    # Code journal 2 - sur 3 caract.
                     s_lf += self.largeur_fixe(line.journal_id.code[:2], 3, ' ', 'l')
 
                     # Filler 2 - 3 char
@@ -218,87 +219,31 @@ class AccountExport(models.TransientModel):
 
                     # Libelle - 32 chars
                     # Si il s'agit d'un achat avec facture
-                    libelle = ""
-                    if(line.journal_id.type in ['sale', 'sale_refund'] and line.move_id):
-                        # Journal de vente // update 05/10/2015 Ajouter au début le numéro de réf devant le libellé
-                        if line.move_id.name:
-                            libelle += line.move_id.name
-                        if line.move_id.ref:
-                            libelle += " " + line.move_id.ref
-                    elif(line.journal_id.type in ['purchase', 'purchase_refund'] and line.move_id):
-                        # Journal d'achat // update fd ud 05/07/2015 : 'name' à la place de 'origin'
-                        if(line.move_id.name):
-                            libelle += line.move_id.name
-                        if(line.move_id.ref):
-                            libelle += " " + line.move_id.ref
-                    # Si il s'agit d'un journal de Bank
-                    elif(line.journal_id.type in ['bank']):
-                        if move.ref:
-                            libelle = move.ref
-                        else:
-                            # On cherche la première ligne qui n'est pas sur le compte comptable
-                            # banque (512...) attaché au journal de banque
-                            for lineBis in move.line_id:
-                                _logger.info("%s != %s ?", lineBis.account_id.code,
-                                             move.journal_id.default_credit_account_id.code)
-                                if(lineBis.account_id.code != move.journal_id.default_credit_account_id.code):
-                                    libelle = lineBis.name
-                                    break
-                    # S'il s'agit du journal des Notes de frais (NF)
-                    elif(line.journal_id.code == 'NF'):
-                        libelle = line.ref + ' ' + line.name
-                    # Tout autre types de comptes
-                    elif(line.ref):
-                        libelle = line.ref + ' ' + line.name
-                    else:
-                        libelle = line.name
-
                     # Normalise en remplaçant les accents & en supprimant les caractères autre que ASCII
-                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD', libelle), 32, ' ', 'l')
+                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD', line.name), 32, ' ', 'l')
 
                     # Numéro de pièce - 10 chars
-                    # Piece (référence : max 10 caractères)
-                    # Si len(n° pièce) <= 10 caractère alors on conserve [cas de la SCI]
-                    # Ventes : VFA-2015-0056 >> V2015-0056
-                    # Achat  : AFA-2015-0045 >> A2015-0045
-                    # BANQUE :
-                    # CM 302 05/2015/1 >> 302-05/1
-                    # CM 302 05/2015/35 >> 302-05/35
-                    # Notes de frais : NF17001 >> FD-NF17001
-                    # Autre : OD/2015/0001 >> OD/15/0001
-                    # Si Achat ou Vente
+                    # Si len(n° pièce) <= 10 caractère alors on conserve en partant de la droite
+                    # Facture client CI2101-0034 >> CI21010034
+                    # Remplace esapce et "/" et "-" par rien si besoin 
                     if(len(move.name) <= 10):
-                        _logger.info("Ref <= 10 caract. alors on conserve : {}".format(move.name))
                         s_lf += self.largeur_fixe(move.name, 10, ' ', 'l')
-                    elif(line.journal_id.type in ['purchase', 'purchase_refund', 'sale', 'sale_refund'] and line.move_id):
-                        _logger.info("Ref : Achat ou Vente : {}||{}".format(move.name, move.name[0] + move.name[4:13]))
-                        s_lf += self.largeur_fixe(move.name[0] + move.name[4:13], 10, ' ', 'l')
-                    # Si c'est une banque et que c'est la CM 302 (Nuxly) ou M 501 (SCI)
-                    elif((line.journal_id.type == 'bank') and ((move.name[:6] == 'CM 302') or (move.name[:6] == 'CM 501'))):
-                        _logger.info("Ref : Bank 302 : {}||{}".format(move.name,
-                                                                      move.name[3:6] + "-" + move.name[7:9] + "/" + move.name[15:25]))
-                        s_lf += self.largeur_fixe(move.name[3:6] + "-" +
-                                                  move.name[7:9] + "/" + move.name[15:25], 10, ' ', 'l')
-                    # Si c'est une Note de frais (NF)
-                    elif(line.journal_id.code == 'NF'):
-                        initial = ''
-                        # Création de façon dynamique des 2 premières initiales du partner
-                        if line.partner_id:
-                            initial = ''.join([s[:1] for s in line.partner_id.name.split(' ')])[:2] + '-'
-                        _logger.info(u"Ref : NF : {}||{}".format(
-                            move.name, self.largeur_fixe(initial + move.name[-7:], 10, ' ', 'l')))
-                        s_lf += self.largeur_fixe(initial + move.name[-7:], 10, ' ', 'l')
-                    # Si c'est une OD
-                    elif(move.name[:2] == 'OD'):
-                        _logger.info("Ref : OD : {}||{}".format(move.name, move.name[:3] + move.name[-7:]))
-                        s_lf += self.largeur_fixe(move.name[:3] + move.name[-7:], 10, ' ', 'l')
-                    # Sinon on prend les 10 dernières caractères en partant de la fin
+                    elif(len(move.name.replace('-','').replace('/','').replace(' ','')) <= 10):
+                        s_lf += self.largeur_fixe(move.name.replace('-','').replace('/','').replace(' ',''), 10, ' ', 'l')
                     else:
-                        _logger.info("Ref : Autre : {}||{}".format(move.name, move.name[-10:]))
-                        s_lf += self.largeur_fixe(move.name[-10:], 10, ' ', 'l')
+                        s_lf += self.largeur_fixe(move.name.replace('-','').replace('/','').replace(' ','')[-10:], 10, ' ', 'l')
 
-                    # Filler - 73 chars
-                    s_lf += self.largeur_fixe(" ", 73, ' ', 'l')
+                    # Filler - 10 chars - zone réservée
+                    s_lf += self.largeur_fixe(" ", 10, ' ', 'l')
+
+                    # Montant en devise (position 169 sur 13 caract)
+                    if move.currency_id and move.currency_id.name != "EUR":
+                        s_lf += self.largeur_fixe(str(int(line.amount_currency * 100)), 13, '0', 'r')
+                    else:
+                        s_lf += self.largeur_fixe(" ", 13, ' ', 'l')
+
+                    # Filler - 50 chars pour finir le fichier
+                    s_lf += self.largeur_fixe(" ", 50, ' ', 'l')
 
                     # Si il y a des erreurs
                     if erreurs:
@@ -307,6 +252,7 @@ class AccountExport(models.TransientModel):
                     # Formater la chaine pour supprimer les accents car Quadra les gère pas
                     # s_lf = unicodedata.normalize('NFKD', s_lf).encode('ascii', 'ignore')
                     # Ecriture de la ligne du mouv dans le fichier
+                    _logger.info('Type of line : {}\n'.format(type(s_lf))
                     f.write('{}\n'.format(s_lf.decode('ascii')))
 
         # Fin des mouv, on ferme le fichier
@@ -314,10 +260,9 @@ class AccountExport(models.TransientModel):
 
         # Récupérer la valeur de la casse à cacher pour savoi si on est en mode simulation
         simulation = 0
-        _logger.info('NUXLY val : %s' % self.simulation)
         simulation = self.simulation
 
-        # ENVOI DE L'EMAIL
+        # Mark all moves lines as exported
         # check is testing mode is enable
         if simulation == False:
             try:
@@ -326,6 +271,7 @@ class AccountExport(models.TransientModel):
             except Exception:
                 raise UserError(_('Impossible to write on the database : exported_date !'))
 
+        # ENVOI DE L'EMAIL
         if nbEcriture > 0:
             ir_mail_server = self.env['ir.mail_server'].search([], limit=1)
             sender = EMAIL_FROM
@@ -333,8 +279,8 @@ class AccountExport(models.TransientModel):
 
             # Pendant la phase de débug
             recepicient_bcc = [EMAIL_TO_DEFAULT]
-            subject = "Odoo - Export QUADRA du " + datetime.now().strftime("%d/%m/%Y à %Hh%M")
-            body = "<Email envoyé par Odoo>\n\nBonjour,\n\nDans l'email il y a 1 fichier TXT à intégrer dans QUADRA :\n"
+            subject = "Odoo - Export QUADRATUS du " + datetime.now().strftime("%d/%m/%Y à %Hh%M")
+            body = "<Email envoyé par Odoo>\n\nBonjour,\n\nDans l'email il y a 1 fichier ASCII à intégrer dans QUADRATUS :\n"
             attachments = []
             for fname in filename:
                 if os.path.exists(fname):
@@ -348,7 +294,7 @@ class AccountExport(models.TransientModel):
                         if not line:
                             break
                     attachments.append((fsname, file_data, 'text/plain'))
-            body += "\n\n Bonne intégration dans QUADRA."
+            body += "\n\n Bonne intégration dans QUADRATUS."
             msg = ir_mail_server.build_email(
                 sender,
                 recepicient,
