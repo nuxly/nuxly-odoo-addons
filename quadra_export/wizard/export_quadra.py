@@ -220,7 +220,7 @@ class AccountExport(models.TransientModel):
                     # Libelle - 32 chars
                     # Si il s'agit d'un achat avec facture
                     # Normalise en remplaçant les accents & en supprimant les caractères autre que ASCII
-                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD', line.name), 32, ' ', 'l')
+                    s_lf += self.largeur_fixe(unicodedata.normalize('NFKD', line.name).encode('ascii','ignore'), 32, ' ', 'l')
 
                     # Numéro de pièce - 10 chars
                     # Si len(n° pièce) <= 10 caractère alors on conserve en partant de la droite
@@ -252,7 +252,7 @@ class AccountExport(models.TransientModel):
                     # Formater la chaine pour supprimer les accents car Quadra les gère pas
                     # s_lf = unicodedata.normalize('NFKD', s_lf).encode('ascii', 'ignore')
                     # Ecriture de la ligne du mouv dans le fichier
-                    _logger.info('Type of line : {}\n'.format(type(s_lf)))
+                    _logger.info('Type of line : {} - LINE [{}]\n'.format(type(s_lf)), s_lf)
                     f.write('{}\n'.format(s_lf.decode('ascii')))
 
         # Fin des mouv, on ferme le fichier
