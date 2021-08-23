@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<openerp>
+	<data>
+		<!-- PopUp du wizard -->
+ 		<record id="wizard_global_allocation" model="ir.ui.view">
+			<field name="name">Assign holidays</field>
+			<field name="model">hr.holidays.multi.allocation</field>
+			<field name="arch" type="xml">
+				<form string="Allocation Management">
+					
+					<p class="oe_grey">
+						Fill in the following fields to assign days off to the selected employees or employee displayed. <br />
+						(2.08 days is the number of days of leave earned by an employee working a month)
+					</p>
+										
+					<br />
+						<group>
+						
+							<field name="description" id="description" />
+							<field name="holiday_status_id" id="holiday_status_id" class="oe_inline" />
+							<field name="days" id="days" class="oe_inline" />
+						
+					</group>
+
+					<footer>
+						<button string="Apply" name="generete_allocations" type="object" class="oe_highlight" />
+						or
+						<button string="Cancel" class="oe_link" special="cancel" />
+					</footer>
+				</form>
+			</field>
+		</record>
+
+		<record id="action_global_allocations" model="ir.actions.act_window">
+            <field name="name">Assign holidays</field>
+            <field name="res_model">hr.holidays.multi.allocation</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="wizard_global_allocation"/>
+            <field name="context">{}</field>
+            <field name="target">new</field>
+       </record>
+       <record model="ir.values" id="action_global_allocation">
+            <field name="model_id" ref="hr.model_hr_employee" />
+            <field name="name">Assign holidays</field>
+            <field name="key2">client_action_multi</field>
+            <field name="value" eval="'ir.actions.act_window,' + str(ref('action_global_allocations'))" />
+            <field name="key">action</field>
+            <field name="model">hr.employee</field>
+        </record>
+			
+	</data>
+</openerp>
