@@ -1,13 +1,7 @@
-from odoo import fields, models, api, _
-from odoo import SUPERUSER_ID
+from odoo import fields, models, _
 from datetime import datetime
 from odoo.exceptions import UserError
 import logging
-import tempfile
-import email
-import mimetypes
-import base64
-import os
 import unicodedata
 
 _logger = logging.getLogger(__name__)
@@ -33,7 +27,7 @@ class AccountExport(models.TransientModel):
     """
 
     # Use to set confirm exported message
-    message = fields.Text('Message', required=True)
+    #message = fields.Text('Message', required=True)
     simulation = fields.Boolean(
         'Simulate the export',
         help="If true, moves will not be tagged as 'exported', but ISACOMPTA file will be generated.")
@@ -76,7 +70,6 @@ class AccountExport(models.TransientModel):
 
         ids_move = obj_move.search([('state', '=', 'posted'), ('exported_date', '=', False),
                                     ('company_id', '=', company.id)], order="name")
-        _logger.info('Id_move : "{}" : "{}" .'.format(type(ids_move), ids_move))
 
         """ Get all partners
         ids_partner = obj_partners.search([('display_name', '!=', ' ')], order="name")
@@ -86,13 +79,12 @@ class AccountExport(models.TransientModel):
 
         if not ids_move:
             _logger.info('Sorry: No item to export for "{}" company.'.format(company.name))
-            message_id = self.env['account.export'].create({'message': _('Sorry: No item to export for "{}" company.'.format(company.name))})
             return {
                 'name': _('Echec d\'opération'),
                 'type': 'ir.actions.act_window',
                 'view_mode': 'form',
                 'res_model': 'account.export',
-                'res_id': message_id.id,
+                'views': [(self.env.ref('isacompta_export.message_wizard_form').id, 'form')],
                 'target': 'new'
             }
 
@@ -136,7 +128,6 @@ class AccountExport(models.TransientModel):
         ar = []
         # Parcours les mouvements
         for move in ids_move:
-            #_logger.info('Move : {} - [{}]\n'.format(type(move), move))
             # ne traite que les moves appartennant à une liste précise de type de journal
             if move.journal_id.type not in journal_types:
                 continue
@@ -147,8 +138,6 @@ class AccountExport(models.TransientModel):
             # Création d'une pièce comptable
             ecr_ecr = b"ECR   " + self.largeur_fixe(move.line_ids[0].journal_id.code, 2, ' ', 'l')
             ecr_ecr += move.line_ids[0].date.strftime('%d%m%y').encode()
-            _logger.info("move ref '{}'".format(move.line_ids[0].ref))
-            _logger.info("move_name '{}'".format(move.line_ids[0].name))
             if move.line_ids[0].ref:
                 ecr_ecr += self.largeur_fixe(move.line_ids[0].ref, 8, ' ', 'l')
             else:
@@ -157,9 +146,9 @@ class AccountExport(models.TransientModel):
                 ecr_ecr += self.largeur_fixe(move.line_ids[0].name, 30, ' ', 'l')
             else:
                 ecr_ecr += self.largeur_fixe(" ", 30, ' ', 'l')
-            # ecr_ecr += self.largeur_fixe(" ", 187, ' ', 'l')
-            # ecr_ecr += self.largeur_fixe(" ", 10, ' ', 'l')
-            # ecr_ecr += self.largeur_fixe(" ", 25, ' ', 'l')
+            ecr_ecr += self.largeur_fixe(" ", 187, ' ', 'l')
+            ecr_ecr += self.largeur_fixe(" ", 10, ' ', 'l')
+            ecr_ecr += self.largeur_fixe(" ", 25, ' ', 'l')
             if move.line_ids[0].ref:
                 ecr_ecr += self.largeur_fixe(move.line_ids[0].ref, 15, ' ', 'l')
             else:
@@ -170,8 +159,6 @@ class AccountExport(models.TransientModel):
             new_ecr = True
             # Parcours des lignes du mouvement courant
             for line in move.line_ids:
-                #_logger.info('Line of ove : {} - [{}]\n'.format(type(line), line))
-
                 # Incrémente le nombre d'écritude
                 nbEcriture += 1
 
@@ -247,7 +234,7 @@ class AccountExport(models.TransientModel):
                         ecr_mvt += b'0'
 
                     ecr_mvt += b"CNW+100"
-                    """
+                    
                     # date déclaration et code TVA 2, 3
                     ecr_mvt += self.largeur_fixe(" ", 12, ' ', 'l')
                     # Filler (*3 : 3, 5, 8)
@@ -260,7 +247,7 @@ class AccountExport(models.TransientModel):
                     ecr_mvt += self.largeur_fixe(" ", 14, ' ', 'l')
                     # Taux TVA
                     ecr_mvt += self.largeur_fixe(" ", 5, ' ', 'l')
-                    """
+                    
                     # Code devise
                     if move.currency_id:
                         ecr_mvt += self.largeur_fixe(move.currency_id.name, 3, ' ', 'l')
@@ -283,7 +270,6 @@ class AccountExport(models.TransientModel):
                     if not compte_tmp in plan_comptable:
                         plan_comptable[compte_tmp] = line.partner_id.name
 
-                    #_logger.info("line partner_id.name : {}".format(line.partner_id.name))
                     if not line.partner_id.name in plan_cpt_comptable:
                         ecr_cpt = b"CPT   "
                         if line.partner_id.isacompta_customer_code:
@@ -294,7 +280,7 @@ class AccountExport(models.TransientModel):
                             ecr_cpt += self.largeur_fixe(line.partner_id.name, 30, ' ', 'l')
                         else:
                             ecr_cpt += self.largeur_fixe(" ", 30, ' ', 'l')
-                        # ecr_cpt += self.largeur_fixe("", 245, ' ', 'l')
+                        ecr_cpt += self.largeur_fixe("", 245, ' ', 'l')
                         plan_cpt_comptable[line.partner_id.name] = ecr_cpt
 
                     # S'l y a des erreurs
@@ -302,7 +288,6 @@ class AccountExport(models.TransientModel):
                         raise UserError(_(erreurs))
 
                     # Ecriture de la ligne du mouvement dans le fichier
-                    #_logger.info('Type of line : {} - LINE [{}]\n'.format(type(ecr_mvt), ecr_mvt))
                     if new_ecr:
                         if last_ecr is not None:
                             plan_ecr_comptable[last_ecr] = ar
@@ -313,15 +298,13 @@ class AccountExport(models.TransientModel):
                     else:
                         ar.append(ecr_mvt)
                         last_ecr = ecr_ecr
-                    #fcompta.write(ecr_mvt.decode('ascii') + '\n')
                     # ajout d'échéance
                     if ecr_echmvt != b"":
                         ar.append(ecr_echmvt)
-                        #fcompta.write(ecr_echmvt.decode('ascii') + '\n')
 
         # add the last entries
-        plan_ecr_comptable[last_ecr] = ar
-        _logger.info("ecr '{}', '{}'".format(last_ecr, len(ar)))
+        if len(ar) != 0:
+            plan_ecr_comptable[last_ecr] = ar
 
         for cpt in plan_cpt_comptable:
             fcompta.write(plan_cpt_comptable[cpt].decode('ascii') + '\n')
@@ -386,13 +369,11 @@ class AccountExport(models.TransientModel):
             raise UserError(_("Pas d'écriture à exporter."))
         """
         # Confirmation par un messages
-        message_id = self.env['account.export'].create({'message': _("Le fichier export isacompta a été généré")})
         return {
             'name': _('Opération réussi'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'account.export',
-            # pass the id
-            'res_id': message_id.id,
+            'views': [(self.env.ref('isacompta_export.message_export_confirm_wizard_form').id, 'form')],
             'target': 'new'
         }
