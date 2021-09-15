@@ -48,7 +48,6 @@ class AccountExport(models.TransientModel):
 
         _logger.info("debut d'export isacompta.......")
         obj_move = self.env['account.move']
-        obj_users = self.env['res.users']
         obj_partners = self.env['res.partner']
         filename = []
 
@@ -281,7 +280,8 @@ class AccountExport(models.TransientModel):
                         else:
                             ecr_cpt += self.largeur_fixe(" ", 30, ' ', 'l')
                         ecr_cpt += self.largeur_fixe("", 245, ' ', 'l')
-                        plan_cpt_comptable[line.partner_id.name] = ecr_cpt
+                        if line.partner_id.name:
+                            plan_cpt_comptable[line.partner_id.name] = ecr_cpt
 
                     # S'l y a des erreurs
                     if erreurs:
@@ -306,8 +306,8 @@ class AccountExport(models.TransientModel):
         if len(ar) != 0:
             plan_ecr_comptable[last_ecr] = ar
 
-        for cpt in plan_cpt_comptable:
-            fcompta.write(plan_cpt_comptable[cpt].decode('ascii') + '\n')
+        # for cpt in plan_cpt_comptable:
+            # fcompta.write(plan_cpt_comptable[cpt].decode('ascii') + '\n')
 
         _logger.info("\nstarting liste ecritures")
         for ecr in plan_ecr_comptable:

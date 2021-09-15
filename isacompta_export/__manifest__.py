@@ -16,7 +16,6 @@ Features:
     'website': 'https://www.nuxly.com',
     'depends': ['account'],
     'data': [
-        'security/groups.xml',
         'security/ir.model.access.csv',
         'wizard/export_isacompta.xml',
         'views/res_company.xml',
