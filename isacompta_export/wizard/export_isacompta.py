@@ -48,6 +48,7 @@ class AccountExport(models.TransientModel):
 
         _logger.info("debut d'export isacompta.......")
         obj_move = self.env['account.move']
+        obj_users = self.env['res.users']
         obj_partners = self.env['res.partner']
         filename = []
 
@@ -69,6 +70,7 @@ class AccountExport(models.TransientModel):
 
         ids_move = obj_move.search([('state', '=', 'posted'), ('exported_date', '=', False),
                                     ('company_id', '=', company.id)], order="name")
+        # _logger.info('Id_move : "{}" : "{}" .'.format(type(ids_move), ids_move))
 
         """ Get all partners
         ids_partner = obj_partners.search([('display_name', '!=', ' ')], order="name")
@@ -103,7 +105,8 @@ class AccountExport(models.TransientModel):
         ecr_echmvt = b""
 
         # (Entête) Création de version (obligatoire au début du fichier comptable)
-        ecr_ln = b"VER   02000000000"
+        ecr_ln = b"VER   0200000"
+        ecr_ln += b"0000"
         ecr_ln += self.largeur_fixe("0", 30, ' ', 'l')
         ecr_ln += self.largeur_fixe("0", 31, ' ', 'l')
         ecr_ln += b"0"
@@ -127,6 +130,8 @@ class AccountExport(models.TransientModel):
         ar = []
         # Parcours les mouvements
         for move in ids_move:
+            _logger.info('move : "{}" : "{}" .'.format(type(move), move))
+            #_logger.info('Move : {} - [{}]\n'.format(type(move), move))
             # ne traite que les moves appartennant à une liste précise de type de journal
             if move.journal_id.type not in journal_types:
                 continue
@@ -145,9 +150,9 @@ class AccountExport(models.TransientModel):
                 ecr_ecr += self.largeur_fixe(move.line_ids[0].name, 30, ' ', 'l')
             else:
                 ecr_ecr += self.largeur_fixe(" ", 30, ' ', 'l')
-            ecr_ecr += self.largeur_fixe(" ", 187, ' ', 'l')
-            ecr_ecr += self.largeur_fixe(" ", 10, ' ', 'l')
-            ecr_ecr += self.largeur_fixe(" ", 25, ' ', 'l')
+            # ecr_ecr += self.largeur_fixe(" ", 187, ' ', 'l')
+            # ecr_ecr += self.largeur_fixe(" ", 10, ' ', 'l')
+            # ecr_ecr += self.largeur_fixe(" ", 25, ' ', 'l')
             if move.line_ids[0].ref:
                 ecr_ecr += self.largeur_fixe(move.line_ids[0].ref, 15, ' ', 'l')
             else:
@@ -158,6 +163,9 @@ class AccountExport(models.TransientModel):
             new_ecr = True
             # Parcours des lignes du mouvement courant
             for line in move.line_ids:
+                _logger.info('move_line_ids : "{}" : "{}" .'.format(type(line), line))
+                #_logger.info('Line of ove : {} - [{}]\n'.format(type(line), line))
+
                 # Incrémente le nombre d'écritude
                 nbEcriture += 1
 
@@ -173,21 +181,21 @@ class AccountExport(models.TransientModel):
                     # cas client
                     if (line.account_id.code[:3] == '411') and (line.partner_id):
                         # vérif sur code client saisi
-                        if not line.partner_id.isacompta_customer_code:
+                        if not line.partner_id.z_code_client:
                             erreurs += "ERROR : Invoice " + move.name + " : missing isacompta customer code (see Accounting tab) for company " + line.partner_id.name + "\n"
                             compte_tmp += b'undefined'
                         else:
-                            compte_tmp += unicodedata.normalize('NFKD', line.partner_id.isacompta_customer_code).encode(
+                            compte_tmp += unicodedata.normalize('NFKD', line.partner_id.z_code_client).encode(
                                 'ASCII', 'ignore')
 
                     # cas fournisseur
                     elif (line.account_id.code[:3] == '401') and (line.partner_id):
                         # vérif sur code fournisseur saisi
-                        if not line.partner_id.isacompta_supplier_code:
+                        if not line.partner_id.z_code_fournisseur:
                             erreurs += "ERROR : Invoice " + move.name + " : missing isacompta supplier code (see Accounting tab) for company " + line.partner_id.name + "\n"
                             compte_tmp += b'undefined'
                         else:
-                            compte_tmp += unicodedata.normalize('NFKD', line.partner_id.isacompta_supplier_code).encode(
+                            compte_tmp += unicodedata.normalize('NFKD', line.partner_id.z_code_fournisseur).encode(
                                 'ASCII', 'ignore')
 
                     # cas compte comptable - 8 caractères
@@ -233,7 +241,7 @@ class AccountExport(models.TransientModel):
                         ecr_mvt += b'0'
 
                     ecr_mvt += b"CNW+100"
-                    
+                    """
                     # date déclaration et code TVA 2, 3
                     ecr_mvt += self.largeur_fixe(" ", 12, ' ', 'l')
                     # Filler (*3 : 3, 5, 8)
@@ -246,7 +254,7 @@ class AccountExport(models.TransientModel):
                     ecr_mvt += self.largeur_fixe(" ", 14, ' ', 'l')
                     # Taux TVA
                     ecr_mvt += self.largeur_fixe(" ", 5, ' ', 'l')
-                    
+                    """
                     # Code devise
                     if move.currency_id:
                         ecr_mvt += self.largeur_fixe(move.currency_id.name, 3, ' ', 'l')
@@ -269,9 +277,11 @@ class AccountExport(models.TransientModel):
                     if not compte_tmp in plan_comptable:
                         plan_comptable[compte_tmp] = line.partner_id.name
 
+                    _logger.info('line.partner_id : "{}" : "{}" .'.format(type(line.partner_id), line.partner_id))
+                    #_logger.info("line partner_id.name : {}".format(line.partner_id.name))
                     if not line.partner_id.name in plan_cpt_comptable:
                         ecr_cpt = b"CPT   "
-                        if line.partner_id.isacompta_customer_code:
+                        if line.partner_id.z_code_client:
                             ecr_cpt += self.largeur_fixe(line.account_id.code, 10, ' ', 'l')
                         else:
                             ecr_cpt += self.largeur_fixe(line.account_id.code, 10, ' ', 'l')
@@ -279,15 +289,19 @@ class AccountExport(models.TransientModel):
                             ecr_cpt += self.largeur_fixe(line.partner_id.name, 30, ' ', 'l')
                         else:
                             ecr_cpt += self.largeur_fixe(" ", 30, ' ', 'l')
-                        ecr_cpt += self.largeur_fixe("", 245, ' ', 'l')
+                        # ecr_cpt += self.largeur_fixe("", 245, ' ', 'l')
                         if line.partner_id.name:
                             plan_cpt_comptable[line.partner_id.name] = ecr_cpt
+                        _logger.info("new plan cpmptable")
+                        _logger.info(line.partner_id.name)
+                        _logger.info(ecr_cpt)
 
                     # S'l y a des erreurs
                     if erreurs:
                         raise UserError(_(erreurs))
 
                     # Ecriture de la ligne du mouvement dans le fichier
+                    #_logger.info('Type of line : {} - LINE [{}]\n'.format(type(ecr_mvt), ecr_mvt))
                     if new_ecr:
                         if last_ecr is not None:
                             plan_ecr_comptable[last_ecr] = ar
@@ -298,18 +312,23 @@ class AccountExport(models.TransientModel):
                     else:
                         ar.append(ecr_mvt)
                         last_ecr = ecr_ecr
+                    #fcompta.write(ecr_mvt.decode('ascii') + '\n')
                     # ajout d'échéance
                     if ecr_echmvt != b"":
                         ar.append(ecr_echmvt)
+                        #fcompta.write(ecr_echmvt.decode('ascii') + '\n')
 
         # add the last entries
         if len(ar) != 0:
             plan_ecr_comptable[last_ecr] = ar
+        _logger.info("ecr '{}', '{}'".format(last_ecr, len(ar)))
 
         # for cpt in plan_cpt_comptable:
             # fcompta.write(plan_cpt_comptable[cpt].decode('ascii') + '\n')
 
         _logger.info("\nstarting liste ecritures")
+        # _logger.info(len(plan_ecr_comptable))
+        # _logger.info(plan_ecr_comptable)
         for ecr in plan_ecr_comptable:
             fcompta.write(ecr.decode('ascii') + '\n')
             for e in plan_ecr_comptable[ecr]:

@@ -4,11 +4,11 @@ from odoo import fields, models
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    isacompta_customer_code = fields.Char(
-        'Customer code',
+    z_code_client = fields.Char(
+        'Code client',
         company_dependant=True,
-        help='Customer third-party account used in accounting. It will be used for export.')
-    isacompta_supplier_code = fields.Char(
-        'Provider code',
+        help='Compte tiers (client) utilisé en comptabilité. Il sera utilisé pour exporter la comptabilité.')
+    z_code_fournisseur = fields.Char(
+        'Code fournisseur',
         company_dependant=True,
-        help='Provider third-party account used in accounting. It will be used for export.')
+        help='Compte tiers (fournisseur) utilisé en comptabilité. Il sera utilisé pour exporter la comptabilité.')

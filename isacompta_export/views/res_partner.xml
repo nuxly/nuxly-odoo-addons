@@ -6,10 +6,10 @@
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
             <xpath expr="//page[@name='accounting']/group/group/field[@name='property_account_receivable_id']" position="before">
-                <field name="isacompta_customer_code"/>
+                <field name="z_code_client"/>
             </xpath>
             <xpath expr="//page[@name='accounting']/group/group/field[@name='property_account_payable_id']" position="before">
-                <field name="isacompta_supplier_code"/>
+                <field name="z_code_fournisseur"/>
             </xpath>
         </field>
     </record>
