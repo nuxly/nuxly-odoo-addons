@@ -12,7 +12,8 @@
                         <newline/>                
                         <label for="simulation" class="o_form_label" string="Simulate the generation"/>
                         <field name="simulation" eval="True"/>
-                        <newline/>                    
+                        <field name="dossier_number" string="Dossier number" />
+                        <newline/>
                     </group>
                     <footer>
                         <button name="export_isacompta" string="Export" type="object" class="oe_highlight"/>
