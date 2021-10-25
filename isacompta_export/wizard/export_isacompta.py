@@ -107,9 +107,10 @@ class AccountExport(models.TransientModel):
 
         # (Entête) Création de version (obligatoire au début du fichier comptable)
         ecr_ln = b"VER   0200000"
-        ecr_ln += b"00000"
+        ecr_ln += b"0000"
+        ecr_ln += self.largeur_fixe(" ", 1, ' ', 'l')
         ecr_ln += self.largeur_fixe(company.partner_id.name, 30, ' ', 'l')
-        ecr_ln += b"0"
+        ecr_ln += self.largeur_fixe(" ", 1, ' ', 'l')
         fcompta.write(ecr_ln.decode('utf-8') + '\n')
 
         # Création de dossier isacompta
@@ -117,7 +118,9 @@ class AccountExport(models.TransientModel):
         dos_ecr += self.largeur_fixe(self.dossier_number, 8, ' ', 'l')
         dos_ecr += self.largeur_fixe(company.partner_id.name, 30, ' ', 'l')
         dos_ecr += self.largeur_fixe(" ", 8, ' ', 'l')
-        dos_ecr += self.largeur_fixe(" ", 34, ' ', 'l')
+        dos_ecr += self.largeur_fixe(" ", 13, ' ', 'l')
+        # code étalon 1, 2 et ana
+        # dos_ecr += self.largeur_fixe(" ", 21, ' ', 'l')
         fcompta.write(dos_ecr.decode('utf-8') + '\n')
 
         # Crétaion d'exercice
@@ -146,9 +149,10 @@ class AccountExport(models.TransientModel):
             moves_exported_ids += move
 
             # Création d'une pièce comptable
+            # todo 296
             ecr_ecr = b"ECR   "
             ecr_ecr += self.largeur_fixe(move.line_ids[0].journal_id.code, 2, ' ', 'l')
-            ecr_ecr += move.line_ids[0].date.strftime('%d%m%y').encode()
+            ecr_ecr += move.line_ids[0].date.strftime('%d%m%Y').encode()
             # Numero de pièce
             if move.line_ids[0].ref:
                 ecr_ecr += self.largeur_fixe(move.line_ids[0].ref, 8, ' ', 'l')
@@ -183,7 +187,8 @@ class AccountExport(models.TransientModel):
             # TODO ajout des journaux move.line_ids[0].journal_id.code
             ecr_jrn = b"JRN   "
             ecr_jrn += self.largeur_fixe(move.line_ids[0].journal_id.code, 2, ' ', 'l')
-            ecr_jrn += self.largeur_fixe(move.line_ids[0].journal_id.name.encode("utf-8"), 30, ' ', 'l')
+            ecr_jrn += self.largeur_fixe(move.line_ids[0].journal_id.name.encode("utf-8"), 30, ' ', 'r')
+            ecr_jrn += self.largeur_fixe(" ", 2, ' ', 'l')
             ecr_jrn += self.largeur_fixe(" ", 2, ' ', 'l')
             ecr_jrn += self.largeur_fixe(" ", 12, ' ', 'l')
             ecr_jrn += self.largeur_fixe(" ", 26, ' ', 'l')
@@ -201,6 +206,7 @@ class AccountExport(models.TransientModel):
                 # Incrémente le nombre d'écritude
                 nbEcriture += 1
 
+                isCptTiers = False
                 s = ''
                 # Les lignes dont le montant est à 0 ne sont pas pris en compte dans l'export
                 if (line.debit == 0) and (line.credit == 0):
@@ -219,6 +225,7 @@ class AccountExport(models.TransientModel):
                         else:
                             compte_tmp += unicodedata.normalize('NFKD', line.partner_id.z_code_client).encode(
                                 'utf-8', 'ignore')
+                            isCptTiers = True
 
                     # cas fournisseur
                     elif (line.account_id.code[:3] == '401') and (line.partner_id):
@@ -229,6 +236,7 @@ class AccountExport(models.TransientModel):
                         else:
                             compte_tmp += unicodedata.normalize('NFKD', line.partner_id.z_code_fournisseur).encode(
                                 'utf-8', 'ignore')
+                            isCptTiers = True
 
                     # cas compte comptable - 8 caractères
                     else:
@@ -236,6 +244,7 @@ class AccountExport(models.TransientModel):
                                                                                                                 'ignore')
 
                     # Création de mouvement
+                    # doc : 286 et fichier exemple 285
                     ecr_mvt = b"MVT   "
                     ecr_mvt += self.largeur_fixe(compte_tmp, 10, ' ', 'l')
                     # libellé mouvement
@@ -252,14 +261,12 @@ class AccountExport(models.TransientModel):
                         ecr_mvt += self.largeur_fixe(str(line.credit), 26, '0', 'r')
                         # ecr_mvt += self.largeur_fixe(str(int(line.credit * 100)), 26, '0', 'r')
 
-                    # ecr_mvt += b"CNW50"
-
                     # Autre informations (quantité 1 et 2 + numéro)
                     ecr_mvt += self.largeur_fixe(" ", 30, ' ', 'l')
                     # champ 103, 105, 107, 108
                     ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
                     ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
-                    # champ 111, 119, 123
+                    # champ 119, 123, 124
                     ecr_mvt += self.largeur_fixe(" ", 13, ' ', 'l')
 
                     """
@@ -281,7 +288,7 @@ class AccountExport(models.TransientModel):
                     """
 
                     # date déclaration et code TVA 2, 3
-                    ecr_mvt += self.largeur_fixe(" ", 12, ' ', 'l')
+                    ecr_mvt += self.largeur_fixe(" ", 4, ' ', 'l')
                     # Filler (*3 : 3, 5, 8)
                     ecr_mvt += self.largeur_fixe(" ", 16, ' ', 'l')
                     # Date de valeur et libres
@@ -312,33 +319,31 @@ class AccountExport(models.TransientModel):
                     # Taux de change
                     ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
                     # Filler (*7 : 5, 5, 5, 2, 8, 3, 1)
-                    ecr_mvt += self.largeur_fixe(" ", 29, ' ', 'l')
-
-                    if not compte_tmp in plan_comptable:
-                        plan_comptable[compte_tmp] = line.partner_id.name
+                    # todo pour correspondre au fichier exemple, la derniere caractères ne sont pas prise en comptes
+                    ecr_mvt += self.largeur_fixe(" ", 28, ' ', 'l')
+                    # ecr_mvt += self.largeur_fixe(" ", 1, ' ', 'l')
 
                     _logger.info('line.partner_id : "{}" : "{}" .'.format(type(line.partner_id), line.partner_id))
                     # _logger.info("line partner_id.name : {}".format(line.partner_id.name))
-                    if not line.partner_id.name in plan_cpt_comptable:
+                    _logger.info("line partner_id.name : {}".format(line.account_id.user_type_id))
+                    # if not line.account_id.code in plan_cpt_comptable:
+                    if not line.account_id.code in plan_cpt_comptable:
                         ecr_cpt = b"CPT   "
-                        if line.partner_id.z_code_client:
-                            ecr_cpt += self.largeur_fixe(line.account_id.code, 10, ' ', 'l')
-                        else:
-                            # TODO la valeur a changer
-                            ecr_cpt += self.largeur_fixe(line.account_id.code, 10, ' ', 'l')
-                        if line.partner_id.name:
-                            ecr_cpt += self.largeur_fixe(line.partner_id.name, 30, ' ', 'l')
+                        ecr_cpt += self.largeur_fixe(line.account_id.code, 10, ' ', 'l')
+                        if line.account_id.name:
+                            ecr_cpt += self.largeur_fixe(line.account_id.name, 30, ' ', 'l')
                         else:
                             ecr_cpt += self.largeur_fixe(" ", 30, ' ', 'l')
-                            # champ 47, 57, 60, 70, 73, 83
+                        # champ 47, 57, 60, 70, 73, 83
                         ecr_cpt += self.largeur_fixe("", 37, ' ', 'l')
                         ecr_cpt += self.largeur_fixe("", 3, ' ', 'l')
-                        # champ 87, 89
-                        ecr_cpt += self.largeur_fixe("", 9, ' ', 'l')
+                        # champ 87
+                        ecr_cpt += self.largeur_fixe("", 2, ' ', 'l')
+                        ecr_cpt += self.largeur_fixe("", 7, ' ', 'l')
                         # champ 96, 106, 116, 117, 119, 121, 122, 132, 142, 152, 153, 154
                         ecr_cpt += self.largeur_fixe("", 59, ' ', 'l')
                         # libellé
-                        ecr_cpt += self.largeur_fixe("", 30, ' ', 'l')
+                        ecr_cpt += self.largeur_fixe(line.account_id.name, 30, ' ', 'r')
                         # champ 185, 189, 192, 193, 194, 195, 196 à 202
                         ecr_cpt += self.largeur_fixe("", 28, ' ', 'l')
                         # champ 213, 227, 228, 231
@@ -348,15 +353,76 @@ class AccountExport(models.TransientModel):
                         # champ 262, 263
                         ecr_cpt += self.largeur_fixe("", 8, ' ', 'l')
                         ecr_cpt += self.largeur_fixe("", 8, ' ', 'l')
-                        # champ 280, 282, 284, 286
-                        ecr_cpt += self.largeur_fixe("", 8, ' ', 'l')
-                        ecr_cpt += self.largeur_fixe("", 8, ' ', 'l')
+                        ecr_cpt += self.largeur_fixe("", 2, ' ', 'l')
+                        # champ 280, 282, 284
                         ecr_cpt += self.largeur_fixe("", 6, ' ', 'l')
-                        if line.partner_id.name:
-                            plan_cpt_comptable[line.partner_id.name] = ecr_cpt
+                        ecr_cpt += self.largeur_fixe("", 3, ' ', 'l')
+                        ecr_cpt += self.largeur_fixe("", 3, ' ', 'l')
+                        if line.account_id.code:
+                            plan_cpt_comptable[line.account_id.code] = ecr_cpt
                         _logger.info("new plan comptable")
-                        _logger.info(line.partner_id.name)
                         _logger.info(ecr_cpt)
+                    # traitement des plan des tiers (partenaires)
+                    # si le type de compte gneral = fournissuer ou client
+                    # parter_id (code client)
+                    if isCptTiers:
+                        _logger.info(line.account_id.company_id.country_code)
+                        _logger.info(line.account_id.company_id.city)
+                        _logger.info(line.account_id.company_id.country_id.name)
+                        _logger.info(line.partner_id.city)
+                        _logger.info(line.partner_id.contact_address)  # replace \n par " "
+                        _logger.info(line.partner_id.contact_address_complete)
+                        _logger.info(line.partner_id.country_id.code)
+                        _logger.info(line.partner_id.country_id.name)
+                        _logger.info(line.account_id.user_type_id)
+                        ecr_tiers = b'TIERS '
+                        if line.partner_id.z_code_fournisseur:
+                            ecr_tiers += self.largeur_fixe('Fournisseurs', 30, ' ', 'l')
+                        if line.partner_id.z_code_client:
+                            ecr_tiers += self.largeur_fixe('Compte client', 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe(line.partner_id.name, 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe(line.partner_id.contact_address, 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 5, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 8, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe(line.partner_id.city, 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 17, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 17, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 14, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 10, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 5, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 5, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 20, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 2, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 15, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 8, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 17, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 1, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 1, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 20, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 90, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 7, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 7, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 11, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 34, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 80, ' ', 'l')
+                        if line.partner_id.z_code_fournisseur:
+                            # if line.account_id.user_type_id == "Fournisseur":
+                            ecr_tiers += self.largeur_fixe(compte_tmp, 10, ' ', 'l')
+                            ecr_tiers += b'FO'
+                        if line.partner_id.z_code_client:
+                            # if line.account_id.user_type_id == "Compte client":
+                            ecr_tiers += self.largeur_fixe(compte_tmp, 10, ' ', 'l')
+                            ecr_tiers += b'CL'
+                        ecr_tiers += self.largeur_fixe("", 2, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 6, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 30, ' ', 'l')
+                        ecr_tiers += self.largeur_fixe("", 80, ' ', 'l')
+
+                        if compte_tmp:
+                            plan_cpt_comptable[compte_tmp] = ecr_tiers
 
                     # S'l y a des erreurs
                     if erreurs:
