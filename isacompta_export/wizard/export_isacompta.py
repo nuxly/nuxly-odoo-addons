@@ -95,17 +95,15 @@ class AccountExport(models.TransientModel):
 
         plan_ecr_comptable = {}
         plan_cpt_comptable = {}
+        plan_tiers_comptable = {}
         plan_jrn_comptable = {}
-
-        # Echéance des mouvements
-        ecr_echmvt = b""
 
         # (Entête) Création de version (obligatoire au début du fichier comptable)
         ecr_ln = b"VER   0200000"
         ecr_ln += b"0000"
         ecr_ln += self.largeur_fixe(" ", 1, ' ', 'l')
         ecr_ln += self.largeur_fixe(unicodedata.normalize('NFKD', company.partner_id.name).encode(
-                                'ascii', 'ignore'), 30, ' ', 'l')
+            'ascii', 'ignore'), 30, ' ', 'l')
         ecr_ln += self.largeur_fixe(" ", 1, ' ', 'l')
         fcompta.write(ecr_ln.decode('ascii') + '\n')
 
@@ -113,9 +111,10 @@ class AccountExport(models.TransientModel):
         dos_ecr = b"DOS   "
         dos_ecr += self.largeur_fixe(self.dossier_number, 8, ' ', 'l')
         dos_ecr += self.largeur_fixe(unicodedata.normalize('NFKD', company.partner_id.name).encode(
-                                'ascii', 'ignore'), 30, ' ', 'l')
+            'ascii', 'ignore'), 30, ' ', 'l')
         dos_ecr += self.largeur_fixe(" ", 8, ' ', 'l')
-        dos_ecr += self.largeur_fixe(" ", 13, ' ', 'l')
+        dos_ecr += b'01110010'
+        dos_ecr += self.largeur_fixe(" ", 5, ' ', 'l')
         # code étalon 1, 2 et ana
         # dos_ecr += self.largeur_fixe(" ", 21, ' ', 'l')
         fcompta.write(dos_ecr.decode('ascii') + '\n')
@@ -156,7 +155,7 @@ class AccountExport(models.TransientModel):
             # Libellé de l'écriture
             if move.line_ids[0].name:
                 ecr_ecr += self.largeur_fixe(unicodedata.normalize('NFKD', move.line_ids[0].name).encode(
-                                'ascii', 'ignore'), 30, ' ', 'l')
+                    'ascii', 'ignore'), 30, ' ', 'l')
             else:
                 ecr_ecr += self.largeur_fixe(" ", 30, ' ', 'l')
             # champ 55, 63, 70, 77, 80, 82
@@ -176,16 +175,16 @@ class AccountExport(models.TransientModel):
             ecr_ecr += self.largeur_fixe(" ", 8, ' ', 'l')
             if move.line_ids[0].ref:
                 ecr_ecr += self.largeur_fixe(unicodedata.normalize('NFKD', move.line_ids[0].ref).encode(
-                                'ascii', 'ignore'), 15, ' ', 'l')
+                    'ascii', 'ignore'), 15, ' ', 'l')
             else:
                 ecr_ecr += self.largeur_fixe(" ", 15, ' ', 'l')
             ecr_ecr += self.largeur_fixe(" ", 10, ' ', 'l')
 
             # ajout des journaux
-            ecr_jrn = b"JRN   "
+            ecr_jrn = b"JOU   "
             ecr_jrn += self.largeur_fixe(move.line_ids[0].journal_id.code, 2, ' ', 'l')
             ecr_jrn += self.largeur_fixe(unicodedata.normalize('NFKD', move.line_ids[0].journal_id.name).encode(
-                                'ascii', 'ignore'), 30, ' ', 'r')
+                'ascii', 'ignore'), 30, ' ', 'r')
             ecr_jrn += self.largeur_fixe(" ", 2, ' ', 'l')
             ecr_jrn += self.largeur_fixe(" ", 2, ' ', 'l')
             ecr_jrn += self.largeur_fixe(" ", 12, ' ', 'l')
@@ -241,124 +240,104 @@ class AccountExport(models.TransientModel):
                         compte_tmp += unicodedata.normalize('NFKD', (line.account_id.code + "000")[0:8]).encode('ascii',
                                                                                                                 'ignore')
 
-                    # Création de mouvement
-                    # doc : 286 et fichier exemple 285
-                    ecr_mvt = b"MVT   "
-                    ecr_mvt += self.largeur_fixe(compte_tmp, 10, ' ', 'l')
-                    # libellé mouvement
-                    _logger.info(line.name)
-                    ecr_mvt += self.largeur_fixe(unicodedata.normalize('NFKD', line.name).encode(
-                                'ascii', 'ignore'), 30, ' ', 'l')
-
-                    # Montant débit et crédit
-                    if int(line.debit * 100) > 0:
-                        ecr_mvt += self.largeur_fixe(str(line.debit), 13, '0', 'r')
-                        # ecr_mvt += self.largeur_fixe(str(int(line.debit * 100)), 13, '0', 'r')
-                        ecr_mvt += self.largeur_fixe(" ", 13, ' ', 'l')
-                    elif int(line.credit * 100) > 0:
-                        ecr_mvt += self.largeur_fixe(str(line.credit), 26, '0', 'r')
-                        # ecr_mvt += self.largeur_fixe(str(int(line.credit * 100)), 26, '0', 'r')
-
-                    # Autre informations (quantité 1 et 2 + numéro)
-                    ecr_mvt += self.largeur_fixe(" ", 30, ' ', 'l')
-                    # champ 103, 105, 107, 108
-                    ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
-                    ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
-                    # champ 119, 123, 124
-                    ecr_mvt += self.largeur_fixe(" ", 13, ' ', 'l')
-
-                    """
-                    # Date échéance et flag échéance
-                    if line.date_maturity:
-                        ecr_mvt += b'1'
-                        ecr_echmvt = b"ECHMVT"
-                        # Montant TTC
-                        if int(line.debit * 100) > 0:
-                            ecr_echmvt += self.largeur_fixe(str(int(line.debit * 100)), 13, '0', 'r')
-                        elif int(line.credit * 100) > 0:
-                            ecr_echmvt += self.largeur_fixe(str(int(line.credit * 100)), 13, '0', 'r')
-                        # Taux TTC
-                        ecr_echmvt += self.largeur_fixe(" ", 10, ' ', 'l')
-                        # Date échéance
-                        ecr_echmvt += line.date_maturity.strftime('%d%m%y').encode()
-                    else:
-                        ecr_mvt += b'0' 
-                    """
-
-                    # date déclaration et code TVA 2, 3
-                    ecr_mvt += self.largeur_fixe(" ", 4, ' ', 'l')
-                    # Filler (*3 : 3, 5, 8)
-                    ecr_mvt += self.largeur_fixe(" ", 16, ' ', 'l')
-                    # Date de valeur et libres
-                    ecr_mvt += self.largeur_fixe(" ", 24, ' ', 'l')
-                    # Libellé de compte
-                    ecr_mvt += self.largeur_fixe(" ", 30, ' ', 'l')
-                    # Modification de mouvement
-                    ecr_mvt += self.largeur_fixe(" ", 14, ' ', 'l')
-                    # Taux TVA
-                    ecr_mvt += self.largeur_fixe(" ", 5, ' ', 'l')
-
-                    # Code devise
-                    if move.currency_id:
-                        ecr_mvt += self.largeur_fixe(move.currency_id.name, 3, ' ', 'l')
-                    else:
-                        ecr_mvt += b"EUR"
-                    # montant devise
-                    if move.currency_id and move.currency_id.name != "EUR":
-                        if int(line.amount_currency) > 0:
-                            # ecr_mvt += self.largeur_fixe(str(abs(int(line.amount_currency * 100))), 11, '0', 'r')
-                            ecr_mvt += self.largeur_fixe(str(line.amount_currency), 11, '0', 'r')
-                            ecr_mvt += self.largeur_fixe(" ", 11, ' ', 'l')
-                        else:
-                            ecr_mvt += self.largeur_fixe(str(line.amount_currency), 22, '0', 'r')
-                            # ecr_mvt += self.largeur_fixe(str(abs(int(line.amount_currency * 100))), 22, '0', 'r')
-                    else:
-                        ecr_mvt += self.largeur_fixe(" ", 22, ' ', 'l')
-                    # Taux de change
-                    ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
-                    # Filler (*7 : 5, 5, 5, 2, 8, 3, 1)
-                    # todo pour correspondre au fichier exemple, la derniere caractères n'est pas prise en comptes
-                    ecr_mvt += self.largeur_fixe(" ", 28, ' ', 'l')
-                    # ecr_mvt += self.largeur_fixe(" ", 1, ' ', 'l')
-
                     _logger.info('line.partner_id : "{}" : "{}" .'.format(type(line.partner_id), line.partner_id))
                     # if not line.account_id.code in plan_cpt_comptable:
                     if line.account_id.code:
                         if isCptTiers:
                             if not line.account_id.code in plan_cpt_comptable:
                                 plan_cpt_comptable[line.account_id.code] = self.create_cpt('ce', line.account_id.code,
-                                                                                       line.account_id.code,
-                                                                                       line.account_id.name)
+                                                                                           line.account_id.code,
+                                                                                           line.account_id.name)
                             if not compte_tmp in plan_cpt_comptable:
                                 plan_cpt_comptable[compte_tmp] = self.create_cpt('au', line.account_id.code, compte_tmp,
-                                                                             line.partner_id.name)
+                                                                                 line.partner_id.name)
+                                ecr_tiers = b"TIERS "
+                                # partner : line.partner_id
+                                ecr_tiers += self.largeur_fixe(
+                                    unicodedata.normalize('NFKD', line.partner_id.name).encode('ascii', 'ignore'), 30,
+                                    ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 30, ' ', 'l')
+                                if line.partner_id.street:
+                                    ecr_tiers += self.largeur_fixe(
+                                        unicodedata.normalize('NFKD', line.partner_id.street).encode('ascii', 'ignore'),
+                                        60, ' ', 'l')
+                                else:
+                                    ecr_tiers += self.largeur_fixe("", 60, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 5, ' ', 'l')
+                                if line.partner_id.zip:
+                                    ecr_tiers += self.largeur_fixe(str(line.partner_id.zip), 8, ' ', 'l')
+                                else:
+                                    ecr_tiers += self.largeur_fixe("", 8, ' ', 'l')
+                                if line.partner_id.city:
+                                    ecr_tiers += self.largeur_fixe(
+                                        unicodedata.normalize('NFKD', str(line.partner_id.city)).encode('ascii',
+                                                                                                        'ignore'), 30,
+                                        ' ', 'l')
+                                else:
+                                    ecr_tiers += self.largeur_fixe("", 30, ' ', 'l')
+                                if line.partner_id.phone:
+                                    ecr_tiers += self.largeur_fixe(str(line.partner_id.phone), 17, ' ', 'l')
+                                else:
+                                    ecr_tiers += self.largeur_fixe("", 17, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 17, ' ', 'l')
+                                if line.partner_id.vat:
+                                    ecr_tiers += self.largeur_fixe(str(line.partner_id.vat), 14, ' ', 'l')
+                                else:
+                                    ecr_tiers += self.largeur_fixe("", 14, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 40, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 2, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 30, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 15, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 8, ' ', 'l')
+                                ecr_tiers += self.largeur_fixe("", 17, ' ', 'l')
+                                plan_tiers_comptable[compte_tmp] = ecr_tiers
                         else:
                             if not line.account_id.code in plan_cpt_comptable:
                                 plan_cpt_comptable[line.account_id.code] = self.create_cpt('ge', line.account_id.code,
-                                                                                       line.account_id.code,
-                                                                                       line.account_id.name)
+                                                                                           line.account_id.code,
+                                                                                           line.account_id.name)
 
                     # S'l y a des erreurs
                     if erreurs:
                         raise UserError(_(erreurs))
 
-                    # Ecriture de la ligne du mouvement dans le fichier
-                    # _logger.info('Type of line : {} - LINE [{}]\n'.format(type(ecr_mvt), ecr_mvt))
+                    # Ecriture de la ligne du mouvement
+                    debit = False
+                    m_debit = line.credit
+                    is_ech_mvt = False
+                    if int(line.debit * 100) > 0:
+                        debit = True
+                        m_debit = line.debit
+                    if compte_tmp[:3] == "411" or compte_tmp[:3] == "401":
+                        is_ech_mvt = True
+
                     if new_ecr:
                         if last_ecr is not None:
                             plan_ecr_comptable[last_ecr] = ar
                             last_ecr = None
                             ar = []
-                        ar.append(ecr_mvt)
+                        # ar.append(ecr_mvt)
+                        ar.append(self.create_mvt(compte_tmp, line.name, debit, m_debit, is_ech_mvt))
                         new_ecr = False
                     else:
-                        ar.append(ecr_mvt)
+                        ar.append(self.create_mvt(compte_tmp, line.name, debit, m_debit, is_ech_mvt))
                         last_ecr = ecr_ecr
-                    # fcompta.write(ecr_mvt.decode('ascii') + '\n')
-                    # ajout d'échéance
-                    if ecr_echmvt != b"":
+
+                        # ajout d'échéance des mouvements
+                    if is_ech_mvt:
+                        ecr_echmvt = b"ECHMVT"
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 13, ' ', 'r')
+                        ecr_echmvt += self.largeur_fixe("100", 10, ' ', 'r')
+                        # date à calculer
+                        ecr_echmvt += move.line_ids[0].date.strftime('%d%m+1%Y').encode()
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 2, ' ', 'r')
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 2, ' ', 'r')
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 13, ' ', 'r')
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 10, ' ', 'r')
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 12, ' ', 'r')
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 8, ' ', 'r')
+                        ecr_echmvt += self.largeur_fixe(str(m_debit), 13, ' ', 'r')
                         ar.append(ecr_echmvt)
-                        # fcompta.write(ecr_echmvt.decode('ascii') + '\n')
 
         # add the last entries
         if len(ar) != 0:
@@ -367,14 +346,14 @@ class AccountExport(models.TransientModel):
 
         for cpt in plan_cpt_comptable:
             fcompta.write(plan_cpt_comptable[cpt].decode('ascii') + '\n')
+            if cpt in plan_tiers_comptable:
+                fcompta.write(plan_tiers_comptable[cpt].decode('ascii') + '\n')
 
         for jrn in plan_jrn_comptable:
             _logger.info(plan_jrn_comptable[jrn])
             fcompta.write(plan_jrn_comptable[jrn].decode("ascii") + '\n')
 
         _logger.info("\nstarting liste ecritures")
-        # _logger.info(len(plan_ecr_comptable))
-        # _logger.info(plan_ecr_comptable)
         for ecr in plan_ecr_comptable:
             fcompta.write(ecr.decode('ascii') + '\n')
             for e in plan_ecr_comptable[ecr]:
@@ -447,7 +426,7 @@ class AccountExport(models.TransientModel):
         ecr_cpt = b"CPT   "
         ecr_cpt += self.largeur_fixe(compte_tmp, 10, ' ', 'r')
         ecr_cpt += self.largeur_fixe(unicodedata.normalize('NFKD', compte_name).encode(
-                                'ascii', 'ignore'), 30, ' ', 'r')
+            'ascii', 'ignore'), 30, ' ', 'r')
         # champ 47, 57, 60, 70, 73, 83
         ecr_cpt += self.largeur_fixe("", 36, ' ', 'l')
         ecr_cpt += self.largeur_fixe("", 1, ' ', 'l')  # 0
@@ -459,13 +438,21 @@ class AccountExport(models.TransientModel):
         ecr_cpt += self.largeur_fixe("", 20, ' ', 'l')
         ecr_cpt += self.largeur_fixe("", 1, ' ', 'l')
         ecr_cpt += self.largeur_fixe("", 2, ' ', 'l')  # in
-        ecr_cpt += self.largeur_fixe("", 23, ' ', 'l')
-        ecr_cpt += self.largeur_fixe(unicodedata.normalize('NFKD', compte).encode(
-                                'ascii', 'ignore'), 10, '0', 'r')  # compte lié
         ecr_cpt += self.largeur_fixe("", 3, ' ', 'l')
+        ecr_cpt += self.largeur_fixe("", 10, ' ', 'l')
+        if type == "au":
+            ecr_cpt += self.largeur_fixe(unicodedata.normalize('NFKD', compte).encode(
+                'ascii', 'ignore'), 10, ' ', 'l')
+        else:
+            ecr_cpt += self.largeur_fixe("", 10, ' ', 'l')
+        ecr_cpt += self.largeur_fixe("", 10, ' ', 'l')  # compte lié
+        if type == "au":
+            ecr_cpt += b"110"
+        else:
+            ecr_cpt += self.largeur_fixe("", 3, ' ', 'l')
         # libellé
         ecr_cpt += self.largeur_fixe(unicodedata.normalize('NFKD', compte_name).encode(
-                                'ascii', 'ignore'), 30, ' ', 'r')
+            'ascii', 'ignore'), 30, ' ', 'r')
         # champ 185, 189, 192, 193, 194, 195, 196 à 202
         ecr_cpt += self.largeur_fixe("", 28, ' ', 'l')
         # champ 213, 227, 228, 231
@@ -475,10 +462,73 @@ class AccountExport(models.TransientModel):
         # champ 262, 263
         ecr_cpt += self.largeur_fixe("", 8, ' ', 'l')
         ecr_cpt += self.largeur_fixe("", 8, ' ', 'l')
-        ecr_cpt += self.largeur_fixe("", 2, ' ', 'l')
+        # type de tiers
+        if compte_tmp[:3] == "411":
+            ecr_cpt += b"cl"
+        elif compte_tmp[:3] == "401":
+            ecr_cpt += b"fo"
+        else:
+            ecr_cpt += self.largeur_fixe("", 2, ' ', 'l')
         # champ 280, 282, 284
         ecr_cpt += self.largeur_fixe("", 6, ' ', 'l')
         ecr_cpt += self.largeur_fixe("", 3, ' ', 'l')
         ecr_cpt += self.largeur_fixe("", 3, ' ', 'l')
 
         return ecr_cpt
+
+    def create_mvt(self, compte_tmp, libelle, debit, m_debit, is_ech_mvt):
+        # Création de mouvement
+        # doc : 286 et fichier exemple 285
+        ecr_mvt = b"MVT   "
+        ecr_mvt += self.largeur_fixe(compte_tmp, 10, ' ', 'l')
+        # libellé mouvement (line.name = libelle)
+        ecr_mvt += self.largeur_fixe(unicodedata.normalize('NFKD', libelle).encode(
+            'ascii', 'ignore'), 30, ' ', 'l')
+
+        # Montant débit et crédit
+        if debit:
+            # ecr_mvt += self.largeur_fixe(str(line.debit), 13, '0', 'r')
+            ecr_mvt += self.largeur_fixe(str(m_debit), 13, '0', 'r')
+            ecr_mvt += self.largeur_fixe(" ", 13, ' ', 'l')
+        else:
+            ecr_mvt += self.largeur_fixe(str(m_debit), 26, '0', 'r')
+            # ecr_mvt += self.largeur_fixe(str(int(line.credit * 100)), 26, '0', 'r')
+
+        # Autre informations (quantité 1 et 2 + numéro)
+        ecr_mvt += self.largeur_fixe(" ", 30, ' ', 'l')
+        # champ 103, 105, 107, 108
+        ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
+        ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
+        # champ 119, 123, 124
+        ecr_mvt += self.largeur_fixe(" ", 11, ' ', 'l')
+        if is_ech_mvt:
+            ecr_mvt += b"1"
+        else:
+            ecr_mvt += self.largeur_fixe(" ", 1, ' ', 'l')
+        ecr_mvt += self.largeur_fixe(" ", 1, ' ', 'l')
+
+        # date déclaration et code TVA 2, 3
+        ecr_mvt += self.largeur_fixe(" ", 4, ' ', 'l')
+        # Filler (*3 : 3, 5, 8)
+        ecr_mvt += self.largeur_fixe(" ", 16, ' ', 'l')
+        # Date de valeur et libres
+        ecr_mvt += self.largeur_fixe(" ", 24, ' ', 'l')
+        # Libellé de compte
+        ecr_mvt += self.largeur_fixe(" ", 30, ' ', 'l')
+        # Modification de mouvement
+        ecr_mvt += self.largeur_fixe(" ", 14, ' ', 'l')
+        # Taux TVA
+        ecr_mvt += self.largeur_fixe(" ", 5, ' ', 'l')
+
+        # Code devise
+        # pb au moent de l'intégration, laisser vide pour que les écritures prennent devise par défaut de exercice
+        ecr_mvt += self.largeur_fixe(" ", 3, ' ', 'l')
+
+        # montant devise
+        ecr_mvt += self.largeur_fixe(" ", 22, ' ', 'l')
+        # Taux de change
+        ecr_mvt += self.largeur_fixe(" ", 8, ' ', 'l')
+        # Filler (*7 : 5, 5, 5, 2, 8, 3, 1)
+        ecr_mvt += self.largeur_fixe(" ", 28, ' ', 'l')
+
+        return ecr_mvt
