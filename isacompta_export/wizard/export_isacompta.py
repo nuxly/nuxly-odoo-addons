@@ -147,11 +147,48 @@ class AccountExport(models.TransientModel):
             ecr_ecr = b"ECR   "
             ecr_ecr += self.largeur_fixe(move.line_ids[0].journal_id.code, 2, ' ', 'l')
             ecr_ecr += move.line_ids[0].date.strftime('%d%m%Y').encode()
-            # Numero de pièce
-            if move.line_ids[0].ref:
-                ecr_ecr += self.largeur_fixe(move.line_ids[0].ref, 8, ' ', 'l')
+
+            """ Numéro de pièce - 8 chars
+                    Piece (référence : max 10 caractères)
+                    Ventes : VFA-2015-0056 >> V15-0056
+                    Achat  : AFA-2015-0045 >> A15-0045
+                    BANQUE :
+                    CM 302 05/2015/1 >> 30205/01
+                    CM 302 05/2015/35 >> 30205/35
+                    Notes de frais : NF17001 >> NF17001
+                    Autre : OD/2015/0001 >> OD150001 
+            """
+            # Si Achat ou Vente
+            if move.journal_id.type in ['purchase', 'purchase_refund', 'sale', 'sale_refund'] and move.line_ids:
+                _logger.info("Ref : Achat ou Vente : {}||{}".format(move.name, move.name[0] + move.name[4:13]))
+                ecr_ecr += self.largeur_fixe(move.name[0] + move.name[6:8], 8, ' ', 'l')
+            # Si c'est une banque et que c'est la CM 302
+            elif (move.journal_id.type == 'bank') and (move.name[:6] == 'CM 302'):
+                _logger.info("Ref : Bank 302 : {}||{}".format(move.name, move.name[3:6] + "-" + move.name[7:10] + move.name[15:25]))
+                ecr_ecr += self.largeur_fixe(move.name[3:6] + move.name[7:9] + "/", 6, ' ', 'r')
+                ecr_ecr += self.largeur_fixe(move.name[15:25], 2, '0', 'r')
+            # TODO Si c'est une Note de frais (NF)
+            elif move.journal_id.code == 'NF':
+                initial = ''
+                # Création de façon dynamique des 2 premières initiales du partner
+                if move.line_ids[0].partner_id:
+                    initial = ''.join([s[:1] for s in move.line_ids[0].partner_id.name.split(' ')])[:2] + '-'
+                _logger.info(u"Ref : NF : {}||{}".format(move.name, self.largeur_fixe(initial + move.name[-7:], 8, ' ', 'l')))
+                ecr_ecr += self.largeur_fixe(move.name, 8, ' ', 'l')
+            # Si c'est une OD
+            elif move.name[:2] == 'OD':
+                _logger.info("Ref : OD : {}||{}".format(move.name, move.name[4:7] + move.name[9:]))
+                ecr_ecr += self.largeur_fixe(move.name[:2] + move.name[5:7] + move.name[11:], 8, ' ', 'r')
+            # Sinon on prend les 10 dernières caractères en partant de la fin
             else:
-                ecr_ecr += self.largeur_fixe(" ", 8, ' ', 'l')
+                _logger.info("Ref : Autre : {}||{}".format(move.name, move.name[-8:]))
+                ecr_ecr += self.largeur_fixe(move.name[-8:], 8, ' ', 'r')
+
+
+            """if move.line_ids[0].ref:
+                ecr_ecr += self.largeur_fixe(move.line_ids[0].name, 8, ' ', 'l')
+            else:
+                ecr_ecr += self.largeur_fixe(" ", 8, ' ', 'l')"""
             # Libellé de l'écriture
             if move.line_ids[0].name:
                 ecr_ecr += self.largeur_fixe(unicodedata.normalize('NFKD', move.line_ids[0].name).encode(
