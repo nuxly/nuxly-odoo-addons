@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<odoo>
+		<record model="ir.ui.view" id="crm_lead_group_piste">
+		  <field name="name">crm.lead.suiviGDoc</field>
+		  <field name="model">crm.lead</field>
+		  <field name="type">form</field>
+		  <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+		  <field name="arch" type="xml">
+			<field name="team_id" position="after">
+				 <field name="category_id" string="GDoc de suivi" widget ="url" style="max-width: 250px; overflow: hidden;" />
+			</field>
+		  </field>
+		</record>
+</odoo>

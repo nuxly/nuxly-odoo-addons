@@ -1,0 +1,3 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+export_invoice_model,export_invoice_model,model_account_analytic_line,base.group_user,1,1,1,0
+export_invoice_state_model,export_invoice_state_model,model_global_timesheet_state,base.group_user,1,1,1,0
