@@ -64,7 +64,8 @@
 
     <menuitem
         name="Export ISACOMPTA"
-        parent="account.menu_action_account_invoice_report_all"
+        parent="account.account_reports_management_menu"
         action="action_export_isacompta"
+        sequence="1"
         id="menu_export_isacompta" />
 </odoo> 

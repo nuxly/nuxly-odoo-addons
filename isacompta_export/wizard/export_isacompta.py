@@ -32,18 +32,6 @@ class AccountExport(models.TransientModel):
         'Simulate the export',
         help="If true, moves will not be tagged as 'exported', but ISACOMPTA file will be generated.")
 
-    # Close confirm wizard
-    def confirm_ok(self):
-        return {'type': 'ir.actions.act_window_close'}
-
-    def largeur_fixe(self, string, size, patern, align):
-        if isinstance(string, str):
-            string = string.encode()
-        if align == 'r':
-            return string[0:size].rjust(size, patern.encode())
-        else:
-            return string[0:size].ljust(size, patern.encode())
-
     def export_isacompta(self):
 
         _logger.info("debut d'export isacompta.......")
@@ -55,22 +43,15 @@ class AccountExport(models.TransientModel):
         _logger.info(test)
 
         moves_exported_ids = self.env['account.move']  # id des mouv exportés pour flaguer
-
-        # tableau des types de journaux qui sont exportés
-        # types possibles : sale / sale_refund / purchase / purchase_refund / cash / bank / general / situation
-        journal_types = ['sale', 'sale_refund', 'purchase', 'purchase_refund', 'bank', 'general']
         export_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        # récupération de ID du User courant
-        current_user = self.env.user
 
         # Nombre d'écriture
         nbEcriture = 0
-
-        company = current_user.company_id
+        # récupération de ID du société
+        company = self.env.user.company_id
 
         ids_move = obj_move.search([('state', '=', 'posted'), ('exported_date', '=', False),
-                                    ('company_id', '=', company.id)], order="name")
+                                    ('company_id', '=', company.id), ('date', '>', '2021-01-01')], order="name")
         # _logger.info('Id_move : "{}" : "{}" .'.format(type(ids_move), ids_move))
 
         if not ids_move:
@@ -119,26 +100,11 @@ class AccountExport(models.TransientModel):
         # dos_ecr += self.largeur_fixe(" ", 21, ' ', 'l')
         fcompta.write(dos_ecr.decode('ascii') + '\n')
 
-        # Crétaion d'exercice
-        now = datetime.now()
-        exo_ecr = b"EXO   0101"
-        exo_ecr += now.strftime('%Y').encode()
-        exo_ecr += b"3112"
-        exo_ecr += now.strftime('%Y').encode()
-        exo_ecr += b"0"  # Flag de destruction des écritures
-        exo_ecr += self.largeur_fixe(" ", 15, ' ', 'l')
-        exo_ecr += self.largeur_fixe(" ", 8, ' ', 'l')
-        exo_ecr += self.largeur_fixe(" ", 1, ' ', 'l')
-        fcompta.write(exo_ecr.decode('ascii') + '\n')
-
         last_ecr = None
         ar = []
         # Parcours les mouvements
         for move in ids_move:
             _logger.info('move : "{}" : "{}" .'.format(type(move), move))
-            # ne traite que les moves appartennant à une liste précise de type de journal
-            if move.journal_id.type not in journal_types:
-                continue
 
             # Ajout de l'ID du move dans le tab pour flagger en "exported" si pas d'erreur au global
             moves_exported_ids += move
@@ -148,41 +114,33 @@ class AccountExport(models.TransientModel):
             ecr_ecr += self.largeur_fixe(move.line_ids[0].journal_id.code, 2, ' ', 'l')
             ecr_ecr += move.line_ids[0].date.strftime('%d%m%Y').encode()
 
-            """ Numéro de pièce - 8 chars
-                    Piece (référence : max 10 caractères)
-                    Ventes : VFA-2015-0056 >> V15-0056
-                    Achat  : AFA-2015-0045 >> A15-0045
-                    BANQUE :
-                    CM 302 05/2015/1 >> 30205/01
-                    CM 302 05/2015/35 >> 30205/35
-                    Notes de frais : NF17001 >> NF17001
-                    Autre : OD/2015/0001 >> OD150001 
+            """ 
+                Numéro de pièce - 8 chars
+                Pièce achat : A21 => AFA-2021-0389 => AF210389
+                Pièce vente : V21 => VFA-2022-0015 => VF220015 // VAV-2020-0001 => VA200001
+                bank : CM 302 11/2021/79 ==> C2111079 // CM 302 11/2022/134 => C2211134
+                general : OD/2021/0045 => OD210045
+                sinon => remplace ("/" "-" => par rien + 8 derniers caractères)
             """
             # Si Achat ou Vente
-            if move.journal_id.type in ['purchase', 'purchase_refund', 'sale', 'sale_refund'] and move.line_ids:
-                _logger.info("Ref : Achat ou Vente : {}||{}".format(move.name, move.name[0] + move.name[4:13]))
-                ecr_ecr += self.largeur_fixe(move.name[0] + move.name[6:8], 8, ' ', 'l')
+            if move.journal_id.type in ['purchase', 'sale'] and move.line_ids:
+                _logger.info("Ref : Achat ou Vente : {}||{}".format(move.name, move.name[0:2] + move.name[6:8]+ move.name[10:14]))
+                ecr_ecr += self.largeur_fixe(move.name[:2] + move.name[6:8]+ move.name[9:13], 8, ' ', 'l')
             # Si c'est une banque et que c'est la CM 302
             elif (move.journal_id.type == 'bank') and (move.name[:6] == 'CM 302'):
-                _logger.info("Ref : Bank 302 : {}||{}".format(move.name, move.name[3:6] + "-" + move.name[7:10] + move.name[15:25]))
-                ecr_ecr += self.largeur_fixe(move.name[3:6] + move.name[7:9] + "/", 6, ' ', 'r')
-                ecr_ecr += self.largeur_fixe(move.name[15:25], 2, '0', 'r')
-            # TODO Si c'est une Note de frais (NF)
-            elif move.journal_id.code == 'NF':
-                initial = ''
-                # Création de façon dynamique des 2 premières initiales du partner
-                if move.line_ids[0].partner_id:
-                    initial = ''.join([s[:1] for s in move.line_ids[0].partner_id.name.split(' ')])[:2] + '-'
-                _logger.info(u"Ref : NF : {}||{}".format(move.name, self.largeur_fixe(initial + move.name[-7:], 8, ' ', 'l')))
-                ecr_ecr += self.largeur_fixe(move.name, 8, ' ', 'l')
+                tmp_bank = move.name.split("/")
+                _logger.info("Ref : Bank 302 test: {}||{}".format(tmp_bank, tmp_bank[0][0] + tmp_bank[1][-2:] + tmp_bank[0][-2:] + tmp_bank[2]))
+                ecr_ecr += self.largeur_fixe(tmp_bank[0][0] + tmp_bank[1][-2:] + tmp_bank[0][-2:], 5, ' ', 'r')
+                ecr_ecr += self.largeur_fixe(tmp_bank[2], 3, '0', 'r')
             # Si c'est une OD
-            elif move.name[:2] == 'OD':
-                _logger.info("Ref : OD : {}||{}".format(move.name, move.name[4:7] + move.name[9:]))
-                ecr_ecr += self.largeur_fixe(move.name[:2] + move.name[5:7] + move.name[11:], 8, ' ', 'r')
+            #elif move.name[:2] == 'OD':
+            elif move.journal_id.code == 'OD':
+                _logger.info("Ref : OD : {}||{}".format(move.name, move.name[:2] + move.name[5:7] + move.name[8:]))
+                ecr_ecr += self.largeur_fixe(move.name[:2] + move.name[5:7] + move.name[8:], 8, ' ', 'r')
             # Sinon on prend les 10 dernières caractères en partant de la fin
             else:
                 _logger.info("Ref : Autre : {}||{}".format(move.name, move.name[-8:]))
-                ecr_ecr += self.largeur_fixe(move.name[-8:], 8, ' ', 'r')
+                ecr_ecr += self.largeur_fixe(move.name.replace("-", "").replace("/","")[-8:], 8, ' ', 'r')
 
 
             """if move.line_ids[0].ref:
@@ -191,7 +149,7 @@ class AccountExport(models.TransientModel):
                 ecr_ecr += self.largeur_fixe(" ", 8, ' ', 'l')"""
             # Libellé de l'écriture
             if move.line_ids[0].name:
-                ecr_ecr += self.largeur_fixe(unicodedata.normalize('NFKD', move.line_ids[0].name).encode(
+                ecr_ecr += self.largeur_fixe(unicodedata.normalize('NFKD', self._sup_retour_ligne(move.line_ids[0].name)).encode(
                     'ascii', 'ignore'), 30, ' ', 'l')
             else:
                 ecr_ecr += self.largeur_fixe(" ", 30, ' ', 'l')
@@ -350,7 +308,7 @@ class AccountExport(models.TransientModel):
 
                     if new_ecr:
                         if last_ecr is not None:
-                            plan_ecr_comptable[last_ecr] = ar
+                            plan_ecr_comptable[(last_ecr, last_ecr[12:16])] = ar
                             last_ecr = None
                             ar = []
                         # ar.append(ecr_mvt)
@@ -378,8 +336,8 @@ class AccountExport(models.TransientModel):
 
         # add the last entries
         if len(ar) != 0:
-            plan_ecr_comptable[last_ecr] = ar
-        _logger.info("ecr '{}', '{}'".format(last_ecr, len(ar)))
+            plan_ecr_comptable[(last_ecr, last_ecr[12:16])] = ar
+        _logger.info("ecr '{}', '{}'".format(last_ecr, last_ecr[12:16], len(ar)))
 
         for cpt in plan_cpt_comptable:
             fcompta.write(plan_cpt_comptable[cpt].decode('ascii') + '\n')
@@ -391,16 +349,25 @@ class AccountExport(models.TransientModel):
             fcompta.write(plan_jrn_comptable[jrn].decode("ascii") + '\n')
 
         _logger.info("\nstarting liste ecritures")
-        for ecr in plan_ecr_comptable:
-            fcompta.write(ecr.decode('ascii') + '\n')
-            for e in plan_ecr_comptable[ecr]:
-                fcompta.write(e.decode('ascii') + '\n')
+        # Préparation des pièces par année
+        plan_ecr_comptable_by_year = {}
+        for (ecr, year) in plan_ecr_comptable:
+            if plan_ecr_comptable_by_year.get(year, 0) == 0:                
+                plan_ecr_comptable_by_year[year] = []
+            plan_ecr_comptable_by_year[year].append(ecr)
+            for e in plan_ecr_comptable[(ecr, year)]:
+                plan_ecr_comptable_by_year[year].append(e)
+                
+        for y in plan_ecr_comptable_by_year:
+            # Crétaion d'exercice
+            fcompta.write(self.create_exo(y).decode('ascii') + '\n')
+            for ecr in plan_ecr_comptable_by_year[y]:
+                fcompta.write(ecr.decode('ascii') + '\n')
 
         # Fin des mouvements, on ferme le fichier
         fcompta.close()
 
-        # Récupérer la valeur de la casse à cacher pour savoi si on est en mode simulation
-        simulation = 0
+        # Récupérer la valeur de la casse à cacher pour savoir si on est en mode simulation
         simulation = self.simulation
 
         # Mark all moves lines as exported
@@ -458,6 +425,19 @@ class AccountExport(models.TransientModel):
             'views': [(self.env.ref('isacompta_export.message_export_confirm_wizard_form').id, 'form')],
             'target': 'new'
         }
+
+    # Close confirm wizard
+    def confirm_ok(self):
+        return {'type': 'ir.actions.act_window_close'}
+
+    def largeur_fixe(self, string, size, patern, align):
+        if isinstance(string, str):
+            string = string.encode()
+        if align == 'r':
+            return string[0:size].rjust(size, patern.encode())
+        else:
+            return string[0:size].ljust(size, patern.encode())
+
 
     def create_cpt(self, type, compte, compte_tmp, compte_name):
         ecr_cpt = b"CPT   "
@@ -519,7 +499,7 @@ class AccountExport(models.TransientModel):
         ecr_mvt = b"MVT   "
         ecr_mvt += self.largeur_fixe(compte_tmp, 10, ' ', 'l')
         # libellé mouvement (line.name = libelle)
-        ecr_mvt += self.largeur_fixe(unicodedata.normalize('NFKD', libelle).encode(
+        ecr_mvt += self.largeur_fixe(unicodedata.normalize('NFKD', libelle and self._sup_retour_ligne(libelle) or '').encode(
             'ascii', 'ignore'), 30, ' ', 'l')
 
         # Montant débit et crédit
@@ -569,3 +549,17 @@ class AccountExport(models.TransientModel):
         ecr_mvt += self.largeur_fixe(" ", 28, ' ', 'l')
 
         return ecr_mvt
+
+    def create_exo(self, year):
+        exo_ecr = b"EXO   0101"
+        exo_ecr += year
+        exo_ecr += b"3112"
+        exo_ecr += year
+        exo_ecr += b"0"  # Flag de destruction des écritures
+        exo_ecr += self.largeur_fixe(" ", 15, ' ', 'l')
+        exo_ecr += self.largeur_fixe(" ", 8, ' ', 'l')
+        exo_ecr += self.largeur_fixe(" ", 1, ' ', 'l')
+        return exo_ecr
+    
+    def _sup_retour_ligne(self, chaine):
+        return chaine.replace("\n", " ").replace("\r", " ").replace("  ", " ")
