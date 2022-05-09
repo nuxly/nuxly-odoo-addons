@@ -48,7 +48,7 @@ class AccountExport(models.TransientModel):
         # Nombre d'écriture
         nbEcriture = 0
         # récupération de ID du société
-        company = self.env.user.company_id
+        company = self.env.company
 
         ids_move = obj_move.search([('state', '=', 'posted'), ('exported_date', '=', False),
                                     ('company_id', '=', company.id), ('date', '>', '2021-01-01')], order="name")
