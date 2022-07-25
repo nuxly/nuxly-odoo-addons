@@ -19,7 +19,7 @@ class Reminder(models.TransientModel):
         today_time = datetime.now()
 
         # Checking working day (not weekend)
-        if today.weekday():
+        if today.weekday() in [0,1,2,3,4]:
             # checking if day is a holiday
             holiday = publicHoliday.search([]).filtered(lambda x: x.date == today)
             if not holiday:
@@ -36,8 +36,7 @@ class Reminder(models.TransientModel):
                         lines = timesheet.search([('date', '=', today), ('employee_id', '=', employee.id)])
                         if not lines:
                             # TODO a faire un rappel pour saisir les temps
-                            _logger.info("not lines")
-                            template_obj = self.env.ref('reminder-timesheet-fill.reminder_timesheet_fill')
+                            template_obj = self.env.ref('timesheet_reminder_mail.reminder_timesheet_fill')
                             if template_obj:
                                 receipt_list = [employee.work_email]
 
@@ -50,4 +49,4 @@ class Reminder(models.TransientModel):
                                     'email_from': template_obj.email_from,
                                 }
                                 stat_send = self.env['mail.mail'].create(mail_values).send()
-                                _logger.info(stat_send)
+                                _logger.debug("Timesheet Reminder Mail ==> mail sent status to reminder to fill those time on timesheet '%s'.", stat_send)
