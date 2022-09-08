@@ -36,7 +36,7 @@ class Reminder(models.TransientModel):
                             self._cron_timesheet_send_reminder(
                                 employee,
                                 'timesheet_reminder_mail.reminder_timesheet_fill',
-                                'hr.open_view_employee_list_my'
+                                'hr_timesheet.act_hr_timesheet_line'
                             )
 
     def _cron_timesheet_send_reminder(self, employees, template_xmlid, action_xmlid, additionnal_values=None):
@@ -46,7 +46,7 @@ class Reminder(models.TransientModel):
         """
         action_url = '%s/web#menu_id=%s&action=%s' % (
             self.env['ir.config_parameter'].sudo().get_param('web.base.url'),
-            self.env.ref('hr.open_view_employee_list_my').id,
+            self.env.ref('hr_timesheet.timesheet_menu_root').id,
             self.env.ref(action_xmlid).id,
         )
         # send mail template to users having email address
