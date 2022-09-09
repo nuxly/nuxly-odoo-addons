@@ -14,5 +14,19 @@
             <field name="nextcall" eval="datetime.utcnow()" />
             <!-- <field name="active" eval="False"/> -->
         </record>
+
+        <record forcecreate="True" id="cron_reminder_timesheet_manager" model="ir.cron">
+            <field name="name">Reminder to check/validate timesheet</field>
+            <field name="model_id" ref="model_timesheet_reminder"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_reminder(True)</field>
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field eval="False" name="doall" />
+            <field name="nextcall" eval="datetime.utcnow()" />
+            <!-- <field name="active" eval="False"/> -->
+        </record>
     </data>
 </odoo>

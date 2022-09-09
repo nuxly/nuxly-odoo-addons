@@ -9,14 +9,17 @@ class Reminder(models.TransientModel):
     _name = 'timesheet.reminder'
     _description = "Alert each user that doesn't wrote at least one line of time on timesheet"
 
-    def _cron_reminder(self):
+    # Ajout de per_day en paramètre optionnel afin de répondre à la demande d'issue #62 (alerter manager)
+    def _cron_reminder(self, per_day=False):
         public_holiday = self.env['hr.holidays.public.line']
         leave = self.env['hr.leave']
         timesheet = self.env['account.analytic.line']
         hr_employee = self.env['hr.employee']
+        account_move = self.env['account.move']
 
         today = date.today()
         today_time = datetime.now()
+        day_lines = {}
 
         # Checking working day (not weekend)
         if today.weekday() in [0, 1, 2, 3, 4]:
@@ -25,19 +28,30 @@ class Reminder(models.TransientModel):
             if not holiday:
                 # Check for all employees, if each one write at least one line of timesheet
                 employees = hr_employee.search([])
-                for employee in employees:
-                    # Check if each one doesn't on leave
-                    on_leave = leave.search([('employee_id', '=', employee.id)]).filtered(lambda
-                                                                                             x: x.number_of_days == 1.0 and x.date_from == today_time or x.date_from <= today_time <= x.date_to)
-                    if not on_leave:
-                        # Check if each one write at least one line of timesheet, or do a alert
-                        lines = timesheet.search([('date', '=', today), ('employee_id', '=', employee.id)])
-                        if not lines:
-                            self._cron_timesheet_send_reminder(
-                                employee,
-                                'timesheet_reminder_mail.reminder_timesheet_fill',
-                                'hr_timesheet.act_hr_timesheet_line'
-                            )
+                # Ajout de per_day en paramètre optionnel afin de répondre à la demande d'issue #62 (en cours)
+                if per_day:
+                    lines = account_move.get_sum_analytic_lines(None, today, per_day)
+                    if lines:
+                        _logger.info("Nuxly __crom_reminder : %s ", lines)
+                        self._cron_timesheet_send_reminder(
+                                    employee.,
+                                    'timesheet_reminder_mail.reminder_timesheet_fill',
+                                    'hr_timesheet.act_hr_timesheet_line'
+                                )
+                else:
+                    for employee in employees:
+                        # Check if each one doesn't on leave
+                        on_leave = leave.search([('employee_id', '=', employee.id)]).filtered(lambda
+                                                                                                x: x.number_of_days == 1.0 and x.date_from == today_time or x.date_from <= today_time <= x.date_to)
+                        if not on_leave:
+                            # Check if each one write at least one line of timesheet, or do a alert
+                            lines = timesheet.search([('date', '=', today), ('employee_id', '=', employee.id)])
+                            if not lines:
+                                self._cron_timesheet_send_reminder(
+                                    employee,
+                                    'timesheet_reminder_mail.reminder_timesheet_fill',
+                                    'hr_timesheet.act_hr_timesheet_line'
+                                )
 
     def _cron_timesheet_send_reminder(self, employees, template_xmlid, action_xmlid, additionnal_values=None):
         """ Send the email reminder to specified users
