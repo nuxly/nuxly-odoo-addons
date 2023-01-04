@@ -24,14 +24,15 @@ class Reminder(models.TransientModel):
             holiday = public_holiday.search([]).filtered(lambda x: x.date == today)
             if not holiday:
                 # Check for all employees, if each one write at least one line of timesheet
-                employees = hr_employee.search([])
+                employees = hr_employee.search([('ignore_timesheet_reminder', '=', False)])
                 for employee in employees:
+                    _logger.info("Check '%s'.", employee.name)
                     # Check if each one doesn't on leave
                     on_leave = leave.search([('employee_id', '=', employee.id)]).filtered(lambda
                                                                                              x: x.number_of_days == 1.0 and x.date_from == today_time or x.date_from <= today_time <= x.date_to)
                     if not on_leave:
                         # Check if each one write at least one line of timesheet, or do a alert
-                        lines = timesheet.search([('date', '=', today), ('employee_id', '=', employee.id)])
+                        lines = timesheet.search([('date', '=', today), ('employee_id', '=', employee.id), ('state', '!=', 'draft')])
                         if not lines:
                             self._cron_timesheet_send_reminder(
                                 employee,

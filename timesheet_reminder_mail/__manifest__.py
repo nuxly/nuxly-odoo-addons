@@ -14,6 +14,7 @@ This module send a notificaton by mail to each user doesn't wrote at least one o
     'data': [
         'data/reminder_cron.xml',
         'views/mail.xml',
+        'views/hr_view.xml',
     ],
     'installable': True,
     'auto_install': True,
