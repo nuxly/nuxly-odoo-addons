@@ -1,0 +1,2 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+timesheet_summary,timesheet_summary,timesheet_reminder_mail.model_timesheet_summary,base.group_user,1,1,1,0
