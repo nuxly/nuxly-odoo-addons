@@ -21,7 +21,6 @@ class Summary(models.TransientModel):
         template_ctx = {'action_url': action_url}
         for manager in managers:
             template.with_context(template_ctx).send_mail(manager.id)
-            logger.debug("=============================> RESULTAT : %s", template_ctx)
             logger.info("Summaries of time spent to send to the manager '%s'.", manager.name)
 
 
