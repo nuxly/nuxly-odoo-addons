@@ -145,3 +145,18 @@ msgstr ""
 "        % endif\n"
 "    </div>\n"
 "            "
+
+#. module: timesheet_reminder_mail
+#: model:ir.actions.server,name:timesheet_reminder_mail.cron_timesheet_summary_manager_ir_actions_server
+#: model:ir.cron,cron_name:timesheet_reminder_mail.cron_timesheet_summary_manager
+#: model:ir.cron,name:timesheet_reminder_mail.cron_timesheet_summary_manager
+#: model:mail.template,subject:timesheet_reminder_mail.mail_template_timesheet_summary_manager
+msgid "Daily summary of time spent"
+msgstr "Résumé quotidien des temps passés"
+
+#. module: timesheet_reminder_mail
+#: model:ir.actions.server,name:timesheet_reminder_mail.cron_reminder_timesheet_ir_actions_server
+#: model:ir.cron,cron_name:timesheet_reminder_mail.cron_reminder_timesheet
+#: model:ir.cron,name:timesheet_reminder_mail.cron_reminder_timesheet
+msgid "Reminder to fill timesheet"
+msgstr "Rappel pour saisir tes temps"

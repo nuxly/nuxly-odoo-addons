@@ -10,18 +10,20 @@ class Summary(models.TransientModel):
     _name = 'timesheet.summary'
 
     def _cron_timesheet_summary_manager(self):
-        managers = self.get_managers()
-        action_url = '%s/web#menu_id=%s&action=%s' % (
-            self.env['ir.config_parameter'].sudo().get_param('web.base.url'),
-            self.env.ref('hr_timesheet.timesheet_menu_root').id,
-            self.env.ref('hr_timesheet.act_hr_timesheet_line').id,
-        )
-        # send mail template to users having email address
-        template = self.env.ref('timesheet_reminder_mail.mail_template_timesheet_summary_manager')
-        template_ctx = {'action_url': action_url}
-        for manager in managers:
-            template.with_context(template_ctx).send_mail(manager.id)
-            logger.info("Summaries of time spent to send to the manager '%s'.", manager.name)
+        # Si c'est le cron tourne en weekend, on s'assure qu'il n'envoie pas de mail
+        if date.today().weekday() not in (5, 6):
+            managers = self.get_managers()
+            action_url = '%s/web#menu_id=%s&action=%s' % (
+                self.env['ir.config_parameter'].sudo().get_param('web.base.url'),
+                self.env.ref('hr_timesheet.timesheet_menu_root').id,
+                self.env.ref('hr_timesheet.act_hr_timesheet_line').id,
+            )
+            # send mail template to users having email address
+            template = self.env.ref('timesheet_reminder_mail.mail_template_timesheet_summary_manager')
+            template_ctx = {'action_url': action_url}
+            for manager in managers:
+                template.with_context(template_ctx).send_mail(manager.id)
+                logger.info("Summaries of time spent to send to the manager '%s'.", manager.name)
 
 
     # Retoune les managers responsablent d'approuver les feuilles de temps
@@ -49,6 +51,7 @@ class Summary(models.TransientModel):
         daily_times_summarized = self.summarize_analytic_lines(daily_times), "Temps du jour"
         
         # Récupération des temps de la veille ouvrée
+        # Si c'est le cron tourne un lundi, on s'assure qu'il envoie les temps de vendredi dernier
         date_yesterday = date_today + relativedelta(days=-3) if date_today.weekday() == 0 else date_today + relativedelta(days=-1)
         yesterday = date_yesterday.strftime("%Y-%m-%d")
         yesterday_times = self.get_analytic_lines(yesterday, yesterday, manager)
