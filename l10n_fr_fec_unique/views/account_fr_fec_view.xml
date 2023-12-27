@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <!-- Personalisation du wizard pour ajouter la case a cocher 'export unique'-->
+    <record id="your_module_account_fr_fec_view_nuxly" model="ir.ui.view">
+        <field name="name">your.module.account.fr.fec.form.view.nuxly</field>
+        <field name="model">account.fr.fec</field>
+        <field name="inherit_id" ref="l10n_fr_fec.account_fr_fec_view"/>
+        <field name="arch" type="xml">
+            <field name="test_file" position="after">
+                <field name="unique_export"/>
+            </field>
+        </field>
+    </record>
+</odoo>

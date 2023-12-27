@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <!-- Add 'exported_date' field to the tree view of account.move -->
+    <record id="your_module_account_view_move_tree_nuxly" model="ir.ui.view">
+        <field name="name">your.module.account.view.move.tree.nuxly</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="exported_date" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
