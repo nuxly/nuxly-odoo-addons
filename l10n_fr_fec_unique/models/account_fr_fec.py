@@ -7,6 +7,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import UserError, AccessDenied
 from odoo.tools import float_is_zero, pycompat
 from odoo.tools.misc import get_lang
+from datetime import date
 
 import logging
 logger = logging.getLogger(__name__)
@@ -16,8 +17,12 @@ class MonModuleAccountFrFec(models.TransientModel):
 
     # Adding requested field to filter unique export only
     unique_export = fields.Boolean(string='Unique Export', help="If enabled, generates accounting entries exclusively for those that haven't been exported, using the 'exported_date' field.")
-
-
+    
+    # Make 'date_from' and 'date_to' non-required for future changes.
+    date_from = fields.Date(required=False)
+    date_to = fields.Date(required=False)
+    
+    
     # Update this method to handle unique export
     def mark_exported_unique(self):
         # Ensure there is only one record (singleton) for this wizard
@@ -56,6 +61,23 @@ class MonModuleAccountFrFec(models.TransientModel):
         # 2) CSV files are easier to read/use for a regular accountant.
         # So it will be easier for the accountant to check the file before
         # sending it to the fiscal administration
+        
+        #######################
+        # PATCH STARTS HERE   #
+        #######################
+ 
+        # Management of start date and end date:
+        # Initialize 'date_from' to January 1, 1900, if no start date is specified and unique export is enabled.
+        if not self.date_from and self.unique_export:
+            self.date_from = date(1900, 1 ,1)
+        # Initialize 'date_to' to the current date if no end date is specified and unique export is enabled.
+        if not self.date_to and self.unique_export:
+            self.date_to = fields.Date.today()
+                
+        #######################
+        # PATCH ENDS HERE     #
+        #######################       
+        
         today = fields.Date.today()
         if self.date_from > today or self.date_to > today:
             raise UserError(_('You could not set the start date or the end date in the future.'))
@@ -153,7 +175,6 @@ class MonModuleAccountFrFec(models.TransientModel):
         #######################
         # PATCH ENDS HERE     #
         #######################
-       
         
         sql_query += '''
         GROUP BY aml.account_id, aa.account_type
