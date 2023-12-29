@@ -10,4 +10,5 @@ class AccountMove(models.Model):
 
     # Mark the accounting entry as exported by setting the export date
     def mark_exported(self):
-        self.write({'exported_date': fields.Date.today()})
+        for move in self:
+            move.write({'exported_date': fields.Date.today()})
