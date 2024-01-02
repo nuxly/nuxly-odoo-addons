@@ -210,8 +210,7 @@ class AccountFrFecUnique(models.TransientModel):
             OFFSET %s
             '''
             #######################
-            # PATCH ENDs HERE     
-            # #
+            # PATCH ENDs HERE     #
             #######################
 
             with io.BytesIO() as fecfile:
@@ -244,6 +243,10 @@ class AccountFrFecUnique(models.TransientModel):
 
                 base64_result = base64.encodebytes(fecfile.getvalue())
 
+            # Check if the query results are empty
+            if not query_results:
+                raise UserError(_('No data to export. The FEC file will not be generated.'))
+            
             end_date = fields.Date.to_string(self.date_to).replace('-', '')
             suffix = ''
             if self.export_type == "nonofficial":
