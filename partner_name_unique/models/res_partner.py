@@ -1,8 +1,5 @@
 from odoo import fields, api, models
 from unidecode import unidecode
-import logging
-logger = logging.getLogger(__name__)
-
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
@@ -27,7 +24,6 @@ class ResPartner(models.Model):
 
             # Normalize the name for accents and convert to lowercase
             name_normalized = unidecode(partner.name.strip()).lower()
-            logger.warning("Nom normalisé 1 {}".format(name_normalized))
 
             # Prepare the search domain
             domain = []
@@ -43,6 +39,5 @@ class ResPartner(models.Model):
             partner.z_same_name_partner_id = False
             for p in all_partners:
                 if unidecode(p.name.strip()).lower() == name_normalized and p.id != partner_id:
-                    logger.warning("Nom normalisé 2 {}".format(unidecode(p.name.strip()).lower()))
                     partner.z_same_name_partner_id = p.id
                     break
