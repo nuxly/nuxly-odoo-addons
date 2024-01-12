@@ -3,7 +3,7 @@
 {
     'name': 'partner_name_unique',
     'version': '16.0.0.0',
-    'category': 'Accounting & Finance',
+    'category': "Customer Relationship Management",
     'summary': 'Unique contact name',
     'description': """
     This module find partners with duplicate names add a warning.
@@ -16,9 +16,9 @@ Features:
     """,
     'author': 'Nuxly',
     'website': 'https://www.nuxly.com',
-    'depends': [],
+    'depends': ['base'],
     'data': [
-        # 'views/',
+        'views/res_partner_views.xml',
     ],
     'installable': True,
 }
