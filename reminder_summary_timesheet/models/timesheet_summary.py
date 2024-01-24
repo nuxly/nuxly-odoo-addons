@@ -28,7 +28,6 @@ class TimesheetSummary(models.TransientModel):
     # Return managers responsible for approving timesheet lines
     def get_managers(self):
         managers = []
-        logger.warning("====> ICI : %s", self.env['hr.employee'])
 
         # Retrieves managers distinct from all employees
         for employee in self.env['hr.employee'].search([('timesheet_manager_id', '!=', False)]):
