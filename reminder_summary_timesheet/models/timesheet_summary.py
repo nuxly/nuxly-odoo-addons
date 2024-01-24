@@ -1,14 +1,16 @@
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 import logging
-from odoo import models
+from odoo import models, _
 
 logger = logging.getLogger(__name__)
 
 
-class Summary(models.TransientModel):
+class TimesheetSummary(models.TransientModel):
     _name = 'timesheet.summary'
+    _description = "Daily summary of time spent for each manager"
 
+    # Send a summary of timesheet lines entered by employees
     def _cron_timesheet_summary_manager(self):
         managers = self.get_managers()
         action_url = '%s/web#menu_id=%s&action=%s' % (
@@ -16,59 +18,55 @@ class Summary(models.TransientModel):
             self.env.ref('hr_timesheet.timesheet_menu_root').id,
             self.env.ref('hr_timesheet.act_hr_timesheet_line').id,
         )
-        # send mail template to users having email address
-        template = self.env.ref('timesheet_reminder_mail.mail_template_timesheet_summary_manager')
+        template = self.env.ref('reminder_summary_timesheet.mail_template_timesheet_summary_manager')
         template_ctx = {'action_url': action_url}
         for manager in managers:
             template.with_context(template_ctx).send_mail(manager.id)
             logger.info("Summaries of time spent to send to the manager '%s'.", manager.name)
 
 
-    # Retoune les managers responsablent d'approuver les feuilles de temps
+    # Return managers responsible for approving timesheet lines
     def get_managers(self):
-        hr_employee = self.env['hr.employee']
         managers = []
+        logger.warning("====> ICI : %s", self.env['hr.employee'])
 
-        # Récupération des employés aillant un manager
-        employees = hr_employee.search([('timesheet_manager_id', "!=", False)])
-
-        # Parcours ces employés en sortant les managers
-        for employee in employees:
+        # Retrieves managers distinct from all employees
+        for employee in self.env['hr.employee'].search([('timesheet_manager_id', '!=', False)]):
             if employee['timesheet_manager_id'] not in managers:
                 managers += employee['timesheet_manager_id']
         return managers
 
 
-    # Retoune les différents tableaux de temps d'un manager
+    # Return the different summary tables of timesheet lines for a given manager
     def get_summarized_analytic_lines(self, manager):
         date_today = date.today()
 
-        # Récupération des temps du jour
+        # Retrieves the summary of today timesheet lines
         today = date_today.strftime("%Y-%m-%d")
         daily_times = self.get_analytic_lines(today, today, manager)
-        daily_times_summarized = self.summarize_analytic_lines(daily_times), "Temps du jour"
+        daily_times_summarized = self.summarize_analytic_lines(daily_times), _('Today summary')
         
-        # Récupération des temps de la veille ouvrée
+        # Retrieves the summary of the previous working day timesheet lines
         date_yesterday = date_today + relativedelta(days=-3) if date_today.weekday() == 0 else date_today + relativedelta(days=-1)
         yesterday = date_yesterday.strftime("%Y-%m-%d")
         yesterday_times = self.get_analytic_lines(yesterday, yesterday, manager)
-        yesterday_times_summarized = self.summarize_analytic_lines(yesterday_times), "Temps de la veille"
+        yesterday_times_summarized = self.summarize_analytic_lines(yesterday_times), _('Previous working day summary')
         
-        # Récupération des temps de la semaine
+        # Retrieves the summary of the current week timesheet lines
         date_monday = (date_today - timedelta(days=date_today.weekday()+2)).strftime("%Y-%m-%d")
         weekly_times = self.get_analytic_lines(date_monday, date_today, manager)
-        weekly_times_summarized = self.summarize_analytic_lines(weekly_times), "Cumule de la semaine"
+        weekly_times_summarized = self.summarize_analytic_lines(weekly_times), _('Total of the week')
         
-        # Récupération des temps du mois
+        # Retrieves the summary of the current month timesheet lines
         date_start_month = date(date_today.year, date_today.month, 1).strftime("%Y-%m-%d")
         monthly_times = self.get_analytic_lines(date_start_month, date_today, manager)
-        monthly_times_summarized = self.summarize_analytic_lines(monthly_times), "Cumule du mois"
+        monthly_times_summarized = self.summarize_analytic_lines(monthly_times), _('Total of the month')
 
         res = daily_times_summarized, yesterday_times_summarized, weekly_times_summarized, monthly_times_summarized
         return res
 
 
-    # Retourne les temps passés des employées en fonction d'un manager et d'un plage données
+    # Returns the timesheet lines of a given manager's employees based on a given range
     def get_analytic_lines(self, date_start, date_end, manager):
         employees = self.env['hr.employee'].search([
             ("timesheet_manager_id", "=", manager.id
@@ -83,15 +81,15 @@ class Summary(models.TransientModel):
         return aal
 
 
-    # Retourne une synthèse des temps passés
+    # Returns a summary of given timesheet lines
     def summarize_analytic_lines(self, aal):
         if aal:
-            # tpi : total par intervenant
-            # tpp : total par projet
+            # tpi : Total Per Intervener
+            # tpp : Total Per Project
             tpi = tpp = "Total"
             intervenants = []
             projets = {}
-            # temps total des intervenants pour tous projets confondus
+            # Total time of all projects combined for each interveners
             tpi_dict = {tpi: {tpp: 0}}
 
             for line in aal:
@@ -99,20 +97,20 @@ class Summary(models.TransientModel):
                 intervenant = line.employee_id.user_partner_id.firstname
                 temps = line.unit_amount
 
-                # Ajout de l'intervenant dans le tableau "intervenants" s'il n'existe pas déjà
+                # Adding the intervener to the "interveners" table if it is not already entered
                 if intervenant not in intervenants:
                     intervenants.append(intervenant)
-                # Ajout de le projet dans le tableau "projets" s'il n'existe pas déjà
+                # Adding the project to the "projects" table if it is not already entered
                 if projet not in projets:
                     projets[projet] = {}
                     projets[projet][tpp] = 0
-                # Si l’intervenant est déjà sur le projet du tableau "projets" alors on additionne le temps passé au temps déjà renseigné
+                # If the intervener is already on the project in the "projects" table then we add the time spent to the time already entered
                 if intervenant in projets[projet]:
                     projets[projet][intervenant] += temps
                     tpi_dict[tpi][intervenant] += temps
                     projets[projet][tpp] += temps
                     tpi_dict[tpi][tpp] += temps
-                # Sinon l’intervenant est ajouté sur le projet du tableau "projets" et son temps passé est renseigné
+                # Otherwise the intervener is added to the project in the “projects” table and their time spent is entered
                 else:
                     projets[projet][intervenant] = temps
                     if intervenant not in tpi_dict[tpi]:
@@ -122,9 +120,9 @@ class Summary(models.TransientModel):
                     projets[projet][tpp] += temps
                     tpi_dict[tpi][tpp] += temps
                 
-            # Ajout d'un intervenant "Total"
+            # Adding a “Total” intervener
             intervenants.append(tpp)
-            # Ajout d'une ligne de temps total des intervenants pour tous projets confondus au tableau des projets
+            # Adding a total time line of participants for all projects combined to the “projects” table
             projets.update(tpi_dict)
             res = intervenants, projets
             return res

@@ -3,9 +3,9 @@
      <data>
         <!-- Email template for reminder to fill timesheet -->
         <record id="reminder_timesheet_fill" model="mail.template">
-            <field name="name">Timesheet: Reminder to fill timesheet</field>
+            <field name="name">Timesheet: Daily reminder to fill timesheet</field>
             <field name="model_id" ref="hr.model_hr_employee"/>
-            <field name="subject">Rappel pour saisir vos temps</field>
+            <field name="subject">Daily reminder to fill your timesheet</field>
             <field name="email_from">${(object.user_id.company_id.partner_id.email_formatted or user.email_formatted) | safe}</field>
             <field name="email_to">${object.work_email | safe}</field>
             <field name="body_html" type="html">
@@ -36,16 +36,16 @@
                             <table border="0" cellpadding="0" cellspacing="0" width="590" style="min-width: 590px; background-color: white; padding: 0px 8px 0px 8px; border-collapse:separate;">
                                 <tr><td valign="top" style="font-size: 13px;">
                                     <div>
-                                        Bonjour ${object.name},<br/><br/>
-                                        À l'heure actuelle, vous n'avez pas de temps "A valider" saisis pour aujourd'hui. Est-ce un oubli ou normal ?
+                                        Hello ${object.name},<br/><br/>
+                                        Currently, you do not have any "To be validated" timesheet lines entered for today. Is this an oversight or normal?
                                         <br/>
                                         % if ctx.get('action_url'):
                                         <div style="margin: 16px 0px 16px 0px;">
                                             <a href="${ctx.get('action_url')}"
-                                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 13px;">Remplissez vos feuilles de temps</a>
+                                                style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px; font-size: 13px;">Fill out your timesheet lines</a>
                                         </div>
                                         % endif
-                                        <br/>Merci,<br/>
+                                        <br/>Thank you,<br/>
                                         % if user.signature
                                             ${user.signature | safe}
                                         % endif
@@ -99,7 +99,7 @@
     
         <!-- Ajout d'un template mail pour la synthèse des temps passés journalier à envoyer au manager -->
         <record id="mail_template_timesheet_summary_manager" model="mail.template">
-            <field name="name">Timesheet - Daily summary of time spent</field>
+            <field name="name">Timesheet: Daily summary of time spent</field>
             <field name="model_id" ref="base.model_res_users"/>
             <field name="email_from">${(object.company_id.partner_id.email_formatted or object.email_formatted) |safe}</field>
             <field name="email_to">${object.work_email | safe}</field>
