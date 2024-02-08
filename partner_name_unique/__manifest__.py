@@ -21,4 +21,5 @@ Features:
         'views/res_partner_views.xml',
     ],
     'installable': True,
+    'licence' : 'LGPL-3',
 }

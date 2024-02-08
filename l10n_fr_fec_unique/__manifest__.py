@@ -22,4 +22,5 @@ Features:
         'views/account_move_views.xml',
     ],
     'installable': True,
+    'licence' : 'LGPL-3',
 }
