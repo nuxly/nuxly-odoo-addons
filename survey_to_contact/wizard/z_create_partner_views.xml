@@ -1,0 +1,26 @@
+<odoo>
+    <record id="view_create_partner_wizard" model="ir.ui.view">
+        <field name="name">create.partner.wizard.form</field>
+        <field name="model">z.create.partner.wizard</field>
+        <field name="arch" type="xml">
+            <!-- Window to chose between create partner from survey or merge with existing partner -->
+            <form string="Create or merge partner">
+                <group>
+                    <field name="action"/>
+                    <field name="partner_id" attrs="{'invisible': [('action', '!=', 'merge')]}"/>
+                </group>
+                <footer>
+                    <button string="Confirm" type="object" name="action_create_or_merge" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_create_partner_wizard" model="ir.actions.act_window">
+        <field name="name">Create or merge partner</field>
+        <field name="res_model">z.create.partner.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
