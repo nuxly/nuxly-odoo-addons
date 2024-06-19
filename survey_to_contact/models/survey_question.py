@@ -3,6 +3,8 @@ from odoo import api, fields, models
 class SurveyQuestion(models.Model):
     _inherit = "survey.question"
 
+    override_on_merge = fields.Boolean(string="Override on merge?", help="If checked, this field's value will overwrite the existing value during the merge.", default=False)
+    sub_contact_group = fields.Integer(string="Sub contact group", help="Indicates the group number for sub-contacts. Used to create child contacts under the main contact.")
     # Allowed fields for the question based on its type
     allowed_field_ids = fields.Many2many(
         comodel_name="ir.model.fields",
@@ -38,7 +40,6 @@ class SurveyQuestion(models.Model):
                 )
                 .ids
             )
-
 
 class SurveyQuestionAnswer(models.Model):
     _inherit = "survey.question.answer"

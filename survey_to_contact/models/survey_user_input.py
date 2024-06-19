@@ -20,16 +20,17 @@ class Survey(models.Model):
             'context': {'default_survey_id': self.id},
         }
 
-    # Prepare partner values from survey answers
+    # Extracts partner values from survey responses.
+    # Handles basic fields, many2one, many2many fields, and comments, storing the values in a dictionary.
+    # Deals with specific conditions like suggestions and multiple choice questions.
     def _prepare_partner(self):
-        """Extract partner values from the answers"""
         self.ensure_one()
         elegible_inputs = self.user_input_line_ids.filtered(
             lambda x: x.question_id.res_partner_field and not x.skipped
         )
         basic_inputs = elegible_inputs.filtered(
             lambda x: x.answer_type not in {"suggestion"}
-            and x.question_id.res_partner_field.name not in {"comment", "company_name"}
+            and x.question_id.res_partner_field.name not in {"comment"}
         )
         vals = {
             line.question_id.res_partner_field.name: line[f"value_{line.answer_type}"]
@@ -55,19 +56,6 @@ class Survey(models.Model):
                     else line[f"value_{line.answer_type}"]
                 )
                 vals["comment"] += f"\n{line.question_id.title}: {value}"
-            # Create the parent company
-            elif field_name == "company_name":
-                if line[f"value_{line.answer_type}"]:
-                    vals["parent_id"] = (
-                        self.env["res.partner"]
-                        .create(
-                            {
-                                "name": line[f"value_{line.answer_type}"],
-                                "company_type": "company",
-                            }
-                        )
-                        .id
-                    )
             else:
                 if line.question_id.question_type == "multiple_choice":
                     if not vals.get(field_name):
