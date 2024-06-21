@@ -29,8 +29,7 @@ class Survey(models.Model):
             lambda x: x.question_id.res_partner_field and not x.skipped
         )
         basic_inputs = elegible_inputs.filtered(
-            lambda x: x.answer_type not in {"suggestion"}
-            and x.question_id.res_partner_field.name not in {"comment"}
+            lambda x: x.answer_type not in {"suggestion"} and x.question_id.res_partner_field.name not in {"comment"}
         )
         vals = {
             line.question_id.res_partner_field.name: line[f"value_{line.answer_type}"]
@@ -39,14 +38,19 @@ class Survey(models.Model):
         for line in elegible_inputs - basic_inputs:
             field_name = line.question_id.res_partner_field.name
             if line.question_id.res_partner_field.ttype == "many2one":
-                vals[
-                    field_name
-                ] = line.suggested_answer_id.res_partner_field_resource_ref.id
+                vals[field_name] = line.suggested_answer_id.res_partner_field_resource_ref.id
             elif line.question_id.res_partner_field.ttype == "many2many":
                 vals.setdefault(field_name, [])
-                vals[field_name] += [
-                    (4, line.suggested_answer_id.res_partner_field_resource_ref.id)
-                ]
+                vals[field_name].append((4, line.suggested_answer_id.res_partner_field_resource_ref.id))
+            elif line.answer_type == "suggestion" and line.suggested_answer_id:
+                suggestion_value = line.suggested_answer_id.value
+                if field_name:
+                    vals[field_name] = suggestion_value
+                else:
+                    if field_name in vals:
+                        vals[field_name] += f", {suggestion_value}"
+                    else:
+                        vals[field_name] = suggestion_value
             # We'll use the comment field to add any other infos
             elif field_name == "comment":
                 vals.setdefault("comment", "")
@@ -55,25 +59,34 @@ class Survey(models.Model):
                     if line.answer_type == "suggestion"
                     else line[f"value_{line.answer_type}"]
                 )
-                vals["comment"] += f"\n{line.question_id.title}: {value}"
+                if vals["comment"]:
+                    vals["comment"] += f"\n{line.question_id.title}: {value}"
+                else:
+                    vals["comment"] = f"{line.question_id.title}: {value}"
             else:
                 if line.question_id.question_type == "multiple_choice":
                     if not vals.get(field_name):
                         vals[field_name] = line.suggested_answer_id.value
                     else:
-                        vals[field_name] += line.suggested_answer_id.value
+                        vals[field_name] += f", {line.suggested_answer_id.value}"
                 else:
                     vals[field_name] = line.suggested_answer_id.value
         vals["generating_survey_user_input_id"] = self.id
         return vals
 
-    # Send an internal message with the input link after creating the partner
-    def _create_contact_post_process(self, partner):
-        """After creating the lead send an internal message with the input link"""
+    # Send an internal message with the input link af survey and responsesafter creating the partner
+    def _create_contact_post_process(self, partner, survey_user_input, edit=False):
+        """After creating the contact, send an internal message with the input link of survey."""
+        object_name = self.env['ir.model']._get(self._name).name.lower()
         partner.message_post_with_view(
-            "mail.message_origin_link",
-            values={"self": partner,
-                    "origin": self.survey_id},
+            "survey_to_contact.z_message_survey_creat_edit",
+            values={
+                "self": partner,
+                "origin1": [self.survey_id],  
+                "origin2": [survey_user_input],
+                "edit": edit,
+                "object_name": object_name
+            },
             subtype_id=self.env.ref("mail.mt_note").id,
         )
 

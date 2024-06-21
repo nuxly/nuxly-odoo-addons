@@ -39,6 +39,7 @@ Features:
         'views/survey_question_views.xml',
         'views/survey_survey_views.xml',
         'wizard/z_create_partner_views.xml',
+        'data/mail_templates_chatter.xml',
     ],
     'installable': True,
     "license": "AGPL-3",
