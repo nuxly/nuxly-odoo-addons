@@ -10,7 +10,7 @@
                 <field name="z_it_can_be_partner" invisible="1"/>
             </field>
             <xpath expr="//header" position="inside">
-                <button name="action_create_partner" type="object" string="Create partner" class="oe_highlight" attrs="{'invisible': [('z_it_can_be_partner', '=', False)]}"/>
+                <button name="action_create_partner" type="object" string="Create or merge partner" class="oe_highlight" attrs="{'invisible': [('z_it_can_be_partner', '=', False)]}"/>
             </xpath>
         </field>
     </record>

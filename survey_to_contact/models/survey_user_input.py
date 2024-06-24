@@ -43,14 +43,15 @@ class Survey(models.Model):
                 vals.setdefault(field_name, [])
                 vals[field_name].append((4, line.suggested_answer_id.res_partner_field_resource_ref.id))
             elif line.answer_type == "suggestion" and line.suggested_answer_id:
-                suggestion_value = line.suggested_answer_id.value
-                if field_name:
-                    vals[field_name] = suggestion_value
-                else:
-                    if field_name in vals:
-                        vals[field_name] += f", {suggestion_value}"
-                    else:
+                if field_name != "comment":
+                    suggestion_value = line.suggested_answer_id.value
+                    if field_name:
                         vals[field_name] = suggestion_value
+                    else:
+                        if field_name in vals:
+                            vals[field_name] += f".<br> {suggestion_value}<br>"
+                        else:
+                            vals[field_name] = suggestion_value
             # We'll use the comment field to add any other infos
             elif field_name == "comment":
                 vals.setdefault("comment", "")
@@ -60,15 +61,15 @@ class Survey(models.Model):
                     else line[f"value_{line.answer_type}"]
                 )
                 if vals["comment"]:
-                    vals["comment"] += f"\n{line.question_id.title}: {value}"
+                    vals["comment"] += f"<br>{line.question_id.title}: {value}<br>"
                 else:
-                    vals["comment"] = f"{line.question_id.title}: {value}"
+                    vals["comment"] = f"<br>{line.question_id.title}: {value}<br>"
             else:
                 if line.question_id.question_type == "multiple_choice":
                     if not vals.get(field_name):
-                        vals[field_name] = line.suggested_answer_id.value
+                        vals[field_name] = f"<br>{line.question_id.title}: {line.suggested_answer_id.value}<br>"
                     else:
-                        vals[field_name] += f", {line.suggested_answer_id.value}"
+                        vals[field_name] += f"<br>{line.question_id.title}: {line.suggested_answer_id.value}<br>"
                 else:
                     vals[field_name] = line.suggested_answer_id.value
         vals["generating_survey_user_input_id"] = self.id

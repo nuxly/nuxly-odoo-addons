@@ -5,3 +5,5 @@ class ResPartner(models.Model):
 
     # Field to link survey user input to res.partner (if a partner is created from survey results)
     generating_survey_user_input_id = fields.Many2one(comodel_name="survey.user_input", store=True)
+    # Enable tracking for the name field to record all modifications
+    name = fields.Char(index=True, default_export_compatible=True, tracking=True)

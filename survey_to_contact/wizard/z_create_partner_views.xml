@@ -7,7 +7,8 @@
             <form string="Create or merge partner">
                 <group>
                     <field name="action"/>
-                    <field name="partner_id" attrs="{'invisible': [('action', '!=', 'merge')]}"/>
+                    <!-- Suggest only company to prevent merging incorrect values for incorrects contacts -->
+                    <field name="partner_id" attrs="{'invisible': [('action', '!=', 'merge')]}" domain="[('is_company', '=', True)]"/>
                 </group>
                 <footer>
                     <button string="Confirm" type="object" name="action_create_or_merge" class="btn-primary"/>
