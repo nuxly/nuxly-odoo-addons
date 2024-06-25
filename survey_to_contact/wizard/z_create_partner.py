@@ -11,8 +11,8 @@ class CreatePartnerWizard(models.TransientModel):
 
     partner_id = fields.Many2one('res.partner', string="Partner")
 
-    # Action create a new partner or merge with an existing one.
     def action_create_or_merge(self):
+        """Execute the selected action to either create a new partner or merge with an existing partner."""
         survey_user_input = self.env['survey.user_input'].browse(self.env.context.get('default_survey_id'))
 
         if self.action == 'create':
@@ -20,120 +20,140 @@ class CreatePartnerWizard(models.TransientModel):
         elif self.action == 'merge':
             self._merge_partner(survey_user_input)
 
-    # Creates the main contact and sub-contacts from survey responses.
     def _create_partner(self, survey_user_input):
-        partner_vals = survey_user_input._prepare_partner()
+        """Create the main partner and sub-contacts from survey responses."""
+        partner_vals = self._prepare_partner_vals(survey_user_input, group_id=0)
         partner_vals['is_company'] = True
-        if not partner_vals.get('name'):
-            partner_vals['name'] = "Contact from survey"
+        partner_vals.setdefault('name', "Contact from survey")
 
-        # Create main contact
-        new_partner = self.env['res.partner'].create(partner_vals)
-        survey_user_input._create_contact_post_process(new_partner, survey_user_input)
+        # Check if the main contact already exists using the hook method
+        existing_partner = survey_user_input._get_existing_partner(partner_vals.get('email'))
+        if existing_partner:
+            new_partner = existing_partner
+        else:
+            # Create the main partner if it doesn't exist
+            new_partner = self.env['res.partner'].create(partner_vals)
+            survey_user_input._create_contact_post_process(new_partner, survey_user_input)
 
-        # Create sub contacts
+        # Create sub-contacts
         sub_contact_groups = self._group_user_input_lines(survey_user_input)
         for group, lines in sub_contact_groups.items():
-            if group != 0:  # Ignorer the group 0 (main contact)
+            if group != 0:  # Skip group 0 (main contact)
                 sub_partner_vals = self._prepare_sub_partner_vals(lines)
                 sub_partner_vals['parent_id'] = new_partner.id
                 sub_partner_vals['is_company'] = False
-                if not sub_partner_vals.get('name'):
-                    sub_partner_vals['name'] = "Sub contact from survey"
-                sub_partner = self.env['res.partner'].create(sub_partner_vals)
-                survey_user_input._create_contact_post_process(sub_partner, survey_user_input)
+                sub_partner_vals.setdefault('name', "Sub contact from survey")
 
-    # Groups survey responses by sub-contact group, ignoring the main contact group.
-    def _group_user_input_lines(self, survey_user_input):
-        sub_contact_groups = {}
-        for line in survey_user_input.user_input_line_ids:
-            group = line.question_id.sub_contact_group
-            if group != 0:
-                if group not in sub_contact_groups:
-                    sub_contact_groups[group] = []
-                sub_contact_groups[group].append(line)
-        return sub_contact_groups
+                # Check if the sub-contact already exists
+                existing_sub_contact = None
+                email = sub_partner_vals.get('email')
+                if email:
+                    existing_sub_contact = survey_user_input._get_existing_partner(email)
+                if existing_sub_contact:
+                    sub_partner = existing_sub_contact
+                else:
+                    # Create the sub-partner if it doesn't exist
+                    sub_partner = self.env['res.partner'].create(sub_partner_vals)
+                    survey_user_input._create_contact_post_process(sub_partner, survey_user_input)
 
-    # Prepares values for sub-contacts from the given survey responses.
-    def _prepare_sub_partner_vals(self, lines):
-        sub_partner_vals = {}
-        for line in lines:
-            field_name = line.question_id.res_partner_field.name
-            if field_name:
-                if line.answer_type:
-                    if line.answer_type != "suggestion" and line.answer_type != "comment":
-                        if field_name not in sub_partner_vals:
-                            sub_partner_vals[field_name] = line[f"value_{line.answer_type}"]
-                        else:
-                            sub_partner_vals[field_name] += f", {line[f'value_{line.answer_type}']}"
-                    if line.answer_type == "suggestion" and line.suggested_answer_id:
-                        if field_name != "comment":
-                            suggestion_value = line.suggested_answer_id.value
-                            if field_name not in sub_partner_vals:
-                                sub_partner_vals[field_name] = suggestion_value
-                            else:
-                                sub_partner_vals[field_name] += f", {suggestion_value}"
-                    if field_name == "comment":
-                        comment_value = (
-                            line.suggested_answer_id.value
-                            if line.answer_type == "suggestion"
-                            else line[f"value_{line.answer_type}"]
-                        )
-                        sub_partner_vals.setdefault("comment", "")
-                        if sub_partner_vals["comment"]:
-                            sub_partner_vals["comment"] += f"<br>{line.question_id.title}: {comment_value}<br>"
-                        else:
-                            sub_partner_vals["comment"] = f"<br>{line.question_id.title}: {comment_value}<br>"
-            return sub_partner_vals
-
-    # Updates the main contact and sub-contacts based on survey responses, respecting the override_on_merge setting.
     def _merge_partner(self, survey_user_input):
+        """Update the main contact and create sub-contacts if they don't exist based on survey responses."""
         existing_partner = self.partner_id
 
         # Update main contact
         for line in survey_user_input.user_input_line_ids:
-            if line.question_id.sub_contact_group == 0 and line.question_id.res_partner_field:
-                field_name = line.question_id.res_partner_field.name
-                if line.answer_type != "suggestion":
+            if line.answer_type and line.question_id.sub_contact_group == 0 and line.question_id.res_partner_field:
+                self._update_partner_field(existing_partner, line)
+
+
+        # Create or update sub-contacts
+        sub_contact_groups = self._group_user_input_lines(survey_user_input)
+        for group, lines in sub_contact_groups.items():
+            if group != 0:  # Skip group 0 (main contact)
+                sub_partner_vals = self._prepare_sub_partner_vals(lines)
+                sub_partner_vals['parent_id'] = existing_partner.id
+                sub_partner_vals['is_company'] = False
+                sub_partner_vals.setdefault('name', "Sub contact from survey")
+
+                # Check if the sub-contact already exists using the email
+                if sub_partner_vals.get('email'):
+                    existing_sub_contact = survey_user_input._get_existing_partner(sub_partner_vals.get('email'))
+                    if not existing_sub_contact:
+                        self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
+                else:
+                    self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
+                
+    def _update_partner_field(self, partner, line):
+        """Update a specific field of the partner based on survey response."""
+        field_name = line.question_id.res_partner_field.name
+        value = line.suggested_answer_id.value if line.answer_type == "suggestion" else line[f"value_{line.answer_type}"]
+        question = line.question_id
+        if question.override_on_merge:
+            partner.write({field_name: value})
+        elif not getattr(partner, field_name):
+            partner.write({field_name: value})
+
+    def _prepare_partner_vals(self, survey_user_input, group_id):
+        """Prepare the values for the main partner or sub-contacts from the survey responses."""
+        lines = [line for line in survey_user_input.user_input_line_ids if line.question_id.sub_contact_group == group_id]
+        return self._prepare_sub_partner_vals(lines)
+
+    def _prepare_sub_partner_vals(self, lines):
+        """Prepare values for sub-contacts from the given survey responses.
+           Extracts partner values from survey responses.
+           Handles basic fields, comments and suggestions storing the values in a dictionary."""
+        sub_partner_vals = {}
+        for line in lines:
+            field_name = line.question_id.res_partner_field.name
+            if field_name and line.answer_type:
+                if line.answer_type != "suggestion" and line.answer_type != "comment":
                     value = line[f"value_{line.answer_type}"]
+                    if field_name not in sub_partner_vals:
+                        sub_partner_vals[field_name] = value
+                    else:
+                        sub_partner_vals[field_name] += f", {value}"
                 if line.answer_type == "suggestion" and line.suggested_answer_id:
-                        if field_name != "comment":
-                            value = line.suggested_answer_id.value
+                    suggestion_value = line.suggested_answer_id.value
+                    if field_name != "comment":
+                        if field_name not in sub_partner_vals:
+                            sub_partner_vals[field_name] = f"<br>{line.question_id.title}: {suggestion_value}<br>"
+                        else:
+                            sub_partner_vals[field_name] += f"<br>{line.question_id.title}: {suggestion_value}<br>"
                 if field_name == "comment":
-                    value = (
+                    comment_value = (
                         line.suggested_answer_id.value
                         if line.answer_type == "suggestion"
                         else line[f"value_{line.answer_type}"]
                     )
-                question = line.question_id
-                if question.override_on_merge:
-                    existing_partner.write({field_name: value})
-                elif not getattr(existing_partner, field_name):
-                    existing_partner.write({field_name: value})
-        # Update or create sub contacts
-        sub_contact_groups = self._group_user_input_lines(survey_user_input)
-        for group, lines in sub_contact_groups.items():
-            # sub_partner_vals = {line.question_id.res_partner_field.name: line[f"value_{line.answer_type}"] for line in lines}
-            sub_partner_vals = {
-                line.question_id.res_partner_field.name: line[f"value_{line.answer_type}"]
-                for line in lines if line.answer_type and line[f"value_{line.answer_type}"] is not None
-            }
-            sub_contact_email = sub_partner_vals.get('email')
-            if sub_contact_email:
-                existing_sub_contact = self.env['res.partner'].search([
-                    ('parent_id', '=', existing_partner.id),
-                    ('email', '=', sub_contact_email)
-                ], limit=1)
-                if existing_sub_contact:
-                    for field, value in sub_partner_vals.items():
-                        question = self.env['survey.question'].search([('res_partner_field.name', '=', field)], limit=1)
-                        if question and question.override_on_merge:
-                            existing_sub_contact.write({field: value})
-                        elif not getattr(existing_sub_contact, field):
-                            existing_sub_contact.write({field: value})
-                else:
-                    sub_partner_vals['parent_id'] = existing_partner.id
-                    if not sub_partner_vals.get('name'):
-                        sub_partner_vals['name'] = "Sub contact from survey"
-                    new_sub_contact = self.env['res.partner'].create(sub_partner_vals)
-                    survey_user_input._create_contact_post_process(new_sub_contact, survey_user_input)
+                    sub_partner_vals.setdefault("comment", "")
+                    if sub_partner_vals["comment"]:
+                        sub_partner_vals["comment"] += f"<br>{line.question_id.title}: {comment_value}<br>"
+                    else:
+                        sub_partner_vals["comment"] = f"<br>{line.question_id.title}: {comment_value}<br>"
+        return sub_partner_vals
+
+    def _group_user_input_lines(self, survey_user_input):
+        """Group survey responses by sub-contact group, ignoring the main contact group."""
+        sub_contact_groups = {}
+        for line in survey_user_input.user_input_line_ids:
+            group = line.question_id.sub_contact_group
+            if group not in sub_contact_groups:
+                sub_contact_groups[group] = []
+            sub_contact_groups[group].append(line)
+        return sub_contact_groups
+
+    def _update_existing_sub_contact(self, sub_contact, sub_partner_vals):
+        """Update the fields of an existing sub-contact."""
+        for field, value in sub_partner_vals.items():
+            question = self.env['survey.question'].search([('res_partner_field.name', '=', field)], limit=1)
+            if question and question.override_on_merge:
+                sub_contact.write({field: value})
+            elif not getattr(sub_contact, field):
+                sub_contact.write({field: value})
+
+    def _create_new_sub_contact(self, parent_partner, sub_partner_vals, survey_user_input):
+        """Create a new sub-contact based on survey responses."""
+        sub_partner_vals['parent_id'] = parent_partner.id
+        sub_partner_vals.setdefault('name', "Sub contact from survey")
+        new_sub_contact = self.env['res.partner'].create(sub_partner_vals)
+        survey_user_input._create_contact_post_process(new_sub_contact, survey_user_input)

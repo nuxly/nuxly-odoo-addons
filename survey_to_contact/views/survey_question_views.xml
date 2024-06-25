@@ -10,7 +10,6 @@
                     <field name="res_partner_field" widget="selection"/>
                     <field name="override_on_merge"/>
                     <field name="sub_contact_group"/>
-                    <field name="allowed_field_ids" invisible="1"/>
                 </group>
             </xpath>
             <xpath expr="//field[@name='suggested_answer_ids']" position="attributes">
