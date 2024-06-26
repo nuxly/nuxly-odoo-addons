@@ -15,5 +15,5 @@ class SurveyQuestion(models.Model):
     res_partner_field = fields.Many2one(
         string="Contact field",
         comodel_name="ir.model.fields",
-        domain="[('model', '=', 'res.partner')]",
+        domain="[('model', '=', 'res.partner'), ('store', 'in', [True, False])]",
     )
