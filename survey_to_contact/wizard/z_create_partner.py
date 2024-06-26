@@ -1,4 +1,7 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
+import logging
+logger = logging.getLogger(__name__)
 
 class CreatePartnerWizard(models.TransientModel):
     _name = 'z.create.partner.wizard'
@@ -31,11 +34,15 @@ class CreatePartnerWizard(models.TransientModel):
         if existing_partner:
             new_partner = existing_partner
         else:
-            # Create the main partner if it doesn't exist
-            new_partner = self.env['res.partner'].create(partner_vals)
-            new_partner.write({'is_company': True})
-            survey_user_input._create_contact_post_process(new_partner, survey_user_input)
-
+            try:
+                # Create the main partner if it doesn't exist
+                new_partner = self.env['res.partner'].create(partner_vals)
+                new_partner.write({'is_company': True})
+                survey_user_input._create_contact_post_process(new_partner, survey_user_input)
+            except Exception as e:
+                new_partner = None # If values not correct
+                user_message = "An error occurred while creating the contact. Please check the field values or ensure that the responses match the expected types."
+                raise UserError(user_message)
         # Create sub-contacts
         sub_contact_groups = self._group_user_input_lines(survey_user_input)
         for group, lines in sub_contact_groups.items():
@@ -104,33 +111,37 @@ class CreatePartnerWizard(models.TransientModel):
            Extracts partner values from survey responses.
            Handles basic fields, comments and suggestions storing the values in a dictionary."""
         sub_partner_vals = {}
+        comment_entries = set()
         for line in lines:
-            field_name = line.question_id.res_partner_field.name
-            if field_name and line.answer_type:
-                if line.answer_type != "suggestion" and line.answer_type != "comment":
-                    value = line[f"value_{line.answer_type}"]
-                    if field_name not in sub_partner_vals:
-                        sub_partner_vals[field_name] = value
-                    else:
-                        sub_partner_vals[field_name] += f", {value}"
-                if line.answer_type == "suggestion" and line.suggested_answer_id:
-                    suggestion_value = line.suggested_answer_id.value
-                    if field_name != "comment":
+            try:
+                field_name = line.question_id.res_partner_field.name
+                if field_name and line.answer_type:
+                    if line.answer_type != "suggestion" and line.answer_type != "comment":
+                        value = line[f"value_{line.answer_type}"]
                         if field_name not in sub_partner_vals:
-                            sub_partner_vals[field_name] = f"<br>{line.question_id.title}: {suggestion_value}<br>"
+                            sub_partner_vals[field_name] = value
                         else:
-                            sub_partner_vals[field_name] += f"<br>{line.question_id.title}: {suggestion_value}<br>"
-                if field_name == "comment":
-                    comment_value = (
-                        line.suggested_answer_id.value
-                        if line.answer_type == "suggestion"
-                        else line[f"value_{line.answer_type}"]
-                    )
-                    sub_partner_vals.setdefault("comment", "")
-                    if sub_partner_vals["comment"]:
-                        sub_partner_vals["comment"] += f"<br>{line.question_id.title}: {comment_value}<br>"
-                    else:
-                        sub_partner_vals["comment"] = f"<br>{line.question_id.title}: {comment_value}<br>"
+                            sub_partner_vals[field_name] += f", {value}"
+                    if line.answer_type == "suggestion" and line.suggested_answer_id:
+                        suggestion_value = line.suggested_answer_id.value
+                        if field_name != "comment":
+                            if field_name not in sub_partner_vals:
+                                sub_partner_vals[field_name] = f"<br>{line.question_id.title}: {suggestion_value}<br>"
+                            else:
+                                sub_partner_vals[field_name] += f"<br>{line.question_id.title}: {suggestion_value}<br>"
+                    if field_name == "comment":
+                        comment_value = (
+                            line.suggested_answer_id.value
+                            if line.answer_type == "suggestion"
+                            else line[f"value_{line.answer_type}"]
+                        )
+                        comment_entry = f"<br>{line.question_id.title}: {comment_value}<br>"
+                        if comment_entry not in comment_entries:
+                            comment_entries.add(comment_entry)
+                            sub_partner_vals.setdefault("comment", "")
+                            sub_partner_vals["comment"] += comment_entry
+            except ValueError as e:
+                continue
         return sub_partner_vals
 
     def _group_user_input_lines(self, survey_user_input):
