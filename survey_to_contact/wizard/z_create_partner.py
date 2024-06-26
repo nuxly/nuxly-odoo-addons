@@ -33,6 +33,7 @@ class CreatePartnerWizard(models.TransientModel):
         else:
             # Create the main partner if it doesn't exist
             new_partner = self.env['res.partner'].create(partner_vals)
+            new_partner.write({'is_company': True})
             survey_user_input._create_contact_post_process(new_partner, survey_user_input)
 
         # Create sub-contacts
