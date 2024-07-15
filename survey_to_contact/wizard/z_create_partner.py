@@ -40,9 +40,12 @@ class CreatePartnerWizard(models.TransientModel):
                 new_partner.write({'is_company': True})
                 survey_user_input._create_contact_post_process(new_partner, survey_user_input)
             except Exception as e:
-                new_partner = None # If values not correct
-                user_message = "An error occurred while creating the contact. Please check the field values or ensure that the responses match the expected types."
+                new_partner = None  # If values not correct
+                field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, partner_vals)
+                user_message = f"An error occurred while creating the main contact. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
+                logger.error(user_message)
                 raise UserError(user_message)
+
         # Create sub-contacts
         sub_contact_groups = self._group_user_input_lines(survey_user_input)
         for group, lines in sub_contact_groups.items():
@@ -60,9 +63,15 @@ class CreatePartnerWizard(models.TransientModel):
                 if existing_sub_contact:
                     sub_partner = existing_sub_contact
                 else:
-                    # Create the sub-partner if it doesn't exist
-                    sub_partner = self.env['res.partner'].create(sub_partner_vals)
-                    survey_user_input._create_contact_post_process(sub_partner, survey_user_input)
+                    try:
+                        # Create the sub-partner if it doesn't exist
+                        sub_partner = self.env['res.partner'].create(sub_partner_vals)
+                        survey_user_input._create_contact_post_process(sub_partner, survey_user_input)
+                    except Exception as e:
+                        field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
+                        user_message = f"An error occurred while creating the sub-contact for group {group}. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
+                        logger.error(user_message)
+                        raise UserError(user_message)
 
     def _merge_partner(self, survey_user_input):
         """Update the main contact and create sub-contacts if they don't exist based on survey responses."""
@@ -72,7 +81,6 @@ class CreatePartnerWizard(models.TransientModel):
         for line in survey_user_input.user_input_line_ids:
             if line.answer_type and line.question_id.sub_contact_group == 0 and line.question_id.res_partner_field:
                 self._update_partner_field(existing_partner, line)
-
 
         # Create or update sub-contacts
         sub_contact_groups = self._group_user_input_lines(survey_user_input)
@@ -87,19 +95,36 @@ class CreatePartnerWizard(models.TransientModel):
                 if sub_partner_vals.get('email'):
                     existing_sub_contact = survey_user_input._get_existing_partner(sub_partner_vals.get('email'))
                     if not existing_sub_contact:
-                        self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
+                        try:
+                            self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
+                        except Exception as e:
+                            field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
+                            user_message = f"An error occurred while creating the sub-contact for group {group}. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
+                            logger.error(user_message)
+                            raise UserError(user_message)
                 else:
-                    self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
-                
+                    try:
+                        self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
+                    except Exception as e:
+                        field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
+                        user_message = f"An error occurred while creating the sub-contact for group {group}. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
+                        logger.error(user_message)
+                        raise UserError(user_message)
+
     def _update_partner_field(self, partner, line):
         """Update a specific field of the partner based on survey response."""
         field_name = line.question_id.res_partner_field.name
         value = line.suggested_answer_id.value if line.answer_type == "suggestion" else line[f"value_{line.answer_type}"]
         question = line.question_id
-        if question.override_on_merge:
-            partner.write({field_name: value})
-        elif not getattr(partner, field_name):
-            partner.write({field_name: value})
+        try:
+            if question.override_on_merge:
+                partner.write({field_name: value})
+            elif not getattr(partner, field_name):
+                partner.write({field_name: value})
+        except Exception as e:
+            user_message = f"An error occurred while updating the field '{field_name}' for the question '{question.title}'. The response does not match the expected type."
+            logger.error(user_message)
+            raise UserError(user_message)
 
     def _prepare_partner_vals(self, survey_user_input, group_id):
         """Prepare the values for the main partner or sub-contacts from the survey responses."""
@@ -158,14 +183,34 @@ class CreatePartnerWizard(models.TransientModel):
         """Update the fields of an existing sub-contact."""
         for field, value in sub_partner_vals.items():
             question = self.env['survey.question'].search([('res_partner_field.name', '=', field)], limit=1)
-            if question and question.override_on_merge:
-                sub_contact.write({field: value})
-            elif not getattr(sub_contact, field):
-                sub_contact.write({field: value})
+            try:
+                if question and question.override_on_merge:
+                    sub_contact.write({field: value})
+                elif not getattr(sub_contact, field):
+                    sub_contact.write({field: value})
+            except Exception as e:
+                user_message = f"An error occurred while updating the field '{field}' for the question '{question.title}'. The response does not match the expected type."
+                logger.error(user_message)
+                raise UserError(user_message)
 
     def _create_new_sub_contact(self, parent_partner, sub_partner_vals, survey_user_input):
         """Create a new sub-contact based on survey responses."""
         sub_partner_vals['parent_id'] = parent_partner.id
         sub_partner_vals.setdefault('name', "Sub contact from survey")
-        new_sub_contact = self.env['res.partner'].create(sub_partner_vals)
-        survey_user_input._create_contact_post_process(new_sub_contact, survey_user_input)
+        try:
+            new_sub_contact = self.env['res.partner'].create(sub_partner_vals)
+            survey_user_input._create_contact_post_process(new_sub_contact, survey_user_input)
+        except Exception as e:
+            field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
+            user_message = f"An error occurred while creating the sub-contact. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
+            logger.error(user_message)
+            raise UserError(user_message)
+
+    def _extract_field_and_question_from_error(self, survey_user_input, partner_vals):
+        """Extracts the field name and question title from the survey user input."""
+        for line in survey_user_input.user_input_line_ids:
+            field_name = line.question_id.res_partner_field.name
+            if field_name in partner_vals:
+                question_title = line.question_id.title
+                return field_name, question_title
+        return "unknown", "unknown"
