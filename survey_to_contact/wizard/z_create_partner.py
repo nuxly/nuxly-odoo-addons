@@ -11,7 +11,6 @@ class CreatePartnerWizard(models.TransientModel):
         ('create', 'Create new partner'),
         ('merge', 'Merge with an existing partner')
     ], required=True, string="Action")
-
     partner_id = fields.Many2one('res.partner', string="Partner")
 
     def action_create_or_merge(self):
@@ -25,7 +24,7 @@ class CreatePartnerWizard(models.TransientModel):
 
     def _create_partner(self, survey_user_input):
         """Create the main partner and sub-contacts from survey responses."""
-        partner_vals = self._prepare_partner_vals(survey_user_input, group_id=0)
+        partner_vals, question_map = self._prepare_partner_vals(survey_user_input, group_id=0)
         partner_vals['is_company'] = True
         partner_vals.setdefault('name', "Contact from survey")
 
@@ -40,17 +39,15 @@ class CreatePartnerWizard(models.TransientModel):
                 new_partner.write({'is_company': True})
                 survey_user_input._create_contact_post_process(new_partner, survey_user_input)
             except Exception as e:
-                new_partner = None  # If values not correct
-                field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, partner_vals)
-                user_message = f"An error occurred while creating the main contact. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
-                logger.error(user_message)
-                raise UserError(user_message)
+                problematic_fields = self._identify_problematic_fields(partner_vals)
+                problematic_questions = ", ".join([f"{question_map[field]} (associate to field: {field})" for field in problematic_fields])
+                raise UserError(f"The following question caused issue: {problematic_questions}")
 
         # Create sub-contacts
         sub_contact_groups = self._group_user_input_lines(survey_user_input)
         for group, lines in sub_contact_groups.items():
             if group != 0:  # Skip group 0 (main contact)
-                sub_partner_vals = self._prepare_sub_partner_vals(lines)
+                sub_partner_vals, sub_question_map = self._prepare_partner_vals_from_lines(lines)
                 sub_partner_vals['parent_id'] = new_partner.id
                 sub_partner_vals['is_company'] = False
                 sub_partner_vals.setdefault('name', "Sub contact from survey")
@@ -68,106 +65,260 @@ class CreatePartnerWizard(models.TransientModel):
                         sub_partner = self.env['res.partner'].create(sub_partner_vals)
                         survey_user_input._create_contact_post_process(sub_partner, survey_user_input)
                     except Exception as e:
-                        field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
-                        user_message = f"An error occurred while creating the sub-contact for group {group}. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
-                        logger.error(user_message)
-                        raise UserError(user_message)
+                        problematic_fields = self._identify_problematic_fields(sub_partner_vals)
+                        problematic_questions = ", ".join([f"{sub_question_map[field]} (associate to field: {field})" for field in problematic_fields])
+                        raise UserError(f"The following question caused issue: {problematic_questions}")
 
     def _merge_partner(self, survey_user_input):
         """Update the main contact and create sub-contacts if they don't exist based on survey responses."""
         existing_partner = self.partner_id
 
-        # Update main contact
-        for line in survey_user_input.user_input_line_ids:
-            if line.answer_type and line.question_id.sub_contact_group == 0 and line.question_id.res_partner_field:
-                self._update_partner_field(existing_partner, line)
+        # Prepare values to update for the main contact
+        lines_with_override = [
+            line for line in survey_user_input.user_input_line_ids
+            if line.question_id.sub_contact_group == 0 and line.question_id.override_on_merge
+        ]
+        fields_to_update = self._prepare_values_for_update(lines_with_override)
+
+        try:
+            # Write all fields at once for the main contact
+            if fields_to_update:
+                existing_partner.write(fields_to_update)
+        except Exception as e:
+            problematic_fields = [field for field in fields_to_update]
+            logger.warning(f"Skipping update for fields {problematic_fields} due to error: {e}")
 
         # Create or update sub-contacts
         sub_contact_groups = self._group_user_input_lines(survey_user_input)
         for group, lines in sub_contact_groups.items():
             if group != 0:  # Skip group 0 (main contact)
-                sub_partner_vals = self._prepare_sub_partner_vals(lines)
+                sub_partner_vals, sub_question_map = self._prepare_partner_vals_from_lines(lines)
                 sub_partner_vals['parent_id'] = existing_partner.id
                 sub_partner_vals['is_company'] = False
                 sub_partner_vals.setdefault('name', "Sub contact from survey")
 
                 # Check if the sub-contact already exists using the email
-                if sub_partner_vals.get('email'):
-                    existing_sub_contact = survey_user_input._get_existing_partner(sub_partner_vals.get('email'))
-                    if not existing_sub_contact:
-                        try:
-                            self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
-                        except Exception as e:
-                            field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
-                            user_message = f"An error occurred while creating the sub-contact for group {group}. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
-                            logger.error(user_message)
-                            raise UserError(user_message)
-                else:
-                    try:
-                        self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input)
-                    except Exception as e:
-                        field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
-                        user_message = f"An error occurred while creating the sub-contact for group {group}. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
-                        logger.error(user_message)
-                        raise UserError(user_message)
+                email = sub_partner_vals.get('email')
+                if email:
+                    existing_sub_contact = survey_user_input._get_existing_partner(email)
+                    if existing_sub_contact:
+                        self._update_existing_sub_contact(survey_user_input, existing_sub_contact, sub_partner_vals)
+                    else:
+                        self._create_new_sub_contact(existing_partner, sub_partner_vals, survey_user_input, sub_question_map)
 
     def _update_partner_field(self, partner, line):
         """Update a specific field of the partner based on survey response."""
-        field_name = line.question_id.res_partner_field.name
-        value = line.suggested_answer_id.value if line.answer_type == "suggestion" else line[f"value_{line.answer_type}"]
         question = line.question_id
+
         try:
             if question.override_on_merge:
-                partner.write({field_name: value})
-            elif not getattr(partner, field_name):
-                partner.write({field_name: value})
+                # Prepare the values for update
+                values_to_update = self._prepare_sub_partner_vals([line])
+                partner.write(values_to_update)
+            elif not getattr(partner, line.question_id.res_partner_field.name):
+                values_to_update = self._prepare_sub_partner_vals([line])
+                partner.write(values_to_update)
         except Exception as e:
-            user_message = f"An error occurred while updating the field '{field_name}' for the question '{question.title}'. The response does not match the expected type."
-            logger.error(user_message)
-            raise UserError(user_message)
+            logger.warning(f"Skipping question {question.title} for partner {partner.name} due to error: {e}")
+
+    def _update_existing_sub_contact(self, survey_user_input, sub_contact, sub_partner_vals):
+        """Update the fields of an existing sub-contact."""
+        lines_with_override = [
+            line for line in survey_user_input.user_input_line_ids
+            if line.question_id.override_on_merge and line.question_id.sub_contact_group != 0
+        ]
+        values_to_update = self._prepare_values_for_update(lines_with_override)
+
+        try:
+            sub_contact.write(values_to_update)
+        except Exception as e:
+            problematic_fields = [field for field in values_to_update]
+            logger.warning(f"Skipping update for fields {problematic_fields} due to error: {e}")
+
+    def _prepare_values_for_update(self, lines):
+        """Prepare the values for updating the partner based on the survey responses."""
+        return self._prepare_sub_partner_vals(lines)
 
     def _prepare_partner_vals(self, survey_user_input, group_id):
         """Prepare the values for the main partner or sub-contacts from the survey responses."""
         lines = [line for line in survey_user_input.user_input_line_ids if line.question_id.sub_contact_group == group_id]
-        return self._prepare_sub_partner_vals(lines)
+        partner_vals = self._prepare_sub_partner_vals(lines)
+        question_map = {line.question_id.res_partner_field.name: line.question_id.title for line in lines}
+        logger.warning("Question Map --> {}".format(question_map))
+        return partner_vals, question_map
+
+    def _prepare_partner_vals_from_lines(self, lines):
+        """Prepare the values and question map from the given survey lines."""
+        partner_vals = self._prepare_sub_partner_vals(lines)
+        question_map = {line.question_id.res_partner_field.name: line.question_id.title for line in lines}
+        return partner_vals, question_map
 
     def _prepare_sub_partner_vals(self, lines):
         """Prepare values for sub-contacts from the given survey responses.
-           Extracts partner values from survey responses.
-           Handles basic fields, comments and suggestions storing the values in a dictionary."""
+        Extracts partner values from survey responses.
+        Handles basic fields, comments and suggestions storing the values in a dictionary."""
         sub_partner_vals = {}
         comment_entries = set()
+
         for line in lines:
             try:
                 field_name = line.question_id.res_partner_field.name
-                if field_name and line.answer_type:
-                    if line.answer_type != "suggestion" and line.answer_type != "comment":
-                        value = line[f"value_{line.answer_type}"]
-                        if field_name not in sub_partner_vals:
-                            sub_partner_vals[field_name] = value
-                        else:
+                field_type = line.question_id.res_partner_field.ttype
+                answer_type = line.answer_type
+
+                value = None
+
+                # Handle simple_choice
+                if answer_type == "simple_choice":
+                    if field_type == 'selection':
+                        value = self._find_selection_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type == 'many2one':
+                        value = self._find_many2one_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type == 'many2many':
+                        value = self._find_many2many_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type == 'one2many':
+                        value = self._find_one2many_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type in ['char', 'text']:
+                        value = line.suggested_answer_id.value
+                    elif field_type == 'html':
+                        value1 = line[f"value_{answer_type}"]
+                        value = f"<p>{line.question_id.title}: {value1}</p>"
+
+                    logger.info(f"Value for simple_choice: {value}")
+
+                # Handle multiple_choice
+                elif answer_type == "multiple_choice":
+                    if field_type == 'many2many':
+                        value = self._find_many2many_value(line.question_id.res_partner_field, ", ".join([ans.value for ans in line.suggested_answer_ids]))
+                    elif field_type == 'one2many':
+                        value = self._find_one2many_value(line.question_id.res_partner_field, ", ".join([ans.value for ans in line.suggested_answer_ids]))
+                    elif field_type in ['char', 'text']:
+                        value = ", ".join([ans.value for ans in line.suggested_answer_ids])
+                    elif field_type == 'html':
+                        value = "<br/>".join([f"<p>{line.question_id.title}: {ans.value}</p>" for ans in line.suggested_answer_ids])
+
+                    logger.info(f"Value for multiple_choice: {value}")
+
+                # Handle text_box and char_box
+                elif answer_type in ["text_box", "char_box"]:
+                    if field_type in ['char', 'text']:
+                        value = line[f"value_{answer_type}"]
+                    elif field_type == 'many2one':
+                        value = self._find_many2one_value(line.question_id.res_partner_field, line[f"value_{answer_type}"])
+                    elif field_type == 'many2many':
+                        value = self._find_many2many_value(line.question_id.res_partner_field, line[f"value_{answer_type}"])
+                    elif field_type == 'one2many':
+                        value = self._find_one2many_value(line.question_id.res_partner_field, line[f"value_{answer_type}"])
+                    elif field_type == 'html':
+                        value = f"<p>{line.question_id.title}: {line[f'value_{answer_type}']}</p>"
+
+                    logger.info(f"Value for text_box/char_box: {value}")
+
+                # Handle numerical_box
+                elif answer_type == "numerical_box":
+                    if field_type == 'float':
+                        value = float(line[f"value_{answer_type}"])
+                    elif field_type == 'integer':
+                        value = int(line[f"value_{answer_type}"])
+                    elif field_type in ['char', 'text']:
+                        value = str(line[f"value_{answer_type}"])
+                    elif field_type == 'html':
+                        value = f"<p>{line.question_id.title}: {line[f'value_{answer_type}']}</p>"
+
+                    logger.info(f"Value for numerical_box: {value}")
+
+                # Handle date
+                elif answer_type == "date":
+                    if field_type == 'date':
+                        value = fields.Date.to_date(line[f"value_{answer_type}"])
+                    elif field_type in ['char', 'text']:
+                        value = str(fields.Date.to_date(line[f"value_{answer_type}"]))
+                    elif field_type == 'html':
+                        value = f"<p>{line.question_id.title}: {fields.Date.to_date(line[f'value_{answer_type}'])}</p>"
+
+                    logger.info(f"Value for date: {value}")
+
+                # Handle datetime
+                elif answer_type == "datetime":
+                    if field_type == 'datetime':
+                        value = fields.Datetime.to_datetime(line[f"value_{answer_type}"])
+                    elif field_type in ['char', 'text']:
+                        value = str(fields.Datetime.to_datetime(line[f"value_{answer_type}"]))
+                    elif field_type == 'html':
+                        value = f"<p>{line.question_id.title}: {fields.Datetime.to_datetime(line[f'value_{answer_type}'])}</p>"
+
+                    logger.info(f"Value for datetime: {value}")
+
+                # Handle suggestions
+                elif answer_type == "suggestion":
+                    if field_type == 'selection':
+                        value = self._find_selection_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type == 'many2one':
+                        value = self._find_many2one_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type == 'many2many':
+                        value = self._find_many2many_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type == 'one2many':
+                        value = self._find_one2many_value(line.question_id.res_partner_field, line.suggested_answer_id.value)
+                    elif field_type in ['char', 'text']:
+                        value = line.suggested_answer_id.value
+                    elif field_type == 'html':
+                        value = f"<p>{line.question_id.title}: {line.suggested_answer_id.value}</p>"
+
+                    logger.info(f"Value for suggestion: {value}")
+
+                # Concatenate values
+                if value:
+                    logger.info(f"Concatenating value for field {field_name}: {value}")
+                    if field_name not in sub_partner_vals:
+                        sub_partner_vals[field_name] = value
+                    else:
+                        if field_type == 'many2many':
+                            existing_ids = sub_partner_vals[field_name][0][2] if isinstance(sub_partner_vals[field_name], list) and len(sub_partner_vals[field_name][0]) > 2 else []
+                            new_ids = value[0][2] if isinstance(value, list) and len(value[0]) > 2 else []
+                            combined_ids = list(set(existing_ids + new_ids))
+                            sub_partner_vals[field_name] = [(6, 0, combined_ids)]
+                        elif field_type == 'one2many':
+                            sub_partner_vals[field_name] += value
+                        elif field_type == 'html':
+                            sub_partner_vals[field_name] += f"<br/>{value}"
+                        elif field_type in ['char', 'text']:
                             sub_partner_vals[field_name] += f", {value}"
-                    if line.answer_type == "suggestion" and line.suggested_answer_id:
-                        suggestion_value = line.suggested_answer_id.value
-                        if field_name != "comment":
-                            if field_name not in sub_partner_vals:
-                                sub_partner_vals[field_name] = f"<br>{line.question_id.title}: {suggestion_value}<br>"
-                            else:
-                                sub_partner_vals[field_name] += f"<br>{line.question_id.title}: {suggestion_value}<br>"
-                    if field_name == "comment":
-                        comment_value = (
-                            line.suggested_answer_id.value
-                            if line.answer_type == "suggestion"
-                            else line[f"value_{line.answer_type}"]
-                        )
-                        comment_entry = f"<br>{line.question_id.title}: {comment_value}<br>"
-                        if comment_entry not in comment_entries:
-                            comment_entries.add(comment_entry)
-                            sub_partner_vals.setdefault("comment", "")
-                            sub_partner_vals["comment"] += comment_entry
-            except ValueError as e:
+                        else:
+                            sub_partner_vals[field_name] = value
+
+                    logger.warning(f"Subpartner vals  {sub_partner_vals[field_name]}")
+
+            except KeyError as e:
+                logger.error(f"KeyError encountered: {e} for line: {line}")
                 continue
+            except ValueError as e:
+                logger.error(f"ValueError encountered: {e}")
+                continue
+
         return sub_partner_vals
+
+    def _find_selection_value(self, field, text_value):
+        """Find the correct selection value based on the text input."""
+        selection_options = dict(self.env['res.partner'].fields_get(allfields=[field.name])[field.name]['selection'])
+        return selection_options.get(text_value, text_value)
+
+    def _find_many2one_value(self, field, text_value):
+        """Find the correct many2one value based on the text input."""
+        model = self.env[field.relation]
+        record = model.search([('name', 'ilike', text_value)], limit=1)
+        return record.id if record else False
+
+    def _find_many2many_value(self, field, text_value):
+        """Find the correct many2many values based on the text input."""
+        model = self.env[field.relation]
+        records = model.search([('name', 'in', text_value.split(', '))])
+        return [(6, 0, records.ids)] if records else [(5, 0, 0)]
+
+    def _find_one2many_value(self, field, text_value):
+        """Find the correct one2many values based on the text input."""
+        model = self.env[field.relation]
+        records = model.search([('name', 'ilike', text_value)])
+        return [(0, 0, {'name': rec.name}) for rec in records]
 
     def _group_user_input_lines(self, survey_user_input):
         """Group survey responses by sub-contact group, ignoring the main contact group."""
@@ -179,21 +330,7 @@ class CreatePartnerWizard(models.TransientModel):
             sub_contact_groups[group].append(line)
         return sub_contact_groups
 
-    def _update_existing_sub_contact(self, sub_contact, sub_partner_vals):
-        """Update the fields of an existing sub-contact."""
-        for field, value in sub_partner_vals.items():
-            question = self.env['survey.question'].search([('res_partner_field.name', '=', field)], limit=1)
-            try:
-                if question and question.override_on_merge:
-                    sub_contact.write({field: value})
-                elif not getattr(sub_contact, field):
-                    sub_contact.write({field: value})
-            except Exception as e:
-                user_message = f"An error occurred while updating the field '{field}' for the question '{question.title}'. The response does not match the expected type."
-                logger.error(user_message)
-                raise UserError(user_message)
-
-    def _create_new_sub_contact(self, parent_partner, sub_partner_vals, survey_user_input):
+    def _create_new_sub_contact(self, parent_partner, sub_partner_vals, survey_user_input, question_map):
         """Create a new sub-contact based on survey responses."""
         sub_partner_vals['parent_id'] = parent_partner.id
         sub_partner_vals.setdefault('name', "Sub contact from survey")
@@ -201,16 +338,17 @@ class CreatePartnerWizard(models.TransientModel):
             new_sub_contact = self.env['res.partner'].create(sub_partner_vals)
             survey_user_input._create_contact_post_process(new_sub_contact, survey_user_input)
         except Exception as e:
-            field_name, question_title = self._extract_field_and_question_from_error(survey_user_input, sub_partner_vals)
-            user_message = f"An error occurred while creating the sub-contact. The response for the question '{question_title}' linked to the field '{field_name}' does not match the expected type."
-            logger.error(user_message)
-            raise UserError(user_message)
+            problematic_fields = self._identify_problematic_fields(sub_partner_vals)
+            problematic_questions = ", ".join([f"{question_map[field]} (associate to field: {field})" for field in problematic_fields])
+            logger.warning("Problematic questions --> {} for fields {}".format(problematic_questions, problematic_fields))
+            raise UserError(f"The following question caused issue: {problematic_questions}")
 
-    def _extract_field_and_question_from_error(self, survey_user_input, partner_vals):
-        """Extracts the field name and question title from the survey user input."""
-        for line in survey_user_input.user_input_line_ids:
-            field_name = line.question_id.res_partner_field.name
-            if field_name in partner_vals:
-                question_title = line.question_id.title
-                return field_name, question_title
-        return "unknown", "unknown"
+    def _identify_problematic_fields(self, vals):
+        """Identify the fields that cause issues during partner creation."""
+        problematic_fields = []
+        for field_name, value in vals.items():
+            try:
+                self.env['res.partner'].new({field_name: value})
+            except Exception as e:
+                problematic_fields.append(field_name)
+        return problematic_fields
