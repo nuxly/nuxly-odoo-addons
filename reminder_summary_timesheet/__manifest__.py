@@ -1,6 +1,6 @@
 {
     'name': 'Reminders and summaries for timesheet lines',
-    'version': '16.0.0.0',
+    'version': '17.0.1.0.0',
     'category': 'HR',
     'summary': 'Remind employees to fill their timesheets and summarize them to managers',
     'description': """

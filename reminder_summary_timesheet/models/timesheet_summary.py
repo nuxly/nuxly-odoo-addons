@@ -30,9 +30,9 @@ class TimesheetSummary(models.TransientModel):
         managers = []
 
         # Retrieves managers distinct from all employees
-        for employee in self.env['hr.employee'].search([('timesheet_manager_id', '!=', False)]):
-            if employee['timesheet_manager_id'] not in managers:
-                managers += employee['timesheet_manager_id']
+        for employee in self.env['hr.employee'].search([('parent_id', '!=', False)]):
+            if employee['parent_id'] not in managers:
+                managers += employee['parent_id']
         return managers
 
 
