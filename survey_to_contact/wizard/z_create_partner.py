@@ -39,9 +39,7 @@ class CreatePartnerWizard(models.TransientModel):
                 new_partner.write({'is_company': True})
                 survey_user_input._create_contact_post_process(new_partner, survey_user_input)
             except Exception as e:
-                problematic_fields = self._identify_problematic_fields(partner_vals)
-                problematic_questions = ", ".join([f"{question_map[field]} (associate to field: {field})" for field in problematic_fields])
-                raise UserError(f"The following question caused issue: {problematic_questions}")
+                raise UserError(f"Une erreur est suvenu lors de la création des contacts a partir de sondages, plus de détails:\n {e}")
 
         # Create sub-contacts
         sub_contact_groups = self._group_user_input_lines(survey_user_input)
@@ -65,9 +63,7 @@ class CreatePartnerWizard(models.TransientModel):
                         sub_partner = self.env['res.partner'].create(sub_partner_vals)
                         survey_user_input._create_contact_post_process(sub_partner, survey_user_input)
                     except Exception as e:
-                        problematic_fields = self._identify_problematic_fields(sub_partner_vals)
-                        problematic_questions = ", ".join([f"{sub_question_map[field]} (associate to field: {field})" for field in problematic_fields])
-                        raise UserError(f"The following question caused issue: {problematic_questions}")
+                        raise UserError(f"Une erreur est suvenu lors de la création des contacts a partir de sondages, plus de détails:\n {e}")
 
     def _merge_partner(self, survey_user_input):
         """Update the main contact and create sub-contacts if they don't exist based on survey responses."""
@@ -305,7 +301,7 @@ class CreatePartnerWizard(models.TransientModel):
     def _find_many2one_value(self, field, text_value):
         """Find the correct many2one value based on the text input."""
         model = self.env[field.relation]
-        record = model.search([('name', 'ilike', text_value)], limit=1)
+        record = model.search([('name', '=', text_value)], limit=1)
         return record.id if record else False
 
     def _find_many2many_value(self, field, text_value):
@@ -338,17 +334,4 @@ class CreatePartnerWizard(models.TransientModel):
             new_sub_contact = self.env['res.partner'].create(sub_partner_vals)
             survey_user_input._create_contact_post_process(new_sub_contact, survey_user_input)
         except Exception as e:
-            problematic_fields = self._identify_problematic_fields(sub_partner_vals)
-            problematic_questions = ", ".join([f"{question_map[field]} (associate to field: {field})" for field in problematic_fields])
-            logger.warning("Problematic questions --> {} for fields {}".format(problematic_questions, problematic_fields))
-            raise UserError(f"The following question caused issue: {problematic_questions}")
-
-    def _identify_problematic_fields(self, vals):
-        """Identify the fields that cause issues during partner creation."""
-        problematic_fields = []
-        for field_name, value in vals.items():
-            try:
-                self.env['res.partner'].new({field_name: value})
-            except Exception as e:
-                problematic_fields.append(field_name)
-        return problematic_fields
+            raise UserError(f"Une erreur est suvenu lors de la création des contacts a partir de sondages, plus de détails:\n {e}")
