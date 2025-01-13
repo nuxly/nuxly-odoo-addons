@@ -300,8 +300,10 @@ class CreatePartnerWizard(models.TransientModel):
 
     def _find_many2one_value(self, field, text_value):
         """Find the correct many2one value based on the text input."""
+        if len(text_value) < 3:
+            return False
         model = self.env[field.relation]
-        record = model.search([('name', '=', text_value)], limit=1)
+        record = model.search([('name', 'ilike', text_value)], limit=1)
         return record.id if record else False
 
     def _find_many2many_value(self, field, text_value):
