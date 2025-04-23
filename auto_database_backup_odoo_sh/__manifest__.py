@@ -16,7 +16,7 @@
     'category': 'Tools',
     'depends': ['auto_database_backup'],
     'data': [
-        'security/ir.model.access.csv',
+        'views/db_backup_configure_view.xml',
     ],
     'installable': True,
     'license': 'LGPL-3',
