@@ -5,126 +5,123 @@
     <field name="model">db.backup.configure</field>
     <field name="inherit_id" ref="auto_database_backup.db_backup_configure_view_form"/>
     <field name="arch" type="xml">
-        <!-- Remove master_pwd field -->
+
+        <!-- Hide db_name for Odoo.sh destinations -->
+        <field name="db_name" position="attributes">
+            <attribute name="invisible">backup_destination == 'odoo_sh_gdrive' or backup_destination == 'odoo_sh_onedrive'</attribute>
+        </field>
+
+        <!-- Hide and remove requirement of master_pwd for Odoo.sh -->
         <field name="master_pwd" position="attributes">
-            <attribute name="invisible">1</attribute>
-            <attribute name="required">0</attribute>
+            <attribute name="invisible">backup_destination == 'odoo_sh_gdrive' or backup_destination == 'odoo_sh_onedrive'</attribute>
+            <attribute name="required">backup_destination != 'odoo_sh_gdrive' and backup_destination != 'odoo_sh_onedrive'</attribute>
         </field>
+
+        <!-- Hide backup_format field for Odoo.sh -->
         <field name="backup_format" position="attributes">
-            <attribute name="invisible">1</attribute>
+            <attribute name="invisible">backup_destination == 'odoo_sh_gdrive' or backup_destination == 'odoo_sh_onedrive'</attribute>
         </field>
 
-
-        <!-- Hide all destinations except GDrive + OneDrive Odoo.sh -->
-        <field name="backup_destination" position="attributes">
-            <attribute name="widget">selection</attribute>
+        <!-- GDrive-specific fields visible for odoo_sh_gdrive and google_drive -->
+        <field name="gdrive_client_key" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_gdrive' and backup_destination != 'google_drive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_gdrive' or backup_destination == 'google_drive'</attribute>
         </field>
-            <!-- Masquer les anciens champs -->
-            <field name="backup_path" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </field>
-            <!-- Champs GDrive -->
-            <field name="gdrive_client_key" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_gdrive'</attribute>
-            </field>
-            <field name="gdrive_client_secret" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_gdrive'</attribute>
-            </field>
-            <field name="gdrive_redirect_uri" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_gdrive'</attribute>
-            </field>
-            <field name="google_drive_folder_key" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_gdrive'</attribute>
-            </field>
-            <!-- Bouton Setup Token GDrive -->
-            <field name="backup_destination" position="after">
-                <div invisible="backup_destination != 'odoo_sh_gdrive'">
-                    <div invisible="backup_destination != 'odoo_sh_gdrive' or is_google_drive_token_generated == False">
-                        <i class="text-success fa fa-check"/>
-                        Refresh token set
-                    </div>
-                    <div invisible="backup_destination != 'odoo_sh_gdrive' or is_google_drive_token_generated == True">
-                        <i class="fa fa-exclamation-triangle text-warning"/>
-                        No refresh token set
-                    </div>
-                </div>
-                <div invisible="backup_destination != 'odoo_sh_gdrive'">
-                    <div invisible="backup_destination != 'odoo_sh_gdrive' or is_google_drive_token_generated == True">
-                        <button class="btn btn-link"
-                                name="action_get_gdrive_auth_code"
-                                type="object">
-                            <i class="fa fa-arrow-right"/>
-                            Setup Token
-                        </button>
-                    </div>
-                    <div invisible="backup_destination != 'odoo_sh_gdrive' or is_google_drive_token_generated == False">
-                        <button class="btn btn-link"
-                                name="action_get_gdrive_auth_code"
-                                type="object">
-                            <i class="fa fa-arrow-right"/>
-                            Reset Token
-                        </button>
-                    </div>
-                </div>
-                <div invisible="backup_destination != 'odoo_sh_onedrive'">
-                    <div invisible="backup_destination != 'odoo_sh_onedrive' or is_onedrive_token_generated == False">
-                        <i class="text-success fa fa-check"/>
-                        Refresh token set
-                    </div>
-                    <div invisible="backup_destination != 'odoo_sh_onedrive' or is_onedrive_token_generated == True">
-                        <i class="fa fa-exclamation-triangle text-warning"/>
-                        No refresh token set
-                    </div>
-                </div>
-                <div invisible="backup_destination != 'odoo_sh_onedrive'">
-                    <div invisible="backup_destination != 'odoo_sh_onedrive' or is_onedrive_token_generated == True">
-                        <button class="btn btn-link"
-                                name="action_get_onedrive_auth_code"
-                                type="object">
-                            <i class="fa fa-arrow-right"/>
-                            Setup Token
-                        </button>
-                    </div>
-                    <div invisible="backup_destination != 'odoo_sh_onedrive' or is_onedrive_token_generated == False">
-                        <button class="btn btn-link"
-                                name="action_get_onedrive_auth_code"
-                                type="object">
-                            <i class="fa fa-arrow-right"/>
-                            Reset Token
-                        </button>
-                    </div>
-                </div>
-            </field>
-            <!-- Champs OneDrive -->
-            <field name="onedrive_client_key" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_onedrive'</attribute>
-            </field>
-            <field name="onedrive_client_secret" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_onedrive'</attribute>
-            </field>
-            <field name="onedrive_folder_key" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_onedrive'</attribute>
-            </field>
-            <field name="onedrive_redirect_uri" position="attributes">
-                <attribute name="invisible">backup_destination != 'odoo_sh_onedrive'</attribute>
-            </field>
-            <!-- Bouton Setup Token OneDrive -->
-            <xpath expr="//group" position="inside">
-                <div invisible="backup_destination != 'odoo_sh_onedrive'">
-                    <div invisible="backup_destination != 'odoo_sh_onedrive' or is_onedrive_token_generated == True">
-                        <i class="fa fa-exclamation-triangle text-warning"/>
-                        No refresh token set
-                    </div>
-                    <div invisible="backup_destination != 'odoo_sh_onedrive' or is_onedrive_token_generated == False">
-                        <button class="btn btn-link"
-                                name="action_get_onedrive_auth_code"
-                                type="object">
-                            <i class="fa fa-arrow-right"/>
-                            Setup Token
-                        </button>
-                    </div>
-                </div>
-            </xpath>
+        <field name="gdrive_client_secret" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_gdrive' and backup_destination != 'google_drive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_gdrive' or backup_destination == 'google_drive'</attribute>
         </field>
-    </record>
+        <field name="gdrive_redirect_uri" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_gdrive' and backup_destination != 'google_drive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_gdrive' or backup_destination == 'google_drive'</attribute>
+        </field>
+        <field name="google_drive_folder_key" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_gdrive' and backup_destination != 'google_drive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_gdrive' or backup_destination == 'google_drive'</attribute>
+        </field>
+        <!-- GDrive token indicators + setup/reset button -->
+        <field name="google_drive_folder_key" position="after">
+            <!-- GDrive token status -->
+            <div invisible="backup_destination != 'odoo_sh_gdrive'">
+                <div invisible="is_google_drive_token_generated == False">
+                    <i class="text-success fa fa-check"/>
+                    Refresh token set
+                </div>
+                <div invisible="is_google_drive_token_generated == True">
+                    <i class="fa fa-exclamation-triangle text-warning"/>
+                    No refresh token set
+                </div>
+            </div>
+            <!-- GDrive token buttons -->
+            <div invisible="backup_destination != 'odoo_sh_gdrive'">
+                <div invisible="is_google_drive_token_generated == True">
+                    <button class="btn btn-link"
+                            name="action_get_gdrive_auth_code"
+                            type="object">
+                        <i class="fa fa-arrow-right"/>
+                        Setup Token
+                    </button>
+                </div>
+                <div invisible="is_google_drive_token_generated == False">
+                    <button class="btn btn-link"
+                            name="action_get_gdrive_auth_code"
+                            type="object">
+                        <i class="fa fa-arrow-right"/>
+                        Reset Token
+                    </button>
+                </div>
+            </div>
+        </field>
+        <!-- OneDrive-specific fields visible for odoo_sh_onedrive and onedrive -->
+        <field name="onedrive_client_key" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_onedrive' and backup_destination != 'onedrive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_onedrive' or backup_destination == 'onedrive'</attribute>
+        </field>
+        <field name="onedrive_client_secret" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_onedrive' and backup_destination != 'onedrive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_onedrive' or backup_destination == 'onedrive'</attribute>
+        </field>
+        <field name="onedrive_redirect_uri" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_onedrive' and backup_destination != 'onedrive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_onedrive' or backup_destination == 'onedrive'</attribute>
+        </field>
+        <field name="onedrive_folder_key" position="attributes">
+            <attribute name="invisible">backup_destination != 'odoo_sh_onedrive' and backup_destination != 'onedrive'</attribute>
+            <attribute name="required">backup_destination == 'odoo_sh_onedrive' or backup_destination == 'onedrive'</attribute>
+        </field>
+        <!-- GDrive token indicators + setup/reset button -->
+        <field name="onedrive_folder_key" position="after">
+            <!-- OneDrive token status -->
+            <div invisible="backup_destination != 'odoo_sh_onedrive'">
+                <div invisible="is_onedrive_token_generated == False">
+                    <i class="text-success fa fa-check"/>
+                    Refresh token set
+                </div>
+                <div invisible="is_onedrive_token_generated == True">
+                    <i class="fa fa-exclamation-triangle text-warning"/>
+                    No refresh token set
+                </div>
+            </div>
+            <!-- OneDrive token buttons -->
+            <div invisible="backup_destination != 'odoo_sh_onedrive'">
+                <div invisible="is_onedrive_token_generated == True">
+                    <button class="btn btn-link"
+                            name="action_get_onedrive_auth_code"
+                            type="object">
+                        <i class="fa fa-arrow-right"/>
+                        Setup Token
+                    </button>
+                </div>
+                <div invisible="is_onedrive_token_generated == False">
+                    <button class="btn btn-link"
+                            name="action_get_onedrive_auth_code"
+                            type="object">
+                        <i class="fa fa-arrow-right"/>
+                        Reset Token
+                    </button>
+                </div>
+            </div>
+        </field>
+    </field>
+  </record>
 </odoo>
