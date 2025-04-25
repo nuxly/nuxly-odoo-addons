@@ -4,13 +4,13 @@
     'version': '17.0.1.0.0',
     'summary': "Send Odoo.sh automatic backups to Google Drive / OneDrive",
     'description': """
-        Ce module hérite de auto_database_backup et ajoute deux options :
-        - Sauvegarde Odoo.sh > Google Drive
-        - Sauvegarde Odoo.sh > OneDrive
+      This module extends `auto_database_backup` to support additional cloud destinations for Odoo.sh:
+        - Google Drive (Odoo.sh > Google Drive)
+        - OneDrive (Odoo.sh > OneDrive)
 
-        Il désactive la saisie du master password,
-        masque les options inutiles, et utilise uniquement les fonctions 
-        de token pour l'envoi dans le cloud. 
+        It removes the need for a master password, hides unnecessary options, and uses token-based authentication for automatic uploads. 
+        Backups are taken from the `/backup.daily` directory, zipped, and uploaded to the selected cloud storage. 
+        The module also supports automatic cleanup of older backups and provides detailed logging for traceability.
     """,
     'author': "Nuxly",
     'category': 'Tools',
