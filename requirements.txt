@@ -4,3 +4,4 @@ boto3
 requests
 paramiko
 pyncclient
+nextcloud-api-wrapper

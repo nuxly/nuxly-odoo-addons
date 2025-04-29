@@ -8,6 +8,7 @@ import os
 import tempfile
 import shutil
 import odoo.tools.osutil
+from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 class DbBackupConfigure(models.Model):
@@ -89,9 +90,12 @@ class DbBackupConfigure(models.Model):
         Scan folder /backup.daily in oOdoo.sh and zip any folder or file containing 'daily'
         into a temporary ZIP archive for cloud upload.
         """
-        zip_path = "/backup.daily"
+        zip_path = "backup.daily"
         temp_dir = tempfile.mkdtemp()
         found = False
+        if not zip_path:
+            _logger.warning(f"Le dossier {zip_path} est introuvable")
+            raise UserError(_("Le dossier de sauvegarde 'backup.daily' est introuvable. Vérifiez la configuration de votre environnement."))
         _logger.debug("Scanning directory: %s", zip_path)
         entries = os.listdir(zip_path)
         _logger.debug("Entries found: %s", entries)
