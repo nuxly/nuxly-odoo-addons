@@ -1,0 +1,30 @@
+/* License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). */
+
+.o_list_footer.o_account_sticky_footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background-color: var(--ListRenderer-thead-bg-color);
+    box-shadow: 0 -1px 0 -1px var(--ListRenderer-thead-border-end-color);
+
+    > tr > td {
+        position: sticky;
+        bottom: 0;
+        background-color: var(--ListRenderer-thead-bg-color);
+    }
+}
+
+/* Fallback when JS class injection is skipped by a specific renderer path. */
+.o_list_table:has(thead [data-tooltip-info*="account.move.line"]) .o_list_footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background-color: var(--ListRenderer-thead-bg-color);
+    box-shadow: 0 -1px 0 -1px var(--ListRenderer-thead-border-end-color);
+
+    > tr > td {
+        position: sticky;
+        bottom: 0;
+        background-color: var(--ListRenderer-thead-bg-color);
+    }
+}
