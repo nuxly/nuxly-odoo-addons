@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <template id="assets_common" name="home_menu_background assets common" inherit_id="web_enterprise.assets_common">
-        <xpath expr="//link[@href='/web_enterprise/static/src/scss/ui.scss']" position="replace">
-            <link rel="stylesheet" type="text/scss" href="/home_menu_background/static/scss/ui.scss"/>
-        </xpath>
-    </template>
-</odoo>
