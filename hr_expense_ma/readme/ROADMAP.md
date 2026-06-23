@@ -1,0 +1,5 @@
+- Record journeys made with an employee's personal vehicle.
+- Manage vehicle and fiscal-power information.
+- Calculate reimbursements using official French mileage rates.
+- Keep mileage-rate data configurable and reusable.
+- Integrate mileage claims with the standard Odoo expense workflow.
