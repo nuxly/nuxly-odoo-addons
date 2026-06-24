@@ -12,7 +12,7 @@
     "depends": ["hr_expense", "fleet"],
     "data": [
         "data/product_template_data.xml",
-        "views/product_template_views.xml",
+        "views/product_product_views.xml",
         "views/fleet_vehicle_views.xml",
     ],
     "installable": True,
