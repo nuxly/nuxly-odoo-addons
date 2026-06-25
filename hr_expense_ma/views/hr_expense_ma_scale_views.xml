@@ -5,7 +5,7 @@
         <field name="model">hr.expense.ma.scale</field>
         <field name="arch" type="xml">
             <list>
-                <field name="year"/>
+                <field name="start_date"/>
                 <field name="vehicle_type"/>
                 <field name="fuel_type"/>
                 <field name="horsepower_min"/>
@@ -23,18 +23,21 @@
         <field name="model">hr.expense.ma.scale</field>
         <field name="arch" type="xml">
             <form>
-                <div class="alert alert-info" role="alert">
-                    <p class="mb-1"><strong>How it works</strong></p>
-                    <p class="mb-0">
-                        Each line represents one official mileage allowance scale range.
-                        The system will later match the expense year, vehicle type, fuel type,
-                        fiscal power and yearly mileage distance to find the correct formula.
-                    </p>
-                </div>
                 <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <p class="mb-1"><strong>How it works</strong></p>
+                        <p class="mb-1">
+                            Each line represents one official mileage allowance scale range.
+                            During calculation, the system will use the latest scale whose start date is lower than or equal to the expense date.
+                        </p>
+                        <p class="mb-0">
+                            The mileage allowance is not calculated progressively by range.
+                            The annual employee mileage after adding the current expense determines the applicable range.
+                        </p>
+                    </div>
                     <group>
                         <group>
-                            <field name="year"/>
+                            <field name="start_date"/>
                             <field name="vehicle_type"/>
                             <field name="fuel_type"/>
                         </group>
@@ -50,18 +53,19 @@
                         <field name="fixed_amount"/>
                     </group>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
 
     <record id="hr_expense_ma_scale_action" model="ir.actions.act_window">
-        <field name="name">Mileage Allowance Scales</field>
+        <field name="name">Mileage allowance scale</field>
         <field name="res_model">hr.expense.ma.scale</field>
         <field name="view_mode">list,form</field>
     </record>
 
     <menuitem id="hr_expense_ma_scale_menu"
-              name="Mileage Allowance Scales"
+              name="Mileage allowance scale"
               parent="hr_expense.menu_hr_expense_configuration"
               action="hr_expense_ma_scale_action"/>
 </odoo>
