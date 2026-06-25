@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Synchronize mileage allowance fuel types from Fleet.
+
+        This keeps the mileage allowance fuel type catalog aligned with
+        fleet.vehicle.model.default_fuel_type while preserving existing
+        records and relations through the technical fuel type code.
+    -->
+    <function model="hr.expense.ma.fuel.type" name="sync_from_fleet_selection"/>
+</odoo>

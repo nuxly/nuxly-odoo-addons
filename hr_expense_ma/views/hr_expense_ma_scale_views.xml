@@ -7,7 +7,7 @@
             <list>
                 <field name="start_date"/>
                 <field name="vehicle_type"/>
-                <field name="fuel_type"/>
+                <field name="fuel_type_ids" widget="many2many_tags"/>
                 <field name="horsepower_min"/>
                 <field name="horsepower_max"/>
                 <field name="distance_min"/>
@@ -39,7 +39,7 @@
                         <group>
                             <field name="start_date"/>
                             <field name="vehicle_type"/>
-                            <field name="fuel_type"/>
+                            <field name="fuel_type_ids" widget="many2many_tags"/>
                         </group>
                         <group>
                             <field name="horsepower_min"/>
