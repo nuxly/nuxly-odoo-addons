@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_expense_ma_scale_list_view" model="ir.ui.view">
+        <field name="name">hr.expense.ma.scale.list</field>
+        <field name="model">hr.expense.ma.scale</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="year"/>
+                <field name="vehicle_type"/>
+                <field name="fuel_type"/>
+                <field name="horsepower_min"/>
+                <field name="horsepower_max"/>
+                <field name="distance_min"/>
+                <field name="distance_max"/>
+                <field name="coefficient"/>
+                <field name="fixed_amount"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="hr_expense_ma_scale_form_view" model="ir.ui.view">
+        <field name="name">hr.expense.ma.scale.form</field>
+        <field name="model">hr.expense.ma.scale</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="alert alert-info" role="alert">
+                    <p class="mb-1"><strong>How it works</strong></p>
+                    <p class="mb-0">
+                        Each line represents one official mileage allowance scale range.
+                        The system will later match the expense year, vehicle type, fuel type,
+                        fiscal power and yearly mileage distance to find the correct formula.
+                    </p>
+                </div>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="year"/>
+                            <field name="vehicle_type"/>
+                            <field name="fuel_type"/>
+                        </group>
+                        <group>
+                            <field name="horsepower_min"/>
+                            <field name="horsepower_max"/>
+                            <field name="distance_min"/>
+                            <field name="distance_max"/>
+                        </group>
+                    </group>
+                    <group string="Formula">
+                        <field name="coefficient"/>
+                        <field name="fixed_amount"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_expense_ma_scale_action" model="ir.actions.act_window">
+        <field name="name">Mileage Allowance Scales</field>
+        <field name="res_model">hr.expense.ma.scale</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="hr_expense_ma_scale_menu"
+              name="Mileage Allowance Scales"
+              parent="hr_expense.menu_hr_expense_configuration"
+              action="hr_expense_ma_scale_action"/>
+</odoo>
