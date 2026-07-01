@@ -26,3 +26,8 @@ class HrExpenseMaScale(models.Model):
             distance = f"{scale.distance_min}+" if not scale.distance_max else f"{scale.distance_min}-{scale.distance_max}"
             fuel_types = ", ".join(scale.fuel_type_ids.mapped("name")) or "-"
             scale.name = f"{scale.start_date} - {scale.vehicle_type} - {fuel_types} - {hp} CV - {distance} km"
+
+    def _compute_amount(self, distance):
+        """Compute the yearly mileage allowance amount for a given distance."""
+        self.ensure_one()
+        return (distance * self.coefficient) + self.fixed_amount

@@ -17,7 +17,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
     trip_type = fields.Selection([("one_way", "One way"), ("round_trip", "Round trip")], string="Trip type", default="one_way", required=True, help="Select whether the trip is one way or round trip.")
     origin_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Departure type", default="other", required=True, help="Suggested source used to fill the departure address.")
     destination_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Arrival type", default="other", required=True, help="Suggested source used to fill the arrival address.")    
-    distance = fields.Float(string="Distance", digits=(16, 2), readonly=True, help="Computed distance in kilometers.")
+    distance = fields.Float(string="Distance (km)", digits=(16, 2), readonly=True, help="Computed distance in kilometers.")
     google_origin_address = fields.Char(string="Google departure address", readonly=True, help="Departure address normalized and returned by the Google Maps API.")
     google_destination_address = fields.Char(string="Google arrival address", readonly=True, help="Arrival address normalized and returned by the Google Maps API.")
 
@@ -59,9 +59,9 @@ class HrExpenseMaTripWizard(models.TransientModel):
         If the trip is marked as round trip, the computed distance is doubled.
         """
         self.ensure_one()
-        api_key = self.env["ir.config_parameter"].sudo().get_param("hr_expense_ma.google_maps_api_key")
+        api_key = self.env["ir.config_parameter"].sudo().get_param("google_address_autocomplete.google_places_api_key")
         if not api_key:
-            raise UserError(_("Please configure the Google Maps API key in system parameters: hr_expense_ma.google_maps_api_key"))
+            raise UserError(_("Please configure the Google Places API key in the general settings."))
 
         data = self._get_google_distance(api_key)
         distance = data["distance_km"] * (2 if self.trip_type == "round_trip" else 1)
@@ -137,6 +137,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
             "ik_trip_type": self.trip_type,
             "ik_distance": self.distance,
         })
+        self.expense_id._compute_ik_amount()
 
     @api.onchange("origin_type")
     def _onchange_origin_type(self):

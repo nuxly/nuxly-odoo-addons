@@ -32,6 +32,11 @@
                     <field name="ik_trip_type" readonly="1"/>
                     <field name="ik_distance" readonly="1"/>
 
+                    <field name="ik_scale_id" readonly="1"/>
+                    <field name="ik_previous_year_distance" readonly="1"/>
+                    <field name="ik_new_year_distance" readonly="1"/>
+                    <field name="ik_counter_updated" readonly="1"/>
+
                 </group>
 
             </xpath>
