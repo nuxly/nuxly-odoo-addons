@@ -125,8 +125,18 @@ class HrExpense(models.Model):
                 "IK update_ik_employee_counter - expense=%s employee=%s year=%s new_total=%s",
                 expense.id, expense.employee_id, year, data[str(year)],
             )
-            expense.employee_id.ik_km_by_year = data
+            expense.employee_id.sudo().ik_km_by_year = data
             expense.ik_counter_updated = True
+            expense.employee_id.sudo().message_post(
+                body=_(
+                    "Mileage counter for %(year)s updated: +%(distance).2f km (new yearly total: %(total).2f km), from expense: %(expense)s.",
+                    year=year,
+                    distance=expense.ik_distance,
+                    total=data[str(year)],
+                    expense=expense.name or expense.id,
+                ),
+                subtype_xmlid="mail.mt_note",
+            )
 
     def write(self, vals):
         """Update the yearly mileage counter when an IK expense reaches the posted state."""

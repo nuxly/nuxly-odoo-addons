@@ -577,6 +577,12 @@ msgid "Mileage allowance trip wizard"
 msgstr "Assistant de trajet pour indemnité kilométrique"
 
 #. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage counter for %(year)s updated: +%(distance).2f km (new yearly total: %(total).2f km), from expense: %(expense)s."
+msgstr "Compteur kilométrique %(year)s mis à jour : +%(distance).2f km (nouveau total annuel : %(total).2f km), depuis la dépense : %(expense)s."
+
+#. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_counter_updated
 msgid "Mileage counter updated"
 msgstr "Compteur kilométrique mis à jour"
