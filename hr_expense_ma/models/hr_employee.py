@@ -10,7 +10,7 @@ class HrEmployee(models.Model):
     def _compute_ik_km_by_year_display(self):
         for employee in self:
             employee.ik_km_by_year_display = "\n".join(
-                f"{year} : {km} km" for year, km in sorted((employee.ik_km_by_year or {}).items()))
+                f"{year} : {km:.2f} km" for year, km in sorted((employee.ik_km_by_year or {}).items()))
 
     def _get_ik_personal_vehicles(self):
         """

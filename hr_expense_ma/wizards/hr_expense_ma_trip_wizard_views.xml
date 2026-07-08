@@ -9,43 +9,35 @@
             <form string="Mileage Trip">
 
                 <sheet>
-
+                    <field name="expense_id" invisible="1"/>
+                    <field name="employee_id" invisible="1"/>
                     <field name="available_vehicle_ids" invisible="1"/>
-
-                <group>
-                    <field name="vehicle_id"/>
-                    <field name="trip_type" widget="radio" options="{'horizontal': true}"/>
-                </group>
-
-                <group string="Departure">
-                    <field name="origin_type" widget="radio" options="{'horizontal': true}"/>
-                    <field name="origin_address"
-                        widget="google_address_autocomplete"
-                        placeholder="Departure address"
-                        readonly="origin_type != 'other'"/>
-                </group>
-
-                <group string="Arrival">
-                    <field name="destination_type" widget="radio" options="{'horizontal': true}"/>
-                    <field name="destination_address"
-                        widget="google_address_autocomplete"
-                        placeholder="Arrival address"
-                        readonly="destination_type != 'other'"/>
-                </group>
-                    <group string="Distance">
-
-                        <field name="distance"/>
-
-                        <field name="google_origin_address"/>
-
-                        <field name="google_destination_address"/>
-
+                    <group>
+                        <field name="vehicle_id"/>
+                        <field name="trip_type" widget="radio" options="{'horizontal': true}"/>
                     </group>
-
+                    <group string="Departure">
+                        <field name="origin_type" widget="radio" options="{'horizontal': true}"/>
+                        <field name="origin_address"
+                            widget="google_address_autocomplete"
+                            placeholder="Departure address"
+                            readonly="origin_type != 'other'"/>
+                    </group>
+                    <group string="Arrival">
+                        <field name="destination_type" widget="radio" options="{'horizontal': true}"/>
+                        <field name="destination_address"
+                            widget="google_address_autocomplete"
+                            placeholder="Arrival address"
+                            readonly="destination_type != 'other'"/>
+                    </group>
+                    <group string="Distance">
+                        <field name="distance"/>
+                        <field name="google_origin_address"/>
+                        <field name="google_destination_address"/>
+                    </group>
                 </sheet>
 
                 <footer>
-
                     <button
                         name="action_compute_distance"
                         type="object"
@@ -63,9 +55,7 @@
                         special="cancel"/>
 
                 </footer>
-
             </form>
-
         </field>
     </record>
 

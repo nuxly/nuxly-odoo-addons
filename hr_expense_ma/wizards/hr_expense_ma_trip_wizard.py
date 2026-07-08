@@ -1,4 +1,7 @@
+import logging
 import requests
+
+_logger = logging.getLogger(__name__)
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
@@ -12,8 +15,8 @@ class HrExpenseMaTripWizard(models.TransientModel):
     employee_id = fields.Many2one("hr.employee", string="Employee", related="expense_id.employee_id", readonly=True, store=False, help="Employee linked to the expense.")
     available_vehicle_ids = fields.Many2many("fleet.vehicle", compute="_compute_available_vehicle_ids", help="Personal vehicles available for the employee.")
     vehicle_id = fields.Many2one("fleet.vehicle", string="Vehicle", required=True, domain="[('id', 'in', available_vehicle_ids)]", help="Personal vehicle used for the mileage allowance trip.")
-    origin_address = fields.Char(string="Departure address", required=True, help="Departure address used to compute the trip distance.")
-    destination_address = fields.Char(string="Arrival address", required=True, help="Arrival address used to compute the trip distance.")
+    origin_address = fields.Char(string="Departure address", help="Departure address used to compute the trip distance.")
+    destination_address = fields.Char(string="Arrival address", help="Arrival address used to compute the trip distance.")
     trip_type = fields.Selection([("one_way", "One way"), ("round_trip", "Round trip")], string="Trip type", default="one_way", required=True, help="Select whether the trip is one way or round trip.")
     origin_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Departure type", default="other", required=True, help="Suggested source used to fill the departure address.")
     destination_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Arrival type", default="other", required=True, help="Suggested source used to fill the arrival address.")    
@@ -59,6 +62,10 @@ class HrExpenseMaTripWizard(models.TransientModel):
         If the trip is marked as round trip, the computed distance is doubled.
         """
         self.ensure_one()
+        if not self.origin_address:
+            raise UserError(_("Please select or enter a departure address."))
+        if not self.destination_address:
+            raise UserError(_("Please select or enter an arrival address."))
         api_key = self.env["ir.config_parameter"].sudo().get_param("google_address_autocomplete.google_places_api_key")
         if not api_key:
             raise UserError(_("Please configure the Google Places API key in the general settings."))
@@ -142,6 +149,12 @@ class HrExpenseMaTripWizard(models.TransientModel):
     @api.onchange("origin_type")
     def _onchange_origin_type(self):
         """Fill the departure address from employee home or work address when requested."""
+        _logger.warning(
+            "IK origin onchange - type=%s employee=%s",
+            self.origin_type,
+            self.employee_id,
+        )
+
         if not self.employee_id:
             self.origin_address = False
         elif self.origin_type == "home":
@@ -151,9 +164,21 @@ class HrExpenseMaTripWizard(models.TransientModel):
         elif self.origin_type == "other":
             self.origin_address = False
 
+        _logger.warning(
+            "IK origin onchange - address=%s",
+            self.origin_address,
+        )
+
+
     @api.onchange("destination_type")
     def _onchange_destination_type(self):
         """Fill the arrival address from employee home or work address when requested."""
+        _logger.warning(
+            "IK destination onchange - type=%s employee=%s",
+            self.destination_type,
+            self.employee_id,
+        )
+
         if not self.employee_id:
             self.destination_address = False
         elif self.destination_type == "home":
@@ -163,3 +188,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
         elif self.destination_type == "other":
             self.destination_address = False
 
+        _logger.warning(
+            "IK destination onchange - address=%s",
+            self.destination_address,
+        )
