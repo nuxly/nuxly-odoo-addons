@@ -937,3 +937,51 @@ msgstr "Travail"
 #: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
 msgid "Zip"
 msgstr "Code postal"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Vehicle: %s"
+msgstr "Véhicule : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Departure address: %s"
+msgstr "Adresse de départ : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Arrival address: %s"
+msgstr "Adresse d'arrivée : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Trip type: %s"
+msgstr "Type de trajet : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage distance (km): %.2f"
+msgstr "Distance kilométrique (km) : %.2f"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage scale: %s"
+msgstr "Barème kilométrique : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Previous yearly distance (km): %.2f"
+msgstr "Distance annuelle précédente (km) : %.2f"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "New yearly distance (km): %.2f"
+msgstr "Nouvelle distance annuelle (km) : %.2f"

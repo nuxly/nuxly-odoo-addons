@@ -1,3 +1,5 @@
+import re
+
 from odoo import fields, models, _
 from odoo.exceptions import UserError
 import logging
@@ -81,6 +83,47 @@ class HrExpense(models.Model):
             raise UserError(_("No mileage allowance scale was found."))
         return scale
 
+    _IK_TRIP_NOTE_MARKER_START = "--- Mileage trip ---"
+    _IK_TRIP_NOTE_MARKER_END = "--- End mileage trip ---"
+
+    def _get_ik_trip_note(self):
+        """
+        Build a plain text report of the mileage trip data.
+
+        The "Mileage Trip" group on the form is only visible in developer
+        mode, so this report is written on the internal notes to keep the
+        trip details visible to regular users as well.
+        """
+        self.ensure_one()
+        trip_type_label = dict(self._fields["ik_trip_type"].selection).get(self.ik_trip_type, self.ik_trip_type)
+        return "\n".join([
+            self._IK_TRIP_NOTE_MARKER_START,
+            _("Vehicle: %s", self.ik_vehicle_id.display_name),
+            _("Departure address: %s", self.ik_origin_address),
+            _("Arrival address: %s", self.ik_destination_address),
+            _("Trip type: %s", trip_type_label),
+            _("Mileage distance (km): %.2f", self.ik_distance),
+            _("Mileage scale: %s", self.ik_scale_id.display_name),
+            _("Previous yearly distance (km): %.2f", self.ik_previous_year_distance),
+            _("New yearly distance (km): %.2f", self.ik_new_year_distance),
+            self._IK_TRIP_NOTE_MARKER_END,
+        ])
+
+    def _update_ik_trip_note(self):
+        """Replace the mileage trip report block in the internal notes, keeping any other manual note."""
+        self.ensure_one()
+        pattern = re.compile(
+            re.escape(self._IK_TRIP_NOTE_MARKER_START) + r".*?" + re.escape(self._IK_TRIP_NOTE_MARKER_END),
+            re.DOTALL,
+        )
+        note = self.description or ""
+        report = self._get_ik_trip_note()
+        if pattern.search(note):
+            note = pattern.sub(report, note)
+        else:
+            note = f"{note}\n\n{report}" if note else report
+        self.description = note
+
     def _compute_ik_amount(self):
         """Compute the mileage allowance amount."""
         self.ensure_one()
@@ -113,6 +156,7 @@ class HrExpense(models.Model):
             "quantity": 1,
             "total_amount_currency": amount,
         })
+        self._update_ik_trip_note()
 
     def _update_ik_employee_counter(self):
         """Update employee yearly mileage counter after validation."""

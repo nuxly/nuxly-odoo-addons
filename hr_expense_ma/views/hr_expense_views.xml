@@ -20,7 +20,7 @@
 
             <xpath expr="//sheet" position="inside">
 
-                <group string="Mileage Trip" invisible="not is_ik_expense">
+                <group string="Mileage Trip" invisible="not is_ik_expense" groups="base.group_no_one">
 
                     <field name="ik_vehicle_id" readonly="1"/>
                     <field name="ik_origin_address" readonly="1"/>
@@ -39,6 +39,14 @@
 
                 </group>
 
+            </xpath>
+
+            <xpath expr="//field[@name='quantity']" position="attributes">
+                <attribute name="readonly">not is_editable or is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='tax_ids']" position="attributes">
+                <attribute name="readonly">not is_editable or is_ik_expense</attribute>
             </xpath>
 
         </field>
