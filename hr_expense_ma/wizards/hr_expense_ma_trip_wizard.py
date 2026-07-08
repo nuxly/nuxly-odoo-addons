@@ -53,6 +53,22 @@ class HrExpenseMaTripWizard(models.TransientModel):
                 res["vehicle_id"] = vehicles.id
         return res
 
+    def _get_ik_trip_address(self, address_type, manual_address):
+        """
+        Resolve the address to use for the trip based on the selected address type.
+
+        The departure/arrival address fields are readonly in the form when a
+        "home" or "work" type is selected, so values set on them by the
+        onchange are only used for display and are not reliably saved by the
+        web client. The actual address must therefore be resolved again here
+        instead of relying on the stored field value.
+        """
+        if address_type == "home":
+            return self.employee_id._get_ik_home_address()
+        if address_type == "work":
+            return self.employee_id._get_ik_work_address()
+        return manual_address
+
     def action_compute_distance(self):
         """
         Compute the trip distance using Google Distance Matrix API.
@@ -62,17 +78,21 @@ class HrExpenseMaTripWizard(models.TransientModel):
         If the trip is marked as round trip, the computed distance is doubled.
         """
         self.ensure_one()
-        if not self.origin_address:
+        origin_address = self._get_ik_trip_address(self.origin_type, self.origin_address)
+        destination_address = self._get_ik_trip_address(self.destination_type, self.destination_address)
+        if not origin_address:
             raise UserError(_("Please select or enter a departure address."))
-        if not self.destination_address:
+        if not destination_address:
             raise UserError(_("Please select or enter an arrival address."))
         api_key = self.env["ir.config_parameter"].sudo().get_param("google_address_autocomplete.google_places_api_key")
         if not api_key:
             raise UserError(_("Please configure the Google Places API key in the general settings."))
 
-        data = self._get_google_distance(api_key)
+        data = self._get_google_distance(api_key, origin_address, destination_address)
         distance = data["distance_km"] * (2 if self.trip_type == "round_trip" else 1)
         self.write({
+            "origin_address": origin_address,
+            "destination_address": destination_address,
             "distance": distance,
             "google_origin_address": data["origin_address"],
             "google_destination_address": data["destination_address"],
@@ -87,7 +107,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
             "target": "new",
         }
 
-    def _get_google_distance(self, api_key):
+    def _get_google_distance(self, api_key, origin_address, destination_address):
         """
         Call Google Distance Matrix API and return normalized trip information.
 
@@ -98,8 +118,8 @@ class HrExpenseMaTripWizard(models.TransientModel):
         response = requests.get(
             "https://maps.googleapis.com/maps/api/distancematrix/json",
             params={
-                "origins": self.origin_address,
-                "destinations": self.destination_address,
+                "origins": origin_address,
+                "destinations": destination_address,
                 "key": api_key,
                 "units": "metric",
                 "language": "fr",
