@@ -57,7 +57,6 @@ msgstr "Arrivée"
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_destination_address
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_address
 #: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
 msgid "Arrival address"
 msgstr "Adresse d'arrivée"
@@ -74,14 +73,44 @@ msgid "Arrival address normalized and returned by the Google Maps API."
 msgstr "Adresse d'arrivée normalisée et renvoyée par l'API Google Maps."
 
 #. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_address
-msgid "Arrival address used to compute the trip distance."
-msgstr "Adresse d'arrivée utilisée pour calculer la distance du trajet."
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_city
+msgid "Arrival city"
+msgstr "Ville d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_city
+msgid "Arrival city used to compute the trip distance."
+msgstr "Ville d'arrivée utilisée pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_country_id
+msgid "Arrival country"
+msgstr "Pays d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_street
+msgid "Arrival street"
+msgstr "Rue d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_street
+msgid "Arrival street used to compute the trip distance."
+msgstr "Rue d'arrivée utilisée pour calculer la distance du trajet."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_type
 msgid "Arrival type"
 msgstr "Type d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_zip
+msgid "Arrival zip"
+msgstr "Code postal d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_zip
+msgid "Arrival zip code used to compute the trip distance."
+msgstr "Code postal d'arrivée utilisé pour calculer la distance du trajet."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_attachment_count
@@ -104,6 +133,11 @@ msgid "Car"
 msgstr "Voiture"
 
 #. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "City"
+msgstr "Ville"
+
+#. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__code
 msgid "Code"
 msgstr "Code"
@@ -122,6 +156,21 @@ msgstr "Calculer la distance"
 #: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__distance
 msgid "Computed distance in kilometers."
 msgstr "Distance calculée en kilomètres."
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Country"
+msgstr "Pays"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_country_id
+msgid "Country of the arrival address. Must be France when the address is entered manually."
+msgstr "Pays de l'adresse d'arrivée. Doit être la France lorsque l'adresse est saisie manuellement."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_country_id
+msgid "Country of the departure address. Must be France when the address is entered manually."
+msgstr "Pays de l'adresse de départ. Doit être la France lorsque l'adresse est saisie manuellement."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__create_uid
@@ -144,7 +193,6 @@ msgstr "Départ"
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_origin_address
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_address
 #: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
 msgid "Departure address"
 msgstr "Adresse de départ"
@@ -161,14 +209,44 @@ msgid "Departure address normalized and returned by the Google Maps API."
 msgstr "Adresse de départ normalisée et renvoyée par l'API Google Maps."
 
 #. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_address
-msgid "Departure address used to compute the trip distance."
-msgstr "Adresse de départ utilisée pour calculer la distance du trajet."
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_city
+msgid "Departure city"
+msgstr "Ville de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_city
+msgid "Departure city used to compute the trip distance."
+msgstr "Ville de départ utilisée pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_country_id
+msgid "Departure country"
+msgstr "Pays de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_street
+msgid "Departure street"
+msgstr "Rue de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_street
+msgid "Departure street used to compute the trip distance."
+msgstr "Rue de départ utilisée pour calculer la distance du trajet."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_type
 msgid "Departure type"
 msgstr "Type de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_zip
+msgid "Departure zip"
+msgstr "Code postal de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_zip
+msgid "Departure zip code used to compute the trip distance."
+msgstr "Code postal de départ utilisé pour calculer la distance du trajet."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle__display_name
@@ -659,6 +737,18 @@ msgstr "Veuillez configurer la clé API Google Places dans les paramètres gén�
 
 #. module: hr_expense_ma
 #. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please select a departure address located in France."
+msgstr "Veuillez sélectionner une adresse de départ située en France."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please select an arrival address located in France."
+msgstr "Veuillez sélectionner une adresse d'arrivée située en France."
+
+#. module: hr_expense_ma
+#. odoo-python
 #: code:addons/hr_expense_ma/models/hr_expense.py:0
 msgid "Please select an employee before entering a mileage trip."
 msgstr "Veuillez sélectionner un employé avant de saisir un trajet kilométrique."
@@ -836,3 +926,8 @@ msgstr "Historique de communication du site web"
 #: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__origin_type__work
 msgid "Work"
 msgstr "Travail"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Zip"
+msgstr "Code postal"

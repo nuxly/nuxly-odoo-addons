@@ -28,16 +28,26 @@ class HrEmployee(models.Model):
         ])
 
 
-    def _get_ik_home_address(self):
-        """Return the employee private address formatted for distance calculation."""
+    def _get_ik_home_address_parts(self):
+        """Return the employee private address split into its individual components."""
         self.ensure_one()
-        return self._format_ik_address(self.private_street, self.private_street2, self.private_zip, self.private_city, self.private_country_id.name)
+        return {
+            "street": self.private_street,
+            "city": self.private_city,
+            "zip": self.private_zip,
+            "country_id": self.private_country_id or self.company_id.country_id,
+        }
 
-    def _get_ik_work_address(self):
-        """Return the employee work address formatted for distance calculation."""
+    def _get_ik_work_address_parts(self):
+        """Return the employee work address split into its individual components."""
         self.ensure_one()
         partner = self.address_id
-        return self._format_ik_address(partner.street, partner.street2, partner.zip, partner.city, partner.country_id.name) if partner else False
+        return {
+            "street": partner.street,
+            "city": partner.city,
+            "zip": partner.zip,
+            "country_id": partner.country_id or self.company_id.country_id,
+        }
 
     def _format_ik_address(self, *parts):
         """Build a single address string from non-empty address parts."""
