@@ -17,13 +17,9 @@ class HrExpenseMaTripWizard(models.TransientModel):
     available_vehicle_ids = fields.Many2many("fleet.vehicle", compute="_compute_available_vehicle_ids", help="Personal vehicles available for the employee.")
     vehicle_id = fields.Many2one("fleet.vehicle", string="Vehicle", required=True, domain="[('id', 'in', available_vehicle_ids)]", help="Personal vehicle used for the mileage allowance trip.")
     origin_street = fields.Char(string="Departure street", help="Departure street used to compute the trip distance.")
-    origin_city = fields.Char(string="Departure city", help="Departure city used to compute the trip distance.")
-    origin_zip = fields.Char(string="Departure zip", help="Departure zip code used to compute the trip distance.")
-    origin_country_id = fields.Many2one("res.country", string="Departure country", help="Country of the departure address. Must be France when the address is entered manually.")
+    origin_country_id = fields.Many2one("res.country", string="Departure country", default=lambda self: self.env.company.country_id, help="Country of the departure address. Used to prefill the address search when entered manually.")
     destination_street = fields.Char(string="Arrival street", help="Arrival street used to compute the trip distance.")
-    destination_city = fields.Char(string="Arrival city", help="Arrival city used to compute the trip distance.")
-    destination_zip = fields.Char(string="Arrival zip", help="Arrival zip code used to compute the trip distance.")
-    destination_country_id = fields.Many2one("res.country", string="Arrival country", help="Country of the arrival address. Must be France when the address is entered manually.")
+    destination_country_id = fields.Many2one("res.country", string="Arrival country", default=lambda self: self.env.company.country_id, help="Country of the arrival address. Used to prefill the address search when entered manually.")
     trip_type = fields.Selection([("one_way", "One way"), ("round_trip", "Round trip")], string="Trip type", default="one_way", required=True, help="Select whether the trip is one way or round trip.")
     origin_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Departure type", default="other", required=True, help="Suggested source used to fill the departure address.")
     destination_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Arrival type", default="other", required=True, help="Suggested source used to fill the arrival address.")
@@ -90,20 +86,28 @@ class HrExpenseMaTripWizard(models.TransientModel):
         """Return the current wizard field values for the given address prefix ("origin"/"destination")."""
         parts = {
             "street": self[f"{prefix}_street"],
-            "city": self[f"{prefix}_city"],
-            "zip": self[f"{prefix}_zip"],
             "country_id": self[f"{prefix}_country_id"],
         }
         _logger.info("IK get_wizard_address_parts - prefix=%s parts=%s", prefix, parts)
         return parts
 
-    def _format_ik_trip_address(self, parts):
-        """Compose a single address string from its individual components."""
-        country = parts.get("country_id")
-        address = self.employee_id._format_ik_address(
-            parts.get("street"), parts.get("zip"), parts.get("city"), country.name if country else False,
-        )
-        _logger.info("IK format_trip_address - parts=%s -> address=%s", parts, address)
+    def _format_ik_trip_address(self, address_type, parts):
+        """
+        Compose a single address string from its individual components.
+
+        For "other" addresses, the street value already holds the full
+        address string selected through the Google autocomplete widget, so
+        it is used as is instead of being recomposed with the country, which
+        would otherwise be duplicated in the resulting address.
+        """
+        if address_type == "other":
+            address = parts.get("street") or ""
+        else:
+            country = parts.get("country_id")
+            address = self.employee_id._format_ik_address(
+                parts.get("street"), parts.get("zip"), parts.get("city"), country.name if country else False,
+            )
+        _logger.info("IK format_trip_address - type=%s parts=%s -> address=%s", address_type, parts, address)
         return address
 
     def _compute_ik_trip_distance(self):
@@ -121,8 +125,8 @@ class HrExpenseMaTripWizard(models.TransientModel):
         )
         origin_parts = self._get_ik_trip_address_parts(self.origin_type, self._get_ik_wizard_address_parts("origin"))
         destination_parts = self._get_ik_trip_address_parts(self.destination_type, self._get_ik_wizard_address_parts("destination"))
-        origin_address = self._format_ik_trip_address(origin_parts)
-        destination_address = self._format_ik_trip_address(destination_parts)
+        origin_address = self._format_ik_trip_address(self.origin_type, origin_parts)
+        destination_address = self._format_ik_trip_address(self.destination_type, destination_parts)
         _logger.info(
             "IK compute_ik_trip_distance - resolved origin=%r destination=%r",
             origin_address, destination_address,
@@ -133,20 +137,6 @@ class HrExpenseMaTripWizard(models.TransientModel):
         if not destination_address:
             _logger.warning("IK compute_ik_trip_distance - missing arrival address")
             raise UserError(_("Please select or enter an arrival address."))
-
-        france = self.env.ref("base.fr")
-        if self.origin_type == "other" and origin_parts.get("country_id") != france:
-            _logger.warning(
-                "IK compute_ik_trip_distance - departure country not France: %s",
-                origin_parts.get("country_id"),
-            )
-            raise UserError(_("Please select a departure address located in France."))
-        if self.destination_type == "other" and destination_parts.get("country_id") != france:
-            _logger.warning(
-                "IK compute_ik_trip_distance - arrival country not France: %s",
-                destination_parts.get("country_id"),
-            )
-            raise UserError(_("Please select an arrival address located in France."))
 
         api_key = self.env["ir.config_parameter"].sudo().get_param("google_address_autocomplete.google_places_api_key")
         if not api_key:
@@ -164,15 +154,11 @@ class HrExpenseMaTripWizard(models.TransientModel):
         if self.origin_type != "other":
             vals.update({
                 "origin_street": origin_parts.get("street"),
-                "origin_city": origin_parts.get("city"),
-                "origin_zip": origin_parts.get("zip"),
                 "origin_country_id": origin_parts.get("country_id").id if origin_parts.get("country_id") else False,
             })
         if self.destination_type != "other":
             vals.update({
                 "destination_street": destination_parts.get("street"),
-                "destination_city": destination_parts.get("city"),
-                "destination_zip": destination_parts.get("zip"),
                 "destination_country_id": destination_parts.get("country_id").id if destination_parts.get("country_id") else False,
             })
         _logger.info("IK compute_ik_trip_distance - writing vals=%s", vals)
@@ -237,8 +223,12 @@ class HrExpenseMaTripWizard(models.TransientModel):
 
         vals = {
             "ik_vehicle_id": self.vehicle_id.id,
-            "ik_origin_address": self._format_ik_trip_address(self._get_ik_wizard_address_parts("origin")),
-            "ik_destination_address": self._format_ik_trip_address(self._get_ik_wizard_address_parts("destination")),
+            "ik_origin_address": self._format_ik_trip_address(
+                self.origin_type, self._get_ik_trip_address_parts(self.origin_type, self._get_ik_wizard_address_parts("origin"))
+            ),
+            "ik_destination_address": self._format_ik_trip_address(
+                self.destination_type, self._get_ik_trip_address_parts(self.destination_type, self._get_ik_wizard_address_parts("destination"))
+            ),
             "ik_google_origin_address": self.google_origin_address,
             "ik_google_destination_address": self.google_destination_address,
             "ik_trip_type": self.trip_type,
@@ -265,10 +255,8 @@ class HrExpenseMaTripWizard(models.TransientModel):
         elif self.employee_id and self.origin_type == "work":
             parts = self.employee_id._get_ik_work_address_parts()
         else:
-            parts = {}
+            parts = {"street": False, "country_id": self.env.company.country_id}
         self.origin_street = parts.get("street", False)
-        self.origin_city = parts.get("city", False)
-        self.origin_zip = parts.get("zip", False)
         self.origin_country_id = parts.get("country_id", False)
         _logger.info("IK onchange_origin_type - resolved parts=%s", parts)
 
@@ -284,9 +272,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
         elif self.employee_id and self.destination_type == "work":
             parts = self.employee_id._get_ik_work_address_parts()
         else:
-            parts = {}
+            parts = {"street": False, "country_id": self.env.company.country_id}
         self.destination_street = parts.get("street", False)
-        self.destination_city = parts.get("city", False)
-        self.destination_zip = parts.get("zip", False)
         self.destination_country_id = parts.get("country_id", False)
         _logger.info("IK onchange_destination_type - resolved parts=%s", parts)
