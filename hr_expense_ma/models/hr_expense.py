@@ -22,6 +22,19 @@ class HrExpense(models.Model):
     ik_new_year_distance = fields.Float(string="New yearly distance (km)", readonly=True, help="Employee yearly mileage after adding this expense distance.",)
     ik_counter_updated = fields.Boolean(string="Mileage counter updated", readonly=True, help="Indicates whether this expense has already updated the employee yearly mileage counter.",)
 
+    def _needs_product_price_computation(self):
+        """
+        Mileage expenses must not use the product standard price.
+
+        The mileage allowance amount is computed from the official scale
+        instead of a fixed product cost, so price_unit must be left to
+        derive from total_amount_currency / quantity (see _compute_price_unit).
+        """
+        self.ensure_one()
+        if self.is_ik_expense:
+            return False
+        return super()._needs_product_price_computation()
+
     def action_open_ik_trip_wizard(self):
         """
         Open the mileage trip wizard from an expense.
@@ -79,12 +92,32 @@ class HrExpense(models.Model):
             ], order="start_date desc", limit=1,)
         _logger.info("IK get_scale - found scale=%s", scale)
         if not scale:
-            _logger.warning("IK get_scale - no scale found for expense=%s", self.id)
-            raise UserError(_("No mileage allowance scale was found."))
+            candidates = self.env["hr.expense.ma.scale"].search([("vehicle_type", "=", vehicle.vehicle_type)])
+            _logger.warning(
+                "IK get_scale - no scale found for expense=%s.\n"
+                "Searched for: date<=%s, vehicle_type=%s, fuel_type=%s, horsepower=%s, yearly_distance=%s.\n"
+                "Existing scales for vehicle_type=%s: %s",
+                self.id, self.date, vehicle.vehicle_type, vehicle.fuel_type, fiscal_power, yearly_distance,
+                vehicle.vehicle_type,
+                [
+                    {
+                        "id": s.id,
+                        "start_date": s.start_date,
+                        "fuel_types": s.fuel_type_ids.mapped("code"),
+                        "horsepower_min": s.horsepower_min,
+                        "horsepower_max": s.horsepower_max,
+                        "distance_min": s.distance_min,
+                        "distance_max": s.distance_max,
+                    }
+                    for s in candidates
+                ] or "none",
+            )
+            raise UserError(_("No mileage allowance scale was found. Please configure at least one mileage allowance scale."))
         return scale
 
-    _IK_TRIP_NOTE_MARKER_START = "--- Mileage trip ---"
-    _IK_TRIP_NOTE_MARKER_END = "--- End mileage trip ---"
+    def _get_ik_trip_note_markers(self):
+        """Return the (start, end) marker lines delimiting the mileage trip report block."""
+        return _("--- Mileage trip ---"), _("--- End mileage trip ---")
 
     def _get_ik_trip_note(self):
         """
@@ -95,9 +128,10 @@ class HrExpense(models.Model):
         trip details visible to regular users as well.
         """
         self.ensure_one()
-        trip_type_label = dict(self._fields["ik_trip_type"].selection).get(self.ik_trip_type, self.ik_trip_type)
+        marker_start, marker_end = self._get_ik_trip_note_markers()
+        trip_type_label = dict(self._fields["ik_trip_type"]._description_selection(self.env)).get(self.ik_trip_type, self.ik_trip_type)
         return "\n".join([
-            self._IK_TRIP_NOTE_MARKER_START,
+            marker_start,
             _("Vehicle: %s", self.ik_vehicle_id.display_name),
             _("Departure address: %s", self.ik_origin_address),
             _("Arrival address: %s", self.ik_destination_address),
@@ -106,14 +140,15 @@ class HrExpense(models.Model):
             _("Mileage scale: %s", self.ik_scale_id.display_name),
             _("Previous yearly distance (km): %.2f", self.ik_previous_year_distance),
             _("New yearly distance (km): %.2f", self.ik_new_year_distance),
-            self._IK_TRIP_NOTE_MARKER_END,
+            marker_end,
         ])
 
     def _update_ik_trip_note(self):
         """Replace the mileage trip report block in the internal notes, keeping any other manual note."""
         self.ensure_one()
+        marker_start, marker_end = self._get_ik_trip_note_markers()
         pattern = re.compile(
-            re.escape(self._IK_TRIP_NOTE_MARKER_START) + r".*?" + re.escape(self._IK_TRIP_NOTE_MARKER_END),
+            re.escape(marker_start) + r".*?" + re.escape(marker_end),
             re.DOTALL,
         )
         note = self.description or ""
@@ -152,7 +187,6 @@ class HrExpense(models.Model):
             "ik_scale_id": new_scale.id,
             "ik_previous_year_distance": previous_distance,
             "ik_new_year_distance": new_distance,
-            "price_unit": amount,
             "quantity": 1,
             "total_amount_currency": amount,
         })

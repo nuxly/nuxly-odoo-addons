@@ -8,7 +8,7 @@ class HrExpenseMaScale(models.Model):
     _order = "start_date desc, vehicle_type, horsepower_min, distance_min"
 
     name = fields.Char(compute="_compute_name", store=True)
-    start_date = fields.Date(string="Start date", required=True, tracking=True, help="Start date of the official mileage allowance scale. During calculation, the latest scale with a start date lower than or equal to the expense date will be used.")    
+    start_date = fields.Date(string="Start date", required=True, tracking=True, help="Start date of the official mileage allowance scale. During calculation, the latest scale with a start date lower than or equal to the expense date will be used.")
     vehicle_type = fields.Selection([("car", "Car"), ("motorcycle", "Motorcycle")], string="Vehicle type", required=True, tracking=True, help="Vehicle type covered by this scale line. It must match the vehicle type defined on the Fleet vehicle model.")
     fuel_type_ids = fields.Many2many("hr.expense.ma.fuel.type", string="Fuel types", tracking=True, help="Fleet fuel types covered by this scale line. Values are synchronized from the Fleet vehicle model fuel type selection.")    
     horsepower_min = fields.Integer(string="Minimum fiscal power", required=True, tracking=True, help="Minimum fiscal power, in CV, covered by this scale line.")

@@ -148,11 +148,6 @@ msgid "Coefficient"
 msgstr "Coefficient"
 
 #. module: hr_expense_ma
-#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
-msgid "Compute Distance"
-msgstr "Calculer la distance"
-
-#. module: hr_expense_ma
 #: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__distance
 msgid "Computed distance in kilometers."
 msgstr "Distance calculée en kilomètres."
@@ -259,11 +254,6 @@ msgstr "Code postal de départ utilisé pour calculer la distance du trajet."
 #: model:ir.model.fields,field_description:hr_expense_ma.field_product_product__display_name
 msgid "Display Name"
 msgstr "Nom d'affichage"
-
-#. module: hr_expense_ma
-#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
-msgid "Distance"
-msgstr "Distance"
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__distance
@@ -985,3 +975,15 @@ msgstr "Distance annuelle précédente (km) : %.2f"
 #: code:addons/hr_expense_ma/models/hr_expense.py:0
 msgid "New yearly distance (km): %.2f"
 msgstr "Nouvelle distance annuelle (km) : %.2f"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "--- Mileage trip ---"
+msgstr "--- Trajet kilométrique ---"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "--- End mileage trip ---"
+msgstr "--- Fin du trajet kilométrique ---"

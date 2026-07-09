@@ -40,20 +40,9 @@
                         <field name="destination_zip" string="Zip" readonly="destination_type != 'other'"/>
                         <field name="destination_country_id" string="Country" readonly="destination_type != 'other'"/>
                     </group>
-                    <group string="Distance">
-                        <field name="distance"/>
-                        <field name="google_origin_address"/>
-                        <field name="google_destination_address"/>
-                    </group>
                 </sheet>
 
                 <footer>
-                    <button
-                        name="action_compute_distance"
-                        type="object"
-                        string="Compute Distance"
-                        class="btn-secondary"/>
-
                     <button
                         name="action_apply"
                         type="object"

@@ -106,7 +106,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
         _logger.info("IK format_trip_address - parts=%s -> address=%s", parts, address)
         return address
 
-    def action_compute_distance(self):
+    def _compute_ik_trip_distance(self):
         """
         Compute the trip distance using Google Distance Matrix API.
 
@@ -116,7 +116,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
         """
         self.ensure_one()
         _logger.info(
-            "IK action_compute_distance - start wizard=%s origin_type=%s destination_type=%s trip_type=%s",
+            "IK compute_ik_trip_distance - start wizard=%s origin_type=%s destination_type=%s trip_type=%s",
             self.id, self.origin_type, self.destination_type, self.trip_type,
         )
         origin_parts = self._get_ik_trip_address_parts(self.origin_type, self._get_ik_wizard_address_parts("origin"))
@@ -124,38 +124,38 @@ class HrExpenseMaTripWizard(models.TransientModel):
         origin_address = self._format_ik_trip_address(origin_parts)
         destination_address = self._format_ik_trip_address(destination_parts)
         _logger.info(
-            "IK action_compute_distance - resolved origin=%r destination=%r",
+            "IK compute_ik_trip_distance - resolved origin=%r destination=%r",
             origin_address, destination_address,
         )
         if not origin_address:
-            _logger.warning("IK action_compute_distance - missing departure address")
+            _logger.warning("IK compute_ik_trip_distance - missing departure address")
             raise UserError(_("Please select or enter a departure address."))
         if not destination_address:
-            _logger.warning("IK action_compute_distance - missing arrival address")
+            _logger.warning("IK compute_ik_trip_distance - missing arrival address")
             raise UserError(_("Please select or enter an arrival address."))
 
         france = self.env.ref("base.fr")
         if self.origin_type == "other" and origin_parts.get("country_id") != france:
             _logger.warning(
-                "IK action_compute_distance - departure country not France: %s",
+                "IK compute_ik_trip_distance - departure country not France: %s",
                 origin_parts.get("country_id"),
             )
             raise UserError(_("Please select a departure address located in France."))
         if self.destination_type == "other" and destination_parts.get("country_id") != france:
             _logger.warning(
-                "IK action_compute_distance - arrival country not France: %s",
+                "IK compute_ik_trip_distance - arrival country not France: %s",
                 destination_parts.get("country_id"),
             )
             raise UserError(_("Please select an arrival address located in France."))
 
         api_key = self.env["ir.config_parameter"].sudo().get_param("google_address_autocomplete.google_places_api_key")
         if not api_key:
-            _logger.warning("IK action_compute_distance - missing Google Places API key")
+            _logger.warning("IK compute_ik_trip_distance - missing Google Places API key")
             raise UserError(_("Please configure the Google Places API key in the general settings."))
 
         data = self._get_google_distance(api_key, origin_address, destination_address)
         distance = data["distance_km"] * (2 if self.trip_type == "round_trip" else 1)
-        _logger.info("IK action_compute_distance - computed distance=%s km (trip_type=%s)", distance, self.trip_type)
+        _logger.info("IK compute_ik_trip_distance - computed distance=%s km (trip_type=%s)", distance, self.trip_type)
         vals = {
             "distance": distance,
             "google_origin_address": data["origin_address"],
@@ -175,17 +175,8 @@ class HrExpenseMaTripWizard(models.TransientModel):
                 "destination_zip": destination_parts.get("zip"),
                 "destination_country_id": destination_parts.get("country_id").id if destination_parts.get("country_id") else False,
             })
-        _logger.info("IK action_compute_distance - writing vals=%s", vals)
+        _logger.info("IK compute_ik_trip_distance - writing vals=%s", vals)
         self.write(vals)
-
-        return {
-            "type": "ir.actions.act_window",
-            "name": _("Mileage Trip"),
-            "res_model": self._name,
-            "res_id": self.id,
-            "view_mode": "form",
-            "target": "new",
-        }
 
     def _get_google_distance(self, api_key, origin_address, destination_address):
         """
@@ -234,17 +225,15 @@ class HrExpenseMaTripWizard(models.TransientModel):
 
     def action_apply(self):
         """
-        Apply the computed trip information on the expense.
+        Compute the trip distance and apply it on the expense in a single step.
 
         Wizard records are temporary, so all data required for accounting,
         validation and later mileage allowance calculation must be stored on
         the related expense before closing the wizard.
         """
         self.ensure_one()
+        self._compute_ik_trip_distance()
         _logger.info("IK action_apply - start wizard=%s distance=%s", self.id, self.distance)
-        if not self.distance:
-            _logger.warning("IK action_apply - distance not computed yet")
-            raise UserError(_("Please compute the distance before applying the trip."))
 
         vals = {
             "ik_vehicle_id": self.vehicle_id.id,
@@ -262,6 +251,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
             "IK action_apply - done expense=%s ik_scale_id=%s price_unit=%s",
             self.expense_id.id, self.expense_id.ik_scale_id, self.expense_id.price_unit,
         )
+        return {"type": "ir.actions.act_window_close"}
 
     @api.onchange("origin_type")
     def _onchange_origin_type(self):
