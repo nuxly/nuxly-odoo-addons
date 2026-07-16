@@ -32,9 +32,20 @@
                             placeholder="Arrival address"
                             readonly="destination_type != 'other'"/>
                     </group>
+                    <group string="Distance" invisible="not distance">
+                        <field name="distance"/>
+                        <field name="google_origin_address"/>
+                        <field name="google_destination_address"/>
+                    </group>
                 </sheet>
 
                 <footer>
+                    <button
+                        name="action_compute_distance"
+                        type="object"
+                        string="Compute Distance"
+                        class="btn-secondary"/>
+
                     <button
                         name="action_apply"
                         type="object"

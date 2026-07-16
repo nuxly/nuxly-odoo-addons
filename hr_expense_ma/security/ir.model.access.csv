@@ -4,3 +4,4 @@ access_hr_expense_ma_scale_manager,hr.expense.ma.scale.manager,model_hr_expense_
 access_hr_expense_ma_fuel_type_user,hr.expense.ma.fuel.type.user,model_hr_expense_ma_fuel_type,hr_expense.group_hr_expense_team_approver,1,0,0,0
 access_hr_expense_ma_fuel_type_manager,hr.expense.ma.fuel.type.manager,model_hr_expense_ma_fuel_type,hr_expense.group_hr_expense_manager,1,1,1,1
 access_hr_expense_ma_trip_wizard,hr.expense.ma.trip.wizard,model_hr_expense_ma_trip_wizard,base.group_user,1,1,1,1
+access_fleet_vehicle_user_hr_expense_ma,fleet.vehicle.user.hr_expense_ma,fleet.model_fleet_vehicle,base.group_user,1,0,0,0

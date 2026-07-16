@@ -543,8 +543,8 @@ msgstr "Assistant de trajet pour indemnité kilométrique"
 #. module: hr_expense_ma
 #. odoo-python
 #: code:addons/hr_expense_ma/models/hr_expense.py:0
-msgid "Mileage counter for %(year)s reverted: -%(distance).2f km (new yearly total: %(total).2f km), following expense %(expense)s leaving the validated state (now: %(state)s)."
-msgstr "Compteur kilométrique %(year)s décrémenté : -%(distance).2f km (nouveau total annuel : %(total).2f km), suite à la sortie de la dépense %(expense)s de l'état validé (désormais : %(state)s)."
+msgid "Mileage counter for %(year)s reverted: -%(distance).2f km (new yearly total: %(total).2f km), following the reset of expense %(expense)s (now: %(state)s)."
+msgstr "Compteur kilométrique %(year)s décrémenté : -%(distance).2f km (nouveau total annuel : %(total).2f km), suite à la réinitialisation de la dépense %(expense)s (désormais : %(state)s)."
 
 #. module: hr_expense_ma
 #. odoo-python

@@ -204,9 +204,29 @@ class HrExpenseMaTripWizard(models.TransientModel):
         _logger.info("IK get_google_distance - parsed data=%s", data)
         return data
 
+    def action_compute_distance(self):
+        """
+        Compute the trip distance and display it on the wizard without applying it.
+
+        This lets the employee preview the distance before committing, while
+        action_apply remains available to compute and apply in a single step
+        for those who do not need to check the details first.
+        """
+        self.ensure_one()
+        self._compute_ik_trip_distance()
+        _logger.info("IK action_compute_distance - wizard=%s distance=%s", self.id, self.distance)
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Mileage Trip"),
+            "res_model": self._name,
+            "res_id": self.id,
+            "view_mode": "form",
+            "target": "new",
+        }
+
     def action_apply(self):
         """
-        Compute the trip distance and apply it on the expense in a single step.
+        Compute the trip distance (if not already computed) and apply it on the expense.
 
         Wizard records are temporary, so all data required for accounting,
         validation and later mileage allowance calculation must be stored on

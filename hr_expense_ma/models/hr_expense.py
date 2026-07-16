@@ -70,13 +70,16 @@ class HrExpense(models.Model):
     def _get_ik_scale(self, yearly_distance):
         """Find the mileage scale matching the expense context."""
         self.ensure_one()
-        vehicle = self.ik_vehicle_id
+        # hr.expense.ma.scale is only readable by expense approvers (see
+        # ir.model.access.csv), but any employee must be able to compute
+        # their own mileage expense, so the scale is looked up in sudo.
+        vehicle = self.ik_vehicle_id.sudo()
         fiscal_power = vehicle.horsepower
         _logger.info(
             "IK get_scale - expense=%s vehicle=%s vehicle_type=%s fuel_type=%s fiscal_power=%s yearly_distance=%s",
             self.id, vehicle, vehicle.vehicle_type, vehicle.fuel_type, fiscal_power, yearly_distance,
         )
-        scale = self.env["hr.expense.ma.scale"].search(
+        scale = self.env["hr.expense.ma.scale"].sudo().search(
             [
                 ("start_date", "<=", self.date),
                 ("vehicle_type", "=", vehicle.vehicle_type),
@@ -92,7 +95,7 @@ class HrExpense(models.Model):
             ], order="start_date desc", limit=1,)
         _logger.info("IK get_scale - found scale=%s", scale)
         if not scale:
-            candidates = self.env["hr.expense.ma.scale"].search([("vehicle_type", "=", vehicle.vehicle_type)])
+            candidates = self.env["hr.expense.ma.scale"].sudo().search([("vehicle_type", "=", vehicle.vehicle_type)])
             _logger.warning(
                 "IK get_scale - no scale found for expense=%s.\n"
                 "Searched for: date<=%s, vehicle_type=%s, fuel_type=%s, horsepower=%s, yearly_distance=%s.\n"
@@ -174,8 +177,10 @@ class HrExpense(models.Model):
         self.ensure_one()
         _logger.info("IK compute_ik_amount - start expense=%s distance=%s", self.id, self.ik_distance)
         year = self._get_ik_counter_year()
+        # ik_km_by_year is restricted to hr.group_hr_user, but any employee
+        # must be able to compute their own mileage expense.
         previous_distance = (
-            self.employee_id.ik_km_by_year or {}
+            self.employee_id.sudo().ik_km_by_year or {}
         ).get(str(year), 0)
         new_distance = previous_distance + self.ik_distance
         _logger.info(
@@ -206,7 +211,7 @@ class HrExpense(models.Model):
         """Increment the employee yearly mileage counter once an IK expense reaches a counted state."""
         for expense in self.filtered(lambda e: e.is_ik_expense and not e.ik_counter_updated):
             year = expense._get_ik_counter_year()
-            data = dict(expense.employee_id.ik_km_by_year or {})
+            data = dict(expense.employee_id.sudo().ik_km_by_year or {})
             data[str(year)] = (
                 data.get(str(year), 0) + expense.ik_distance)
             _logger.info(
@@ -237,7 +242,7 @@ class HrExpense(models.Model):
         for expense in self.filtered(lambda e: e.is_ik_expense and e.ik_counter_updated):
             year = previous_years[expense.id]
             distance = previous_distances[expense.id]
-            data = dict(expense.employee_id.ik_km_by_year or {})
+            data = dict(expense.employee_id.sudo().ik_km_by_year or {})
             data[str(year)] = data.get(str(year), 0) - distance
             _logger.info(
                 "IK revert_ik_employee_counter - expense=%s employee=%s year=%s new_total=%s",
@@ -248,7 +253,7 @@ class HrExpense(models.Model):
             state_label = dict(expense._fields["state"]._description_selection(expense.env)).get(expense.state, expense.state)
             expense.employee_id.sudo().message_post(
                 body=_(
-                    "Mileage counter for %(year)s reverted: -%(distance).2f km (new yearly total: %(total).2f km), following expense %(expense)s leaving the validated state (now: %(state)s).",
+                    "Mileage counter for %(year)s reverted: -%(distance).2f km (new yearly total: %(total).2f km), following the reset of expense %(expense)s (now: %(state)s).",
                     year=year,
                     distance=distance,
                     total=data[str(year)],
