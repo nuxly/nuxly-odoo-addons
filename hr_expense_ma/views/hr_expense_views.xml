@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="hr_expense_form_view_inherit_hr_expense_ma" model="ir.ui.view">
+        <field name="name">hr.expense.form.inherit.hr.expense.ma</field>
+        <field name="model">hr.expense</field>
+        <field name="inherit_id" ref="hr_expense.hr_expense_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="is_ik_expense" invisible="1"/>
+
+                <button
+                    name="action_open_ik_trip_wizard"
+                    type="object"
+                    string="Enter Mileage Trip"
+                    class="btn-primary"
+                    invisible="not is_ik_expense"/>
+            </xpath>
+
+            <xpath expr="//sheet" position="inside">
+
+                <group string="Mileage Trip" invisible="not is_ik_expense" groups="base.group_no_one">
+
+                    <field name="ik_vehicle_id" readonly="1"/>
+                    <field name="ik_origin_address" readonly="1"/>
+                    <field name="ik_destination_address" readonly="1"/>
+
+                    <field name="ik_google_origin_address" readonly="1"/>
+                    <field name="ik_google_destination_address" readonly="1"/>
+
+                    <field name="ik_trip_type" readonly="1"/>
+                    <field name="ik_distance" readonly="1"/>
+
+                    <field name="ik_scale_id" readonly="1"/>
+                    <field name="ik_previous_year_distance" readonly="1"/>
+                    <field name="ik_new_year_distance" readonly="1"/>
+                    <field name="ik_counter_updated" readonly="1"/>
+
+                </group>
+
+            </xpath>
+
+            <xpath expr="//field[@name='quantity']" position="attributes">
+                <attribute name="readonly">not is_editable or is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='tax_ids']" position="attributes">
+                <attribute name="readonly">not is_editable or is_ik_expense</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

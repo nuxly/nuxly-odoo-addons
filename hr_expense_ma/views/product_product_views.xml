@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_product_form_view_inherit_hr_expense_ma" model="ir.ui.view">
+        <field name="name">product.product.form.inherit.hr.expense.ma</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="hr_expense.product_product_expense_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="is_ik_expense"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

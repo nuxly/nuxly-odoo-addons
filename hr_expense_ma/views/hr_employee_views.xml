@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_employee_form_view_inherit_hr_expense_ma" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.hr.expense.ma</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='hr_document_group']" position="after">
+                <group string="Mileage Allowance" name="hr_mileage_allowance_group">
+                    <field name="ik_km_by_year" invisible="1"/>
+                    <field name="ik_km_by_year_display" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

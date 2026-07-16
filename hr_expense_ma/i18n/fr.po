@@ -1,0 +1,987 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hr_expense_ma
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e-20260619\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-02 07:17+0000\n"
+"PO-Revision-Date: 2026-07-08 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_form_view
+msgid "<strong>How it works</strong>"
+msgstr "<strong>Fonctionnement</strong>"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_needaction
+msgid "Action Needed"
+msgstr "Action requise"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_ids
+msgid "Activities"
+msgstr "Activités"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Décoration d'exception d'activité"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_state
+msgid "Activity State"
+msgstr "Statut de l'activité"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icône du type d'activité"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Apply"
+msgstr "Appliquer"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Arrival"
+msgstr "Arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_destination_address
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Arrival address"
+msgstr "Adresse d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_destination_address
+msgid "Arrival address entered by the employee in the mileage trip wizard."
+msgstr "Adresse d'arrivée saisie par l'employé dans l'assistant de trajet kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_google_destination_address
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__google_destination_address
+msgid "Arrival address normalized and returned by the Google Maps API."
+msgstr "Adresse d'arrivée normalisée et renvoyée par l'API Google Maps."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_city
+msgid "Arrival city"
+msgstr "Ville d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_city
+msgid "Arrival city used to compute the trip distance."
+msgstr "Ville d'arrivée utilisée pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_country_id
+msgid "Arrival country"
+msgstr "Pays d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_street
+msgid "Arrival street"
+msgstr "Rue d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_street
+msgid "Arrival street used to compute the trip distance."
+msgstr "Rue d'arrivée utilisée pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_type
+msgid "Arrival type"
+msgstr "Type d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_zip
+msgid "Arrival zip"
+msgstr "Code postal d'arrivée"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_zip
+msgid "Arrival zip code used to compute the trip distance."
+msgstr "Code postal d'arrivée utilisé pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_attachment_count
+msgid "Attachment Count"
+msgstr "Nombre de pièces jointes"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__available_vehicle_ids
+msgid "Available Vehicle"
+msgstr "Véhicule disponible"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Cancel"
+msgstr "Annuler"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_scale__vehicle_type__car
+msgid "Car"
+msgstr "Voiture"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "City"
+msgstr "Ville"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__code
+msgid "Code"
+msgstr "Code"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__coefficient
+msgid "Coefficient"
+msgstr "Coefficient"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Compute Distance"
+msgstr "Calculer la distance"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__distance
+msgid "Computed distance in kilometers."
+msgstr "Distance calculée en kilomètres."
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Country"
+msgstr "Pays"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_country_id
+msgid "Country of the arrival address. Must be France when the address is entered manually."
+msgstr "Pays de l'adresse d'arrivée. Doit être la France lorsque l'adresse est saisie manuellement."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_country_id
+msgid "Country of the departure address. Must be France when the address is entered manually."
+msgstr "Pays de l'adresse de départ. Doit être la France lorsque l'adresse est saisie manuellement."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__create_uid
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__create_uid
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__create_date
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__create_date
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Departure"
+msgstr "Départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_origin_address
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Departure address"
+msgstr "Adresse de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_origin_address
+msgid "Departure address entered by the employee in the mileage trip wizard."
+msgstr "Adresse de départ saisie par l'employé dans l'assistant de trajet kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_google_origin_address
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__google_origin_address
+msgid "Departure address normalized and returned by the Google Maps API."
+msgstr "Adresse de départ normalisée et renvoyée par l'API Google Maps."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_city
+msgid "Departure city"
+msgstr "Ville de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_city
+msgid "Departure city used to compute the trip distance."
+msgstr "Ville de départ utilisée pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_country_id
+msgid "Departure country"
+msgstr "Pays de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_street
+msgid "Departure street"
+msgstr "Rue de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_street
+msgid "Departure street used to compute the trip distance."
+msgstr "Rue de départ utilisée pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_type
+msgid "Departure type"
+msgstr "Type de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_zip
+msgid "Departure zip"
+msgstr "Code postal de départ"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_zip
+msgid "Departure zip code used to compute the trip distance."
+msgstr "Code postal de départ utilisé pour calculer la distance du trajet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle__display_name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle_model__display_name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__display_name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__display_name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__display_name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__display_name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_product_product__display_name
+msgid "Display Name"
+msgstr "Nom d'affichage"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Distance"
+msgstr "Distance"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__distance
+msgid "Distance (km)"
+msgstr "Distance (km)"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_distance
+msgid "Distance in kilometers used for the mileage allowance calculation."
+msgstr "Distance en kilomètres utilisée pour le calcul de l'indemnité kilométrique."
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_form_view
+msgid ""
+"Each line represents one official mileage allowance scale range.\n"
+"                            During calculation, the system will use the latest scale whose start date is lower than or equal to the expense date."
+msgstr ""
+"Chaque ligne représente une tranche officielle du barème kilométrique.\n"
+"                            Lors du calcul, le système utilisera le barème le plus récent dont la date d'effet est inférieure ou égale à la date de la dépense."
+
+#. module: hr_expense_ma
+#: model:ir.model,name:hr_expense_ma.model_hr_employee
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__employee_id
+msgid "Employee"
+msgstr "Employé"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__employee_id
+msgid "Employee linked to the expense."
+msgstr "Employé lié à la dépense."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_new_year_distance
+msgid "Employee yearly mileage after adding this expense distance."
+msgstr "Kilométrage annuel de l'employé après ajout de la distance de cette dépense."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_previous_year_distance
+msgid "Employee yearly mileage before this expense."
+msgstr "Kilométrage annuel de l'employé avant cette dépense."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_product_product__is_ik_expense
+msgid ""
+"Enable this option to identify this product as a mileage allowance expense."
+msgstr "Activez cette option pour identifier ce produit comme une dépense d'indemnité kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_fleet_vehicle__is_personal_vehicle
+msgid ""
+"Enable this option when the vehicle is personally owned by the employee and "
+"can be used for mileage allowance expenses."
+msgstr ""
+"Activez cette option lorsque le véhicule est la propriété personnelle de "
+"l'employé et peut être utilisé pour les indemnités kilométriques."
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_form_view_inherit_hr_expense_ma
+msgid "Enter Mileage Trip"
+msgstr "Saisir un trajet kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model,name:hr_expense_ma.model_hr_expense
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__expense_id
+msgid "Expense"
+msgstr "Dépense"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__expense_id
+msgid "Expense on which the mileage trip data will be applied."
+msgstr "Dépense sur laquelle les données du trajet kilométrique seront appliquées."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__fixed_amount
+msgid "Fixed amount"
+msgstr "Montant fixe"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__fixed_amount
+msgid "Fixed amount added to the mileage calculation for this scale line."
+msgstr "Montant fixe ajouté au calcul kilométrique pour cette ligne de barème."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__fuel_type_ids
+msgid ""
+"Fleet fuel types covered by this scale line. Values are synchronized from "
+"the Fleet vehicle model fuel type selection."
+msgstr ""
+"Types de carburant Fleet couverts par cette ligne de barème. Les valeurs "
+"sont synchronisées depuis la sélection des types de carburant du modèle de "
+"véhicule Fleet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_follower_ids
+msgid "Followers"
+msgstr "Abonnés"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Abonnés (Partenaires)"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icône Font Awesome, ex. fa-tasks"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_form_view
+msgid "Formula"
+msgstr "Formule"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__fuel_type_ids
+msgid "Fuel types"
+msgstr "Types de carburant"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Google Maps API error: %s"
+msgstr "Erreur de l'API Google Maps : %s"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_google_destination_address
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__google_destination_address
+msgid "Google arrival address"
+msgstr "Adresse d'arrivée Google"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_google_origin_address
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__google_origin_address
+msgid "Google departure address"
+msgstr "Adresse de départ Google"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__has_message
+msgid "Has Message"
+msgstr "A un message"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__destination_type__home
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__origin_type__home
+msgid "Home"
+msgstr "Domicile"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle__id
+#: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle_model__id
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_employee__id
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__id
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__id
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__id
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__id
+#: model:ir.model.fields,field_description:hr_expense_ma.field_product_product__id
+msgid "ID"
+msgstr "ID"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_exception_icon
+msgid "Icon"
+msgstr "Icône"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Icône pour indiquer une activité d'exception."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si coché, de nouveaux messages nécessitent votre attention."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__message_has_error
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si coché, certains messages ont une erreur d'envoi."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_trip_type
+msgid "Indicates whether the mileage trip is one way or round trip."
+msgstr "Indique si le trajet kilométrique est un aller simple ou un aller-retour."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__is_ik_expense
+msgid ""
+"Indicates whether the selected expense product is configured as a mileage "
+"allowance product."
+msgstr ""
+"Indique si le produit de dépense sélectionné est configuré comme un "
+"produit d'indemnité kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_counter_updated
+msgid ""
+"Indicates whether this expense has already updated the employee yearly "
+"mileage counter."
+msgstr ""
+"Indique si cette dépense a déjà mis à jour le compteur kilométrique annuel "
+"de l'employé."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_is_follower
+msgid "Is Follower"
+msgstr "Est abonné"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__write_uid
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__write_uid
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__write_uid
+msgid "Last Updated by"
+msgstr "Dernière mise à jour par"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__write_date
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__write_date
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__write_date
+msgid "Last Updated on"
+msgstr "Dernière mise à jour le"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__distance_max
+msgid "Maximum distance"
+msgstr "Distance maximale"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__horsepower_max
+msgid "Maximum fiscal power"
+msgstr "Puissance fiscale maximale"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__horsepower_max
+msgid ""
+"Maximum fiscal power, in CV, covered by this scale line. Leave empty for "
+"open-ended ranges, such as 7 CV and more."
+msgstr ""
+"Puissance fiscale maximale, en CV, couverte par cette ligne de barème. "
+"Laisser vide pour les tranches ouvertes, comme 7 CV et plus."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__distance_max
+msgid ""
+"Maximum yearly mileage distance, in kilometers, covered by this scale line. "
+"Leave empty for open-ended ranges, such as more than 20,000 km."
+msgstr ""
+"Distance kilométrique annuelle maximale, en kilomètres, couverte par cette "
+"ligne de barème. Laisser vide pour les tranches ouvertes, comme plus de "
+"20 000 km."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_has_error
+msgid "Message Delivery error"
+msgstr "Erreur d'envoi de message"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_ids
+msgid "Messages"
+msgstr "Messages"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_employee_form_view_inherit_hr_expense_ma
+msgid "Mileage Allowance"
+msgstr "Indemnités kilométriques"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_form_view_inherit_hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Mileage Trip"
+msgstr "Trajet kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__is_ik_expense
+#: model:ir.model.fields,field_description:hr_expense_ma.field_product_product__is_ik_expense
+msgid "Mileage allowance"
+msgstr "Indemnité kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model,name:hr_expense_ma.model_hr_expense_ma_fuel_type
+msgid "Mileage allowance fuel type"
+msgstr "Type de carburant pour indemnité kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_employee__ik_km_by_year
+msgid "Mileage allowance kilometers by year"
+msgstr "Kilomètres d'indemnité kilométrique par année"
+
+#. module: hr_expense_ma
+#: model:ir.actions.act_window,name:hr_expense_ma.hr_expense_ma_scale_action
+#: model:ir.model,name:hr_expense_ma.model_hr_expense_ma_scale
+#: model:ir.ui.menu,name:hr_expense_ma.hr_expense_ma_scale_menu
+msgid "Mileage allowance scale"
+msgstr "Barème kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_scale_id
+msgid "Mileage allowance scale used to compute this expense."
+msgstr "Barème kilométrique utilisé pour calculer cette dépense."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_employee__ik_km_by_year_display
+msgid "Mileage allowance summary"
+msgstr "Résumé de l'indemnité kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model,name:hr_expense_ma.model_hr_expense_ma_trip_wizard
+msgid "Mileage allowance trip wizard"
+msgstr "Assistant de trajet pour indemnité kilométrique"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage counter for %(year)s updated: +%(distance).2f km (new yearly total: %(total).2f km), from expense: %(expense)s."
+msgstr "Compteur kilométrique %(year)s mis à jour : +%(distance).2f km (nouveau total annuel : %(total).2f km), depuis la dépense : %(expense)s."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_counter_updated
+msgid "Mileage counter updated"
+msgstr "Compteur kilométrique mis à jour"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_distance
+msgid "Mileage distance (km)"
+msgstr "Distance kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_scale_id
+msgid "Mileage scale"
+msgstr "Barème kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_vehicle_id
+msgid "Mileage vehicle"
+msgstr "Véhicule kilométrique"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__distance_min
+msgid "Minimum distance"
+msgstr "Distance minimale"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__horsepower_min
+msgid "Minimum fiscal power"
+msgstr "Puissance fiscale minimale"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__horsepower_min
+msgid "Minimum fiscal power, in CV, covered by this scale line."
+msgstr "Puissance fiscale minimale, en CV, couverte par cette ligne de barème."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__distance_min
+msgid ""
+"Minimum yearly mileage distance, in kilometers, covered by this scale line."
+msgstr ""
+"Distance kilométrique annuelle minimale, en kilomètres, couverte par cette "
+"ligne de barème."
+
+#. module: hr_expense_ma
+#: model:ir.model,name:hr_expense_ma.model_fleet_vehicle_model
+msgid "Model of a vehicle"
+msgstr "Modèle d'un véhicule"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__fleet_vehicle_model__vehicle_type__motorcycle
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_scale__vehicle_type__motorcycle
+msgid "Motorcycle"
+msgstr "Moto"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__coefficient
+msgid "Multiplier applied to the mileage distance for this scale line."
+msgstr "Multiplicateur appliqué à la distance kilométrique pour cette ligne de barème."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Échéance de mon activité"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__name
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_new_year_distance
+msgid "New yearly distance (km)"
+msgstr "Nouvelle distance annuelle (km)"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Échéance de l'activité suivante"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_summary
+msgid "Next Activity Summary"
+msgstr "Résumé de l'activité suivante"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_type_id
+msgid "Next Activity Type"
+msgstr "Type d'activité suivante"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid ""
+"No mileage allowance scale was found. Please configure at least one mileage "
+"allowance scale."
+msgstr ""
+"Aucun barème kilométrique n'a été trouvé. Veuillez configurer au moins un "
+"barème kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Nombre d'actions"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_has_error_counter
+msgid "Number of errors"
+msgstr "Nombre d'erreurs"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Nombre de messages nécessitant une action"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Nombre de messages avec une erreur d'envoi"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense__ik_trip_type__one_way
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__trip_type__one_way
+msgid "One way"
+msgstr "Aller simple"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__destination_type__other
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__origin_type__other
+msgid "Other"
+msgstr "Autre"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle__is_personal_vehicle
+msgid "Personal vehicle"
+msgstr "Véhicule personnel"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__vehicle_id
+msgid "Personal vehicle used for the mileage allowance trip."
+msgstr "Véhicule personnel utilisé pour le trajet kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__available_vehicle_ids
+msgid "Personal vehicles available for the employee."
+msgstr "Véhicules personnels disponibles pour l'employé."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please compute the distance before applying the trip."
+msgstr "Veuillez calculer la distance avant d'appliquer le trajet."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please configure the Google Places API key in the general settings."
+msgstr "Veuillez configurer la clé API Google Places dans les paramètres généraux."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please select a departure address located in France."
+msgstr "Veuillez sélectionner une adresse de départ située en France."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please select an arrival address located in France."
+msgstr "Veuillez sélectionner une adresse d'arrivée située en France."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Please select an employee before entering a mileage trip."
+msgstr "Veuillez sélectionner un employé avant de saisir un trajet kilométrique."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please select or enter a departure address."
+msgstr "Veuillez sélectionner ou saisir une adresse de départ."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Please select or enter an arrival address."
+msgstr "Veuillez sélectionner ou saisir une adresse d'arrivée."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_previous_year_distance
+msgid "Previous yearly distance (km)"
+msgstr "Kilométrage annuel précédent"
+
+#. module: hr_expense_ma
+#: model:ir.model,name:hr_expense_ma.model_product_product
+msgid "Product Variant"
+msgstr "Variante de produit"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__activity_user_id
+msgid "Responsible User"
+msgstr "Utilisateur responsable"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense__ik_trip_type__round_trip
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__trip_type__round_trip
+msgid "Round trip"
+msgstr "Aller-retour"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Erreur d'envoi SMS"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__trip_type
+msgid "Select whether the trip is one way or round trip."
+msgstr "Sélectionnez si le trajet est un aller simple ou un aller-retour."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__start_date
+msgid "Start date"
+msgstr "Date d'effet"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__start_date
+msgid ""
+"Start date of the official mileage allowance scale. During calculation, the "
+"latest scale with a start date lower than or equal to the expense date will "
+"be used."
+msgstr ""
+"Date d'effet du barème officiel d'indemnité kilométrique. Lors du calcul, "
+"le barème le plus récent dont la date d'effet est inférieure ou égale à la "
+"date de la dépense sera utilisé."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Statut basé sur les activités\n"
+"En retard : la date d'échéance est déjà dépassée\n"
+"Aujourd'hui : la date de l'activité est aujourd'hui\n"
+"Planifiée : activités futures."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_employee__ik_km_by_year
+msgid ""
+"Stores the employee yearly mileage allowance kilometers as a dictionary "
+"keyed by year."
+msgstr ""
+"Stocke les kilomètres d'indemnité kilométrique annuels de l'employé sous "
+"forme de dictionnaire indexé par année."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_type
+msgid "Suggested source used to fill the arrival address."
+msgstr "Source suggérée utilisée pour remplir l'adresse d'arrivée."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_type
+msgid "Suggested source used to fill the departure address."
+msgstr "Source suggérée utilisée pour remplir l'adresse de départ."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_fuel_type__code
+msgid "Technical code matching the Fleet vehicle model fuel type selection."
+msgstr "Code technique correspondant à la sélection du type de carburant du modèle de véhicule Fleet."
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_form_view
+msgid ""
+"The mileage allowance is not calculated progressively by range.\n"
+"                            The annual employee mileage after adding the current expense determines the applicable range."
+msgstr ""
+"L'indemnité kilométrique n'est pas calculée progressivement par tranche.\n"
+"                            Le kilométrage annuel de l'employé après ajout de la dépense en cours détermine la tranche applicable."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "This expense is not a mileage allowance expense."
+msgstr "Cette dépense n'est pas une dépense d'indemnité kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_trip_type
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__trip_type
+msgid "Trip type"
+msgstr "Type de trajet"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Type de l'activité d'exception enregistrée."
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
+msgid "Unable to compute the distance for this trip: %s"
+msgstr "Impossible de calculer la distance pour ce trajet : %s"
+
+#. module: hr_expense_ma
+#: model:ir.model,name:hr_expense_ma.model_fleet_vehicle
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__vehicle_id
+msgid "Vehicle"
+msgstr "Véhicule"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle_model__vehicle_type
+msgid "Vehicle Type"
+msgstr "Type de véhicule"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__vehicle_type
+msgid "Vehicle type"
+msgstr "Type de véhicule"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__vehicle_type
+msgid ""
+"Vehicle type covered by this scale line. It must match the vehicle type "
+"defined on the Fleet vehicle model."
+msgstr ""
+"Type de véhicule couvert par cette ligne de barème. Il doit correspondre "
+"au type de véhicule défini sur le modèle de véhicule Fleet."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_vehicle_id
+msgid "Vehicle used for the mileage allowance trip."
+msgstr "Véhicule utilisé pour le trajet kilométrique."
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__website_message_ids
+msgid "Website Messages"
+msgstr "Messages du site web"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__website_message_ids
+msgid "Website communication history"
+msgstr "Historique de communication du site web"
+
+#. module: hr_expense_ma
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__destination_type__work
+#: model:ir.model.fields.selection,name:hr_expense_ma.selection__hr_expense_ma_trip_wizard__origin_type__work
+msgid "Work"
+msgstr "Travail"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Zip"
+msgstr "Code postal"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Vehicle: %s"
+msgstr "Véhicule : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Departure address: %s"
+msgstr "Adresse de départ : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Arrival address: %s"
+msgstr "Adresse d'arrivée : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Trip type: %s"
+msgstr "Type de trajet : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage distance (km): %.2f"
+msgstr "Distance kilométrique (km) : %.2f"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage scale: %s"
+msgstr "Barème kilométrique : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Previous yearly distance (km): %.2f"
+msgstr "Distance annuelle précédente (km) : %.2f"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "New yearly distance (km): %.2f"
+msgstr "Nouvelle distance annuelle (km) : %.2f"

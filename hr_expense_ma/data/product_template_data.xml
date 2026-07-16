@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="hr_expense.expense_product_mileage" model="product.product">
+        <field name="is_ik_expense">1</field>
+    </record>
+</odoo>
