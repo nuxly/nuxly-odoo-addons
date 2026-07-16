@@ -16,6 +16,7 @@
         "data/hr_expense_ma_fuel_type_data.xml",
         "views/product_product_views.xml",
         "views/fleet_vehicle_views.xml",
+        "views/fleet_vehicle_model_views.xml",
         "views/hr_employee_views.xml",
         "views/hr_expense_ma_scale_views.xml",
         "views/hr_expense_views.xml",

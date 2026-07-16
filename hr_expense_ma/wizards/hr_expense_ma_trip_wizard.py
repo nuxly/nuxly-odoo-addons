@@ -17,9 +17,7 @@ class HrExpenseMaTripWizard(models.TransientModel):
     available_vehicle_ids = fields.Many2many("fleet.vehicle", compute="_compute_available_vehicle_ids", help="Personal vehicles available for the employee.")
     vehicle_id = fields.Many2one("fleet.vehicle", string="Vehicle", required=True, domain="[('id', 'in', available_vehicle_ids)]", help="Personal vehicle used for the mileage allowance trip.")
     origin_street = fields.Char(string="Departure street", help="Departure street used to compute the trip distance.")
-    origin_country_id = fields.Many2one("res.country", string="Departure country", default=lambda self: self.env.company.country_id, help="Country of the departure address. Used to prefill the address search when entered manually.")
     destination_street = fields.Char(string="Arrival street", help="Arrival street used to compute the trip distance.")
-    destination_country_id = fields.Many2one("res.country", string="Arrival country", default=lambda self: self.env.company.country_id, help="Country of the arrival address. Used to prefill the address search when entered manually.")
     trip_type = fields.Selection([("one_way", "One way"), ("round_trip", "Round trip")], string="Trip type", default="one_way", required=True, help="Select whether the trip is one way or round trip.")
     origin_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Departure type", default="other", required=True, help="Suggested source used to fill the departure address.")
     destination_type = fields.Selection([("home", "Home"), ("work", "Work"), ("other", "Other")], string="Arrival type", default="other", required=True, help="Suggested source used to fill the arrival address.")
@@ -86,7 +84,6 @@ class HrExpenseMaTripWizard(models.TransientModel):
         """Return the current wizard field values for the given address prefix ("origin"/"destination")."""
         parts = {
             "street": self[f"{prefix}_street"],
-            "country_id": self[f"{prefix}_country_id"],
         }
         _logger.info("IK get_wizard_address_parts - prefix=%s parts=%s", prefix, parts)
         return parts
@@ -153,13 +150,11 @@ class HrExpenseMaTripWizard(models.TransientModel):
         }
         if self.origin_type != "other":
             vals.update({
-                "origin_street": origin_parts.get("street"),
-                "origin_country_id": origin_parts.get("country_id").id if origin_parts.get("country_id") else False,
+                "origin_street": origin_address,
             })
         if self.destination_type != "other":
             vals.update({
-                "destination_street": destination_parts.get("street"),
-                "destination_country_id": destination_parts.get("country_id").id if destination_parts.get("country_id") else False,
+                "destination_street": destination_address,
             })
         _logger.info("IK compute_ik_trip_distance - writing vals=%s", vals)
         self.write(vals)
@@ -255,9 +250,8 @@ class HrExpenseMaTripWizard(models.TransientModel):
         elif self.employee_id and self.origin_type == "work":
             parts = self.employee_id._get_ik_work_address_parts()
         else:
-            parts = {"street": False, "country_id": self.env.company.country_id}
-        self.origin_street = parts.get("street", False)
-        self.origin_country_id = parts.get("country_id", False)
+            parts = {"street": False}
+        self.origin_street = self._format_ik_trip_address(self.origin_type, parts)
         _logger.info("IK onchange_origin_type - resolved parts=%s", parts)
 
     @api.onchange("destination_type")
@@ -272,7 +266,6 @@ class HrExpenseMaTripWizard(models.TransientModel):
         elif self.employee_id and self.destination_type == "work":
             parts = self.employee_id._get_ik_work_address_parts()
         else:
-            parts = {"street": False, "country_id": self.env.company.country_id}
-        self.destination_street = parts.get("street", False)
-        self.destination_country_id = parts.get("country_id", False)
+            parts = {"street": False}
+        self.destination_street = self._format_ik_trip_address(self.destination_type, parts)
         _logger.info("IK onchange_destination_type - resolved parts=%s", parts)

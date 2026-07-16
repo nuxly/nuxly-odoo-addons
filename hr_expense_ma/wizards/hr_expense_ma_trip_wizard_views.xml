@@ -18,23 +18,19 @@
                     </group>
                     <group string="Departure">
                         <field name="origin_type" widget="radio" options="{'horizontal': true}"/>
-                        <field name="origin_country_id" string="Country" readonly="origin_type != 'other'"/>
                         <field name="origin_street"
                             string="Departure address"
                             widget="google_address_autocomplete"
                             placeholder="Departure address"
-                            readonly="origin_type != 'other'"
-                            options="{'country_id': 'origin_country_id'}"/>
+                            readonly="origin_type != 'other'"/>
                     </group>
                     <group string="Arrival">
                         <field name="destination_type" widget="radio" options="{'horizontal': true}"/>
-                        <field name="destination_country_id" string="Country" readonly="destination_type != 'other'"/>
                         <field name="destination_street"
                             string="Arrival address"
                             widget="google_address_autocomplete"
                             placeholder="Arrival address"
-                            readonly="destination_type != 'other'"
-                            options="{'country_id': 'destination_country_id'}"/>
+                            readonly="destination_type != 'other'"/>
                     </group>
                 </sheet>
 

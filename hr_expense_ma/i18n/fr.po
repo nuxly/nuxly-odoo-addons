@@ -16,6 +16,30 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense_ma_scale.py:0
+msgid "%(min)s CV and above"
+msgstr "CV à partir de %(min)s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense_ma_scale.py:0
+msgid "%(min)s km and above"
+msgstr "km à partir de %(min)s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense_ma_scale.py:0
+msgid "%(min)s to %(max)s CV"
+msgstr "CV de %(min)s à %(max)s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense_ma_scale.py:0
+msgid "%(min)s to %(max)s km"
+msgstr "km de %(min)s à %(max)s"
+
+#. module: hr_expense_ma
 #: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_form_view
 msgid "<strong>How it works</strong>"
 msgstr "<strong>Fonctionnement</strong>"
@@ -73,21 +97,6 @@ msgid "Arrival address normalized and returned by the Google Maps API."
 msgstr "Adresse d'arrivée normalisée et renvoyée par l'API Google Maps."
 
 #. module: hr_expense_ma
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_city
-msgid "Arrival city"
-msgstr "Ville d'arrivée"
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_city
-msgid "Arrival city used to compute the trip distance."
-msgstr "Ville d'arrivée utilisée pour calculer la distance du trajet."
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_country_id
-msgid "Arrival country"
-msgstr "Pays d'arrivée"
-
-#. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_street
 msgid "Arrival street"
 msgstr "Rue d'arrivée"
@@ -101,16 +110,6 @@ msgstr "Rue d'arrivée utilisée pour calculer la distance du trajet."
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_type
 msgid "Arrival type"
 msgstr "Type d'arrivée"
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_zip
-msgid "Arrival zip"
-msgstr "Code postal d'arrivée"
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_zip
-msgid "Arrival zip code used to compute the trip distance."
-msgstr "Code postal d'arrivée utilisé pour calculer la distance du trajet."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_scale__message_attachment_count
@@ -133,11 +132,6 @@ msgid "Car"
 msgstr "Voiture"
 
 #. module: hr_expense_ma
-#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
-msgid "City"
-msgstr "Ville"
-
-#. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__code
 msgid "Code"
 msgstr "Code"
@@ -148,24 +142,19 @@ msgid "Coefficient"
 msgstr "Coefficient"
 
 #. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_list_view
+msgid "CV max"
+msgstr "CV max"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_list_view
+msgid "CV min"
+msgstr "CV min"
+
+#. module: hr_expense_ma
 #: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__distance
 msgid "Computed distance in kilometers."
 msgstr "Distance calculée en kilomètres."
-
-#. module: hr_expense_ma
-#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
-msgid "Country"
-msgstr "Pays"
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__destination_country_id
-msgid "Country of the arrival address. Must be France when the address is entered manually."
-msgstr "Pays de l'adresse d'arrivée. Doit être la France lorsque l'adresse est saisie manuellement."
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_country_id
-msgid "Country of the departure address. Must be France when the address is entered manually."
-msgstr "Pays de l'adresse de départ. Doit être la France lorsque l'adresse est saisie manuellement."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_fuel_type__create_uid
@@ -204,21 +193,6 @@ msgid "Departure address normalized and returned by the Google Maps API."
 msgstr "Adresse de départ normalisée et renvoyée par l'API Google Maps."
 
 #. module: hr_expense_ma
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_city
-msgid "Departure city"
-msgstr "Ville de départ"
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_city
-msgid "Departure city used to compute the trip distance."
-msgstr "Ville de départ utilisée pour calculer la distance du trajet."
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_country_id
-msgid "Departure country"
-msgstr "Pays de départ"
-
-#. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_street
 msgid "Departure street"
 msgstr "Rue de départ"
@@ -232,16 +206,6 @@ msgstr "Rue de départ utilisée pour calculer la distance du trajet."
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_type
 msgid "Departure type"
 msgstr "Type de départ"
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_zip
-msgid "Departure zip"
-msgstr "Code postal de départ"
-
-#. module: hr_expense_ma
-#: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_trip_wizard__origin_zip
-msgid "Departure zip code used to compute the trip distance."
-msgstr "Code postal de départ utilisé pour calculer la distance du trajet."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_fleet_vehicle__display_name
@@ -259,6 +223,16 @@ msgstr "Nom d'affichage"
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense_ma_trip_wizard__distance
 msgid "Distance (km)"
 msgstr "Distance (km)"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_list_view
+msgid "Dist. max"
+msgstr "Dist. max"
+
+#. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_list_view
+msgid "Dist. min"
+msgstr "Dist. min"
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,help:hr_expense_ma.field_hr_expense__ik_distance
@@ -565,6 +539,12 @@ msgstr "Résumé de l'indemnité kilométrique"
 #: model:ir.model,name:hr_expense_ma.model_hr_expense_ma_trip_wizard
 msgid "Mileage allowance trip wizard"
 msgstr "Assistant de trajet pour indemnité kilométrique"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage counter for %(year)s reverted: -%(distance).2f km (new yearly total: %(total).2f km), following expense %(expense)s leaving the validated state (now: %(state)s)."
+msgstr "Compteur kilométrique %(year)s décrémenté : -%(distance).2f km (nouveau total annuel : %(total).2f km), suite à la sortie de la dépense %(expense)s de l'état validé (désormais : %(state)s)."
 
 #. module: hr_expense_ma
 #. odoo-python
@@ -963,6 +943,18 @@ msgstr "Distance kilométrique (km) : %.2f"
 #: code:addons/hr_expense_ma/models/hr_expense.py:0
 msgid "Mileage scale: %s"
 msgstr "Barème kilométrique : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage scale coefficient: %s"
+msgstr "Coefficient du barème kilométrique : %s"
+
+#. module: hr_expense_ma
+#. odoo-python
+#: code:addons/hr_expense_ma/models/hr_expense.py:0
+msgid "Mileage scale fixed amount: %.2f"
+msgstr "Montant fixe du barème kilométrique : %.2f"
 
 #. module: hr_expense_ma
 #. odoo-python

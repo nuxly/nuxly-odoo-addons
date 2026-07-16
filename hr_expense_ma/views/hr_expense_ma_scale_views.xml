@@ -8,10 +8,10 @@
                 <field name="start_date"/>
                 <field name="vehicle_type"/>
                 <field name="fuel_type_ids" widget="many2many_tags"/>
-                <field name="horsepower_min"/>
-                <field name="horsepower_max"/>
-                <field name="distance_min"/>
-                <field name="distance_max"/>
+                <field name="horsepower_min" string="CV min"/>
+                <field name="horsepower_max" string="CV max"/>
+                <field name="distance_min" string="Dist. min"/>
+                <field name="distance_max" string="Dist. max"/>
                 <field name="coefficient"/>
                 <field name="fixed_amount"/>
             </list>
