@@ -9,13 +9,14 @@
 
             <xpath expr="//field[@name='product_id']" position="after">
                 <field name="is_ik_expense" invisible="1"/>
+                <field name="ik_trip_type" invisible="1"/>
 
                 <button
                     name="action_open_ik_trip_wizard"
                     type="object"
                     string="Enter Mileage Trip"
                     class="btn-primary"
-                    invisible="not is_ik_expense"/>
+                    invisible="not is_ik_expense or state != 'draft'"/>
             </xpath>
 
             <xpath expr="//sheet" position="inside">
@@ -41,12 +42,46 @@
 
             </xpath>
 
+            <xpath expr="//field[@name='price_unit'][2]" position="attributes">
+                <attribute name="invisible">not product_has_cost or is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='quantity']" position="attributes">
+                <attribute name="invisible">not product_has_cost or is_ik_expense</attribute>
+            </xpath>
+
             <xpath expr="//field[@name='quantity']" position="attributes">
                 <attribute name="readonly">not is_editable or is_ik_expense</attribute>
+                <attribute name="invisible">is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='product_uom_id']" position="attributes">
+                <attribute name="invisible">is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//div[@invisible='not product_has_cost']" position="attributes">
+                <attribute name="invisible">not product_has_cost or is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='tax_ids']" position="attributes">
+                <attribute name="invisible">is_ik_expense</attribute>
             </xpath>
 
             <xpath expr="//field[@name='tax_ids']" position="attributes">
                 <attribute name="readonly">not is_editable or is_ik_expense</attribute>
+                <attribute name="invisible">is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='tax_amount_currency']" position="attributes">
+                <attribute name="invisible">is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//div[field[@name='tax_ids']]" position="attributes">
+                <attribute name="invisible">is_ik_expense</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='description']" position="attributes">
+                <attribute name="readonly">not is_editable or (is_ik_expense and ik_trip_type)</attribute>
             </xpath>
 
         </field>

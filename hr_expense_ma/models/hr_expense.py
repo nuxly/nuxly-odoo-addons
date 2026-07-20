@@ -22,6 +22,19 @@ class HrExpense(models.Model):
     ik_new_year_distance = fields.Float(string="New yearly distance (km)", readonly=True, help="Employee yearly mileage after adding this expense distance.",)
     ik_counter_updated = fields.Boolean(string="Mileage counter updated", readonly=True, help="Indicates whether this expense has already updated the employee yearly mileage counter.",)
 
+    def _needs_product_price_computation(self):
+        """
+        Mileage expenses must not use the product standard price.
+
+        The mileage allowance amount is computed from the official scale
+        instead of a fixed product cost, so price_unit must be left to
+        derive from total_amount_currency / quantity (see _compute_price_unit).
+        """
+        self.ensure_one()
+        if self.is_ik_expense:
+            return False
+        return super()._needs_product_price_computation()
+
     def action_open_ik_trip_wizard(self):
         """
         Open the mileage trip wizard from an expense.
@@ -57,13 +70,16 @@ class HrExpense(models.Model):
     def _get_ik_scale(self, yearly_distance):
         """Find the mileage scale matching the expense context."""
         self.ensure_one()
-        vehicle = self.ik_vehicle_id
+        # hr.expense.ma.scale is only readable by expense approvers (see
+        # ir.model.access.csv), but any employee must be able to compute
+        # their own mileage expense, so the scale is looked up in sudo.
+        vehicle = self.ik_vehicle_id.sudo()
         fiscal_power = vehicle.horsepower
         _logger.info(
             "IK get_scale - expense=%s vehicle=%s vehicle_type=%s fuel_type=%s fiscal_power=%s yearly_distance=%s",
             self.id, vehicle, vehicle.vehicle_type, vehicle.fuel_type, fiscal_power, yearly_distance,
         )
-        scale = self.env["hr.expense.ma.scale"].search(
+        scale = self.env["hr.expense.ma.scale"].sudo().search(
             [
                 ("start_date", "<=", self.date),
                 ("vehicle_type", "=", vehicle.vehicle_type),
@@ -79,12 +95,32 @@ class HrExpense(models.Model):
             ], order="start_date desc", limit=1,)
         _logger.info("IK get_scale - found scale=%s", scale)
         if not scale:
-            _logger.warning("IK get_scale - no scale found for expense=%s", self.id)
-            raise UserError(_("No mileage allowance scale was found."))
+            candidates = self.env["hr.expense.ma.scale"].sudo().search([("vehicle_type", "=", vehicle.vehicle_type)])
+            _logger.warning(
+                "IK get_scale - no scale found for expense=%s.\n"
+                "Searched for: date<=%s, vehicle_type=%s, fuel_type=%s, horsepower=%s, yearly_distance=%s.\n"
+                "Existing scales for vehicle_type=%s: %s",
+                self.id, self.date, vehicle.vehicle_type, vehicle.fuel_type, fiscal_power, yearly_distance,
+                vehicle.vehicle_type,
+                [
+                    {
+                        "id": s.id,
+                        "start_date": s.start_date,
+                        "fuel_types": s.fuel_type_ids.mapped("code"),
+                        "horsepower_min": s.horsepower_min,
+                        "horsepower_max": s.horsepower_max,
+                        "distance_min": s.distance_min,
+                        "distance_max": s.distance_max,
+                    }
+                    for s in candidates
+                ] or "none",
+            )
+            raise UserError(_("No mileage allowance scale was found. Please configure at least one mileage allowance scale."))
         return scale
 
-    _IK_TRIP_NOTE_MARKER_START = "--- Mileage trip ---"
-    _IK_TRIP_NOTE_MARKER_END = "--- End mileage trip ---"
+    def _get_ik_trip_note_markers(self):
+        """Return the (start, end) marker lines delimiting the mileage trip report block."""
+        return _("--- Mileage trip ---"), _("--- End mileage trip ---")
 
     def _get_ik_trip_note(self):
         """
@@ -92,28 +128,40 @@ class HrExpense(models.Model):
 
         The "Mileage Trip" group on the form is only visible in developer
         mode, so this report is written on the internal notes to keep the
-        trip details visible to regular users as well.
+        trip details visible to regular users as well. The mileage scale is
+        only readable by expense approvers (see ir.model.access.csv), so it
+        is accessed in sudo to keep this informational text available to any
+        user able to read their own expense.
         """
         self.ensure_one()
-        trip_type_label = dict(self._fields["ik_trip_type"].selection).get(self.ik_trip_type, self.ik_trip_type)
-        return "\n".join([
-            self._IK_TRIP_NOTE_MARKER_START,
+        marker_start, marker_end = self._get_ik_trip_note_markers()
+        trip_type_label = dict(self._fields["ik_trip_type"]._description_selection(self.env)).get(self.ik_trip_type, self.ik_trip_type)
+        scale = self.ik_scale_id.sudo()
+        lines = [
+            marker_start,
             _("Vehicle: %s", self.ik_vehicle_id.display_name),
             _("Departure address: %s", self.ik_origin_address),
             _("Arrival address: %s", self.ik_destination_address),
             _("Trip type: %s", trip_type_label),
             _("Mileage distance (km): %.2f", self.ik_distance),
-            _("Mileage scale: %s", self.ik_scale_id.display_name),
+            _("Mileage scale: %s", scale.display_name),
+            _("Mileage scale coefficient: %s", scale.coefficient),
+        ]
+        if scale.fixed_amount:
+            lines.append(_("Mileage scale fixed amount: %.2f", scale.fixed_amount))
+        lines += [
             _("Previous yearly distance (km): %.2f", self.ik_previous_year_distance),
             _("New yearly distance (km): %.2f", self.ik_new_year_distance),
-            self._IK_TRIP_NOTE_MARKER_END,
-        ])
+            marker_end,
+        ]
+        return "\n".join(lines)
 
     def _update_ik_trip_note(self):
         """Replace the mileage trip report block in the internal notes, keeping any other manual note."""
         self.ensure_one()
+        marker_start, marker_end = self._get_ik_trip_note_markers()
         pattern = re.compile(
-            re.escape(self._IK_TRIP_NOTE_MARKER_START) + r".*?" + re.escape(self._IK_TRIP_NOTE_MARKER_END),
+            re.escape(marker_start) + r".*?" + re.escape(marker_end),
             re.DOTALL,
         )
         note = self.description or ""
@@ -129,8 +177,10 @@ class HrExpense(models.Model):
         self.ensure_one()
         _logger.info("IK compute_ik_amount - start expense=%s distance=%s", self.id, self.ik_distance)
         year = self._get_ik_counter_year()
+        # ik_km_by_year is restricted to hr.group_hr_user, but any employee
+        # must be able to compute their own mileage expense.
         previous_distance = (
-            self.employee_id.ik_km_by_year or {}
+            self.employee_id.sudo().ik_km_by_year or {}
         ).get(str(year), 0)
         new_distance = previous_distance + self.ik_distance
         _logger.info(
@@ -152,17 +202,16 @@ class HrExpense(models.Model):
             "ik_scale_id": new_scale.id,
             "ik_previous_year_distance": previous_distance,
             "ik_new_year_distance": new_distance,
-            "price_unit": amount,
             "quantity": 1,
             "total_amount_currency": amount,
         })
         self._update_ik_trip_note()
 
     def _update_ik_employee_counter(self):
-        """Update employee yearly mileage counter after validation."""
+        """Increment the employee yearly mileage counter once an IK expense reaches a counted state."""
         for expense in self.filtered(lambda e: e.is_ik_expense and not e.ik_counter_updated):
             year = expense._get_ik_counter_year()
-            data = dict(expense.employee_id.ik_km_by_year or {})
+            data = dict(expense.employee_id.sudo().ik_km_by_year or {})
             data[str(year)] = (
                 data.get(str(year), 0) + expense.ik_distance)
             _logger.info(
@@ -182,15 +231,84 @@ class HrExpense(models.Model):
                 subtype_xmlid="mail.mt_note",
             )
 
-    def write(self, vals):
-        """Update the yearly mileage counter when an IK expense reaches the posted state."""
-        res = super().write(vals)
-        to_update = self.filtered(
-            lambda e: e.is_ik_expense
-            and e.state == "posted"
-            and not e.ik_counter_updated
-        )
-        if to_update:
-            _logger.info("IK write - updating mileage counter for expenses=%s", to_update.ids)
-        to_update._update_ik_employee_counter()
-        return res
+    def _revert_ik_employee_counter(self, previous_distances, previous_years):
+        """
+        Decrement the employee yearly mileage counter when a counted IK expense leaves its counted state.
+
+        The distance and counter year used for the decrement are the ones
+        captured before the write, since the expense distance or date may be
+        edited in the same write call that moves it out of a counted state.
+        """
+        for expense in self.filtered(lambda e: e.is_ik_expense and e.ik_counter_updated):
+            year = previous_years[expense.id]
+            distance = previous_distances[expense.id]
+            data = dict(expense.employee_id.sudo().ik_km_by_year or {})
+            data[str(year)] = data.get(str(year), 0) - distance
+            _logger.info(
+                "IK revert_ik_employee_counter - expense=%s employee=%s year=%s new_total=%s",
+                expense.id, expense.employee_id, year, data[str(year)],
+            )
+            expense.employee_id.sudo().ik_km_by_year = data
+            expense.ik_counter_updated = False
+            state_label = dict(expense._fields["state"]._description_selection(expense.env)).get(expense.state, expense.state)
+            expense.employee_id.sudo().message_post(
+                body=_(
+                    "Mileage counter for %(year)s reverted: -%(distance).2f km (new yearly total: %(total).2f km), following the reset of expense %(expense)s (now: %(state)s).",
+                    year=year,
+                    distance=distance,
+                    total=data[str(year)],
+                    expense=expense.name or expense.id,
+                    state=state_label,
+                ),
+                subtype_xmlid="mail.mt_note",
+            )
+
+    _IK_COUNTED_STATES = ("posted", "in_payment", "paid")
+
+    def _compute_state(self):
+        """
+        Keep the employee yearly mileage counter in sync with the expense validation state.
+
+        "state" is a stored computed field derived from the linked journal
+        entry (account_move_id.state/payment_state) and approval_state, so it
+        can change without ever going through write() on hr.expense, e.g. when
+        the linked journal entry is reset or cancelled. Reacting here instead
+        of in write() ensures the counter stays in sync regardless of what
+        triggered the recompute.
+
+        The counter is incremented the first time an IK expense reaches a
+        counted state (posted, in payment or paid), and decremented if it
+        later leaves that group, e.g. when it is reset to draft or refused.
+        Moving forward between counted states (posted -> in payment -> paid)
+        must not trigger a decrement. The actual counter update is deferred to
+        a precommit callback so it runs once the recomputed state is final,
+        the same way mail.thread defers field change tracking.
+        """
+        previous_states = {expense.id: expense.state for expense in self}
+        super()._compute_state()
+
+        ik_expenses = self.filtered("is_ik_expense")
+        if not ik_expenses:
+            return
+        previous_distances = {expense.id: expense.ik_distance for expense in ik_expenses}
+        previous_years = {expense.id: expense._get_ik_counter_year() for expense in ik_expenses}
+
+        def _sync_ik_counters():
+            to_increment = ik_expenses.filtered(
+                lambda e: e.state in self._IK_COUNTED_STATES
+                and not e.ik_counter_updated
+            )
+            if to_increment:
+                _logger.info("IK compute_state - incrementing mileage counter for expenses=%s", to_increment.ids)
+            to_increment._update_ik_employee_counter()
+
+            to_decrement = ik_expenses.filtered(
+                lambda e: previous_states.get(e.id) in self._IK_COUNTED_STATES
+                and e.state not in self._IK_COUNTED_STATES
+                and e.ik_counter_updated
+            )
+            if to_decrement:
+                _logger.info("IK compute_state - reverting mileage counter for expenses=%s", to_decrement.ids)
+            to_decrement._revert_ik_employee_counter(previous_distances, previous_years)
+
+        self.env.cr.precommit.add(_sync_ik_counters)
