@@ -25,16 +25,44 @@ class HrExpense(models.Model):
     @api.depends("product_has_cost", "is_ik_expense")
     def _compute_currency_id(self):
         """
-        Force mileage allowance expenses to always use EUR.
+        Force mileage allowance expenses to always use the company currency.
 
-        The mileage allowance scales configured on this module are official
-        European scales, so the currency must not be left to the company's
-        or the employee's own currency.
+        The mileage allowance amount is computed from the official scale in
+        _compute_ik_amount, so the currency must not be left to the
+        employee's own currency, which could otherwise differ.
         """
         super()._compute_currency_id()
-        eur = self.env.ref("base.EUR")
         for expense in self.filtered("is_ik_expense"):
-            expense.currency_id = eur
+            expense.currency_id = expense.company_id.currency_id
+
+    @api.depends("product_id", "is_ik_expense")
+    def _compute_from_product(self):
+        """
+        Mileage expenses must not follow the "product has a cost" UI flow.
+
+        The core Mileage product has a non-zero standard_price (used as a
+        placeholder unit price), which makes product_has_cost True and hides
+        the direct Total input in favor of the read-only company-currency
+        conversion row. Mileage amounts are always entered directly (see
+        _compute_ik_amount), so product_has_cost is forced back to False here.
+        """
+        super()._compute_from_product()
+        for expense in self.filtered("is_ik_expense"):
+            expense.product_has_cost = False
+
+    @api.onchange("product_id")
+    def _onchange_product_id_ik_currency(self):
+        """
+        Force the company currency as soon as the mileage allowance product is selected.
+
+        If the user already picked a different currency before selecting the
+        product, the onchange-dirty protection on currency_id prevents
+        _compute_currency_id from overriding it, so it must be forced here
+        explicitly, in reaction to the product itself changing.
+        """
+        if self.is_ik_expense:
+            self.currency_id = self.company_id.currency_id
+            self.total_amount_currency = 0.0
 
     def _needs_product_price_computation(self):
         """
@@ -218,10 +246,11 @@ class HrExpense(models.Model):
             "ik_new_year_distance": new_distance,
             "quantity": 1,
             "total_amount_currency": amount,
-            # Defensive: _compute_currency_id already forces EUR, but a
-            # precompute on creation may run before is_ik_expense is
-            # resolved, so it is enforced again here as a safety net.
-            "currency_id": self.env.ref("base.EUR").id,
+            # Defensive: _compute_currency_id already forces the company
+            # currency, but a precompute on creation may run before
+            # is_ik_expense is resolved, so it is enforced again here as a
+            # safety net.
+            "currency_id": self.company_id.currency_id.id,
         })
         self._update_ik_trip_note()
 
