@@ -1,0 +1,28 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* web_list_cumulative_balance
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: web_list_cumulative_balance
+#: model:ir.model.fields,field_description:web_list_cumulative_balance.field_account_move_line__x_cumulative_balance
+msgid "Cumulative Balance"
+msgstr "Solde Cumulé"
+
+#. module: web_list_cumulative_balance
+#: model:ir.model.fields,help:web_list_cumulative_balance.field_account_move_line__x_cumulative_balance
+msgid ""
+"Running total of the Balance column, in the order shown on screen. If "
+"some lines are selected, only they count towards the total."
+msgstr ""
+"Cumul du solde de la colonne Solde, dans l'ordre affiché à l'écran. Si "
+"des lignes sont sélectionnées, seules elles comptent dans le cumul."
