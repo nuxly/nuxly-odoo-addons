@@ -1,6 +1,6 @@
 import re
 
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 import logging
 
@@ -21,6 +21,20 @@ class HrExpense(models.Model):
     ik_previous_year_distance = fields.Float(string="Previous yearly distance (km)", readonly=True, help="Employee yearly mileage before this expense.",)
     ik_new_year_distance = fields.Float(string="New yearly distance (km)", readonly=True, help="Employee yearly mileage after adding this expense distance.",)
     ik_counter_updated = fields.Boolean(string="Mileage counter updated", readonly=True, help="Indicates whether this expense has already updated the employee yearly mileage counter.",)
+
+    @api.depends("product_has_cost", "is_ik_expense")
+    def _compute_currency_id(self):
+        """
+        Force mileage allowance expenses to always use EUR.
+
+        The mileage allowance scales configured on this module are official
+        European scales, so the currency must not be left to the company's
+        or the employee's own currency.
+        """
+        super()._compute_currency_id()
+        eur = self.env.ref("base.EUR")
+        for expense in self.filtered("is_ik_expense"):
+            expense.currency_id = eur
 
     def _needs_product_price_computation(self):
         """
@@ -204,6 +218,10 @@ class HrExpense(models.Model):
             "ik_new_year_distance": new_distance,
             "quantity": 1,
             "total_amount_currency": amount,
+            # Defensive: _compute_currency_id already forces EUR, but a
+            # precompute on creation may run before is_ik_expense is
+            # resolved, so it is enforced again here as a safety net.
+            "currency_id": self.env.ref("base.EUR").id,
         })
         self._update_ik_trip_note()
 
