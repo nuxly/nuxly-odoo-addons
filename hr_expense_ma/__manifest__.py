@@ -4,7 +4,7 @@
 {
     "name": "HR Expense Mileage",
     "summary": "Manage mileage claims in employee expenses",
-    "version": "19.0.1.7.1",
+    "version": "19.0.1.7.2",
     "category": "Human Resources/Expenses",
     "website": "https://github.com/nuxly/nuxly-odoo-addons",
     "author": "Nuxly",
