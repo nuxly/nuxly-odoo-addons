@@ -16,7 +16,7 @@ msgstr ""
 #. module: web_list_cumulative_balance
 #: model:ir.model.fields,field_description:web_list_cumulative_balance.field_account_move_line__x_cumulative_balance
 msgid "Cumulative Balance"
-msgstr "Solde Cumulé"
+msgstr "Solde cumulé"
 
 #. module: web_list_cumulative_balance
 #: model:ir.model.fields,help:web_list_cumulative_balance.field_account_move_line__x_cumulative_balance
