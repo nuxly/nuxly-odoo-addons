@@ -43,7 +43,7 @@
                     <button
                         name="action_compute_distance"
                         type="object"
-                        string="Compute Distance"
+                        string="Compute distance"
                         class="btn-secondary"/>
 
                     <button

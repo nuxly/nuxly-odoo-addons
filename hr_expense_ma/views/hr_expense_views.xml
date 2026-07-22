@@ -76,6 +76,18 @@
                 <attribute name="invisible">is_ik_expense</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='total_amount_currency']" position="attributes">
+                <attribute name="readonly">is_ik_expense or not is_editable</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='total_amount'][@force_save='1']" position="attributes">
+                <attribute name="readonly">is_ik_expense or not is_editable or product_has_cost</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='currency_id'][@groups='base.group_multi_currency']" position="attributes">
+                <attribute name="readonly">is_ik_expense or not is_editable</attribute>
+            </xpath>
+
             <xpath expr="//div[field[@name='tax_ids']]" position="attributes">
                 <attribute name="invisible">is_ik_expense</attribute>
             </xpath>
@@ -83,6 +95,31 @@
             <xpath expr="//field[@name='description']" position="attributes">
                 <attribute name="readonly">not is_editable or (is_ik_expense and ik_trip_type)</attribute>
             </xpath>
+
+        </field>
+    </record>
+
+    <record id="hr_expense_list_view_inherit_hr_expense_ma" model="ir.ui.view">
+        <field name="name">hr.expense.list.inherit.hr.expense.ma</field>
+        <field name="model">hr.expense</field>
+        <field name="inherit_id" ref="hr_expense.hr_expense_view_expenses_analysis_tree"/>
+        <field name="arch" type="xml">
+
+            <field name="product_has_cost" position="after">
+                <field name="is_ik_expense" column_invisible="True"/>
+            </field>
+
+            <field name="total_amount" position="attributes">
+                <attribute name="readonly">not is_editable or product_has_cost or is_ik_expense</attribute>
+            </field>
+
+            <field name="total_amount_currency" position="attributes">
+                <attribute name="readonly">not is_editable or not is_multiple_currency or product_has_cost or is_ik_expense</attribute>
+            </field>
+
+            <field name="currency_id" position="attributes">
+                <attribute name="readonly">not is_editable or product_has_cost or is_ik_expense</attribute>
+            </field>
 
         </field>
     </record>

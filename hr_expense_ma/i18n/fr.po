@@ -142,6 +142,11 @@ msgid "Coefficient"
 msgstr "Coefficient"
 
 #. module: hr_expense_ma
+#: model_terms:ir.ui.view,arch_db:hr_expense_ma.view_hr_expense_ma_trip_wizard_form
+msgid "Compute distance"
+msgstr "Calculer la distance"
+
+#. module: hr_expense_ma
 #: model_terms:ir.ui.view,arch_db:hr_expense_ma.hr_expense_ma_scale_list_view
 msgid "CV max"
 msgstr "CV max"

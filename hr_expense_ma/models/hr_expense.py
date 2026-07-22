@@ -1,6 +1,6 @@
 import re
 
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 import logging
 
@@ -21,6 +21,48 @@ class HrExpense(models.Model):
     ik_previous_year_distance = fields.Float(string="Previous yearly distance (km)", readonly=True, help="Employee yearly mileage before this expense.",)
     ik_new_year_distance = fields.Float(string="New yearly distance (km)", readonly=True, help="Employee yearly mileage after adding this expense distance.",)
     ik_counter_updated = fields.Boolean(string="Mileage counter updated", readonly=True, help="Indicates whether this expense has already updated the employee yearly mileage counter.",)
+
+    @api.depends("product_has_cost", "is_ik_expense")
+    def _compute_currency_id(self):
+        """
+        Force mileage allowance expenses to always use the company currency.
+
+        The mileage allowance amount is computed from the official scale in
+        _compute_ik_amount, so the currency must not be left to the
+        employee's own currency, which could otherwise differ.
+        """
+        super()._compute_currency_id()
+        for expense in self.filtered("is_ik_expense"):
+            expense.currency_id = expense.company_id.currency_id
+
+    @api.depends("product_id", "is_ik_expense")
+    def _compute_from_product(self):
+        """
+        Mileage expenses must not follow the "product has a cost" UI flow.
+
+        The core Mileage product has a non-zero standard_price (used as a
+        placeholder unit price), which makes product_has_cost True and hides
+        the direct Total input in favor of the read-only company-currency
+        conversion row. Mileage amounts are always entered directly (see
+        _compute_ik_amount), so product_has_cost is forced back to False here.
+        """
+        super()._compute_from_product()
+        for expense in self.filtered("is_ik_expense"):
+            expense.product_has_cost = False
+
+    @api.onchange("product_id")
+    def _onchange_product_id_ik_currency(self):
+        """
+        Force the company currency as soon as the mileage allowance product is selected.
+
+        If the user already picked a different currency before selecting the
+        product, the onchange-dirty protection on currency_id prevents
+        _compute_currency_id from overriding it, so it must be forced here
+        explicitly, in reaction to the product itself changing.
+        """
+        if self.is_ik_expense:
+            self.currency_id = self.company_id.currency_id
+            self.total_amount_currency = 0.0
 
     def _needs_product_price_computation(self):
         """
@@ -204,6 +246,11 @@ class HrExpense(models.Model):
             "ik_new_year_distance": new_distance,
             "quantity": 1,
             "total_amount_currency": amount,
+            # Defensive: _compute_currency_id already forces the company
+            # currency, but a precompute on creation may run before
+            # is_ik_expense is resolved, so it is enforced again here as a
+            # safety net.
+            "currency_id": self.company_id.currency_id.id,
         })
         self._update_ik_trip_note()
 
