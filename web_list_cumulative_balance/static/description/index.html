@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account List Cumulative Balance</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <style>
+    .hero-title {
+      font-family: Montserrat, sans-serif;
+      font-size: 40px;
+      font-weight: 800;
+      color: #8aaebb;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #74788D;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 500;
+    }
+
+    .feature-row {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      margin-right: 15px;
+      border-radius: 50%;
+      background: #8aaebb;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .feature-text {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .section-title {
+      color: #3b3b3b;
+    }
+
+    .screenshot-placeholder {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 60px 20px;
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    .screenshot-card {
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .screenshot-card img {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .screenshot-caption {
+      margin-top: 8px;
+      color: #74788D;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container text-center my-5">
+    <h1 class="hero-title">Account List Cumulative Balance</h1>
+    <p class="subtitle mb-4">Live running balance to speed up manual reconciliation</p>
+    <p style="font-size:16px; color:#555; max-width:700px; margin:0 auto;">
+      Adds a "Cumulative Balance" column to the Journal Items list, so accountants can select
+      entries and watch, live, whether they sum to zero — no more reconciling with a calculator
+      on the side.
+    </p>
+  </div>
+
+  <div class="container">
+    <h2 class="text-center mb-4 section-title">Key Features</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-list-ol"></i></div>
+          <span class="feature-text">Running total of the Balance column, in the order currently shown on screen</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-check-square-o"></i></div>
+          <span class="feature-text">Select any lines, consecutive or not, and the cumulative total recalculates instantly using only the selected lines</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-bolt"></i></div>
+          <span class="feature-text">Fully live: no button to click, the column updates as you check or uncheck lines</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-filter"></i></div>
+          <span class="feature-text">Follows whatever sort, filter or grouping is currently applied to the list</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-eye-slash"></i></div>
+          <span class="feature-text">Optional column, placed right after the standard Balance column, toggled from the column selector</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-plug"></i></div>
+          <span class="feature-text">Standalone module, only depends on Accounting — no configuration needed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Setup Steps</h2>
+    <ol class="list-group list-group-numbered">
+      <li class="list-group-item">Install the module: <code style="color: #be1727;">web_list_cumulative_balance</code></li>
+      <li class="list-group-item">Open Accounting &gt; Accounting &gt; Journal Items</li>
+      <li class="list-group-item">Enable the <strong>Cumulative Balance</strong> column from the column selector, if not shown by default</li>
+      <li class="list-group-item">Select the lines you want to check, and read the balance directly on the last selected line</li>
+    </ol>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Why this Module?</h2>
+    <div class="alert alert-info" style="font-size: 16px;">
+      <p>
+        Manual reconciliation (e.g. on cash or clearing accounts) usually means picking entries
+        one by one and adding them up outside of Odoo to check whether they balance to zero —
+        slow, and easy to get wrong on long lists.
+      </p>
+      <p class="mb-0">
+        This module removes that manual step: pick any lines directly in the Journal Items list,
+        in any order, and the cumulative balance is computed and displayed live, right in the
+        list, next to the standard Balance column.
+      </p>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Screenshots &amp; Demo</h2>
+    <div class="screenshot-placeholder">
+      Demo video coming soon.
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="cumulative_balance_column.jpg" alt="Cumulative Balance column in the Journal Items list">
+          <div class="screenshot-caption">The Cumulative Balance column, right after Balance, with no selection</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="cumulative_balance_selection.jpg" alt="Cumulative Balance recalculated on a partial, non-consecutive selection">
+          <div class="screenshot-caption">Selecting a few non-consecutive lines: only they count in the running total</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Support &amp; Contact</h2>
+    <div class="text-center">
+      <a href="mailto:bonjour@nuxly.com" class="btn btn-lg" style="background-color:#be1727; color:white; border:none; border-radius:6px; padding: 10px 10px 15px;">
+        <i class="fa fa-envelope" style="margin-right: 2px;"></i>
+        Contact Support
+      </a>
+    </div>
+  </div>
+
+  <div class="container text-center my-5">
+    <p class="text-muted">
+      This module is maintained by <strong>Nuxly</strong>. Visit
+      <a href="https://nuxly.com" target="_blank" style="color: #be1727; text-decoration: underline;">nuxly.com</a>
+    </p>
+  </div>
+
+</body>
+</html>
