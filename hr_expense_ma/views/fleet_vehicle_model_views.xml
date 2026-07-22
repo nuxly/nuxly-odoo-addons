@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="fleet_vehicle_model_view_form_inherit_hr_expense_ma" model="ir.ui.view">
+        <field name="name">fleet.vehicle.model.form.inherit.hr.expense.ma</field>
+        <field name="model">fleet.vehicle.model</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_model_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//group[@name='group_engine']" position="attributes">
+                <attribute name="invisible">vehicle_type not in ('car', 'motorcycle')</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

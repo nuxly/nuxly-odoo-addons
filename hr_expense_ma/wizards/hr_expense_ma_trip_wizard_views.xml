@@ -22,11 +22,7 @@
                             string="Departure address"
                             widget="google_address_autocomplete"
                             placeholder="Departure address"
-                            readonly="origin_type != 'other'"
-                            options="{'city': 'origin_city', 'zip': 'origin_zip', 'country_id': 'origin_country_id'}"/>
-                        <field name="origin_city" string="City" readonly="origin_type != 'other'"/>
-                        <field name="origin_zip" string="Zip" readonly="origin_type != 'other'"/>
-                        <field name="origin_country_id" string="Country" readonly="origin_type != 'other'"/>
+                            readonly="origin_type != 'other'"/>
                     </group>
                     <group string="Arrival">
                         <field name="destination_type" widget="radio" options="{'horizontal': true}"/>
@@ -34,13 +30,9 @@
                             string="Arrival address"
                             widget="google_address_autocomplete"
                             placeholder="Arrival address"
-                            readonly="destination_type != 'other'"
-                            options="{'city': 'destination_city', 'zip': 'destination_zip', 'country_id': 'destination_country_id'}"/>
-                        <field name="destination_city" string="City" readonly="destination_type != 'other'"/>
-                        <field name="destination_zip" string="Zip" readonly="destination_type != 'other'"/>
-                        <field name="destination_country_id" string="Country" readonly="destination_type != 'other'"/>
+                            readonly="destination_type != 'other'"/>
                     </group>
-                    <group string="Distance">
+                    <group string="Distance" invisible="not distance">
                         <field name="distance"/>
                         <field name="google_origin_address"/>
                         <field name="google_destination_address"/>
@@ -51,7 +43,7 @@
                     <button
                         name="action_compute_distance"
                         type="object"
-                        string="Compute Distance"
+                        string="Compute distance"
                         class="btn-secondary"/>
 
                     <button

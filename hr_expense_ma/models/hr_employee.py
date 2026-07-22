@@ -8,9 +8,11 @@ class HrEmployee(models.Model):
     ik_km_by_year_display = fields.Text(string="Mileage allowance summary", compute="_compute_ik_km_by_year_display")
 
     def _compute_ik_km_by_year_display(self):
+        # ik_km_by_year is restricted to hr.group_hr_user, but this summary is
+        # meant to be readable by the employee themselves, so it is read in sudo.
         for employee in self:
             employee.ik_km_by_year_display = "\n".join(
-                f"{year} : {km:.2f} km" for year, km in sorted((employee.ik_km_by_year or {}).items()))
+                f"{year} : {km:.2f} km" for year, km in sorted((employee.sudo().ik_km_by_year or {}).items()))
 
     def _get_ik_personal_vehicles(self):
         """
@@ -31,22 +33,26 @@ class HrEmployee(models.Model):
     def _get_ik_home_address_parts(self):
         """Return the employee private address split into its individual components."""
         self.ensure_one()
+        # private_* fields are restricted to hr.group_hr_user. A manager filling
+        # in an expense on behalf of another employee, or the employee itself
+        # without that group, must still be able to resolve this address.
+        employee = self.sudo()
         return {
-            "street": self.private_street,
-            "city": self.private_city,
-            "zip": self.private_zip,
-            "country_id": self.private_country_id or self.company_id.country_id,
+            "street": employee.private_street,
+            "city": employee.private_city,
+            "zip": employee.private_zip,
+            "country_id": employee.private_country_id or employee.company_id.country_id,
         }
 
     def _get_ik_work_address_parts(self):
         """Return the employee work address split into its individual components."""
         self.ensure_one()
-        partner = self.address_id
+        partner = self.sudo().address_id
         return {
             "street": partner.street,
             "city": partner.city,
             "zip": partner.zip,
-            "country_id": partner.country_id or self.company_id.country_id,
+            "country_id": partner.country_id or self.sudo().company_id.country_id,
         }
 
     def _format_ik_address(self, *parts):
