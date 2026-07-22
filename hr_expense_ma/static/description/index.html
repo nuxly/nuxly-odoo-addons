@@ -1,20 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>HR Expense Mileage</title>
-    </head>
-    <body>
-        <section>
-            <h1>HR Expense Mileage</h1>
-            <p>
-                Generic foundation for managing mileage claims through Odoo
-                employee expenses.
-            </p>
-            <p>
-                This initial release is an installable scaffold and does not
-                provide user-facing features yet.
-            </p>
-        </section>
-    </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Expense Mileage</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <style>
+    .hero-title {
+      font-family: Montserrat, sans-serif;
+      font-size: 40px;
+      font-weight: 800;
+      color: #8aaebb;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #74788D;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 500;
+    }
+
+    .feature-row {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      margin-right: 15px;
+      border-radius: 50%;
+      background: #8aaebb;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .feature-text {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .section-title {
+      color: #3b3b3b;
+    }
+
+    .screenshot-placeholder {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 60px 20px;
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+
+    .screenshot-card {
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .screenshot-card img {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .screenshot-caption {
+      margin-top: 8px;
+      color: #74788D;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container text-center my-5">
+    <h1 class="hero-title">HR Expense Mileage</h1>
+    <p class="subtitle mb-4">Official mileage allowance for Odoo employee expenses</p>
+    <p style="font-size:16px; color:#555; max-width:700px; margin:0 auto;">
+      Let employees declare business trips made with their personal vehicle, and let Odoo
+      compute the reimbursement automatically from an official mileage allowance scale.
+    </p>
+  </div>
+
+  <div class="container">
+    <h2 class="text-center mb-4 section-title">Key Features</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-map-marker"></i></div>
+          <span class="feature-text">Guided trip wizard: departure/arrival from home, work, or any address, with Google-powered address autocomplete</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-road"></i></div>
+          <span class="feature-text">Automatic distance calculation via the Google Distance Matrix API, one way or round trip</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-calculator"></i></div>
+          <span class="feature-text">Configurable official mileage allowance scale, by vehicle type, fuel type, fiscal power and yearly distance</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-line-chart"></i></div>
+          <span class="feature-text">Correct differential calculation when an employee's yearly mileage crosses a scale threshold</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-motorcycle"></i></div>
+          <span class="feature-text">Supports both cars and motorcycles as personal vehicles</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-history"></i></div>
+          <span class="feature-text">Full audit trail: every counter update or reversal is logged on the employee's chatter</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-refresh"></i></div>
+          <span class="feature-text">The yearly counter stays in sync automatically, even if an expense is reset to draft or refused</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-plug"></i></div>
+          <span class="feature-text">Integrates natively with the standard Odoo Expenses approval and accounting workflow</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Setup Steps</h2>
+    <ol class="list-group list-group-numbered">
+      <li class="list-group-item">Install the module: <code style="color: #be1727;">hr_expense_ma</code></li>
+      <li class="list-group-item">Configure the Google Places API key in the general settings (required for address autocomplete and distance calculation)</li>
+      <li class="list-group-item">Mark the vehicles used by employees as <strong>Personal vehicle</strong> in Fleet, and assign a driver</li>
+      <li class="list-group-item">Enable <strong>Mileage allowance</strong> on the expense product used for mileage claims</li>
+      <li class="list-group-item">Configure at least one <strong>mileage allowance scale</strong> under Expenses &gt; Configuration</li>
+      <li class="list-group-item">Employees create an expense with the mileage product, then click <strong>Enter Mileage Trip</strong> to fill in the trip and get the distance and amount computed automatically</li>
+    </ol>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Why this Module?</h2>
+    <div class="alert alert-info" style="font-size: 16px;">
+      <p>
+        Reimbursing employees who use their personal vehicle for business trips usually means
+        manually looking up an official mileage scale and computing the amount by hand — a
+        process that is slow and error-prone, especially when an employee's yearly mileage
+        crosses from one scale bracket to another mid-year.
+      </p>
+      <p>
+        This module removes that manual work: the employee only enters the trip (departure,
+        arrival, vehicle), and Odoo takes care of the distance calculation, the scale lookup,
+        and the reimbursement amount — including the correct differential amount when the
+        yearly mileage total crosses a bracket threshold.
+      </p>
+      <p class="mb-0">
+        The mileage allowance scale is fully configurable, so it can be adapted to any official
+        scale (French, Moroccan, or a custom internal policy), and the module is not tied to a
+        specific country for the trip addresses themselves.
+      </p>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Screenshots &amp; Demo</h2>
+    <div class="alert alert-success mt-3">
+      <strong>🎥 Demo Available:</strong>
+      Watch the full video demonstration here:
+      <a href="https://drive.google.com/file/d/1bVnIC3ukWYGo_WqKTi0ev3Bxtyz29FJq/view?usp=sharing"
+         target="_blank" style="color:#be1727; font-weight:bold;">
+        Mileage Expense + Trip Wizard (Video)
+      </a>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="menu_mileage_allowance.jpg" alt="Mileage allowance scale menu location">
+          <div class="screenshot-caption">Where to find the mileage allowance scale configuration</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="mileage_scale_form.jpg" alt="Mileage allowance scale form">
+          <div class="screenshot-caption">Configuring an official mileage allowance scale</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="mileage_expense_list.jpg" alt="List of mileage expenses">
+          <div class="screenshot-caption">List of mileage allowance expenses</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="trip_wizard_addresses.jpg" alt="Trip wizard departure and arrival addresses">
+          <div class="screenshot-caption">Trip wizard: departure and arrival addresses</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="personal_vehicle_checkbox.jpg" alt="Personal vehicle checkbox on the vehicle form">
+          <div class="screenshot-caption">Marking a vehicle as a personal vehicle</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="screenshot-card">
+          <img src="employee_yearly_counter.jpg" alt="Employee yearly mileage counter">
+          <div class="screenshot-caption">Employee yearly mileage summary</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Support &amp; Contact</h2>
+    <div class="text-center">
+      <a href="mailto:bonjour@nuxly.com" class="btn btn-lg" style="background-color:#be1727; color:white; border:none; border-radius:6px; padding: 10px 10px 15px;">
+        <i class="fa fa-envelope" style="margin-right: 2px;"></i>
+        Contact Support
+      </a>
+    </div>
+  </div>
+
+  <div class="container text-center my-5">
+    <p class="text-muted">
+      This module is maintained by <strong>Nuxly</strong>. Visit
+      <a href="https://nuxly.com" target="_blank" style="color: #be1727; text-decoration: underline;">nuxly.com</a>
+    </p>
+  </div>
+
+</body>
 </html>
