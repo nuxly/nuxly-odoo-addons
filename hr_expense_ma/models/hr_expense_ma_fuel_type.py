@@ -9,9 +9,7 @@ class HrExpenseMaFuelType(models.Model):
     name = fields.Char(required=True, translate=True)
     code = fields.Char(required=True, index=True, help="Technical code matching the Fleet vehicle model fuel type selection.")
 
-    _sql_constraints = [
-        ("code_unique", "unique(code)", "The fuel type code must be unique."),
-    ]
+    _code_unique = models.Constraint("unique(code)", "The fuel type code must be unique.")
 
     @api.model
     def sync_from_fleet_selection(self):
