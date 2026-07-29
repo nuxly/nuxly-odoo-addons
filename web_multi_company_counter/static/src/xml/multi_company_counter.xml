@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Extends the native company switcher button itself, instead of adding a
+         separate systray icon, so the badge reads as part of the company name. -->
+    <t t-inherit="web.SwitchCompanyMenu" t-inherit-mode="extension">
+        <xpath expr="//button[@data-hotkey='shift+u']" position="inside">
+            <span
+                class="badge rounded-pill bg-danger o_multi_company_counter_badge"
+                t-if="user.activeCompanies.length > 1"
+                t-esc="user.activeCompanies.length"
+            />
+        </xpath>
+    </t>
+</templates>
