@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_closing_multi_wizard_form" model="ir.ui.view">
+        <field name="name">account.closing.multi.wizard.form</field>
+        <field name="model">account.closing.multi.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="is_multi_company" invisible="1"/>
+                        <field name="is_accounting_admin" invisible="1"/>
+                        <field name="company_ids" widget="many2many_tags" readonly="1"/>
+                    </group>
+                    <group string="Lock Dates">
+                        <field name="sale_lock_date" readonly="not is_accounting_admin" placeholder="Not locked"/>
+                        <field name="purchase_lock_date" readonly="not is_accounting_admin" placeholder="Not locked"/>
+                        <field name="tax_lock_date" readonly="not is_accounting_admin" placeholder="Not locked"/>
+                        <field name="fiscalyear_lock_date" readonly="not is_accounting_admin" placeholder="Not locked"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Close Next Monthly Period" name="action_close_next_period" type="object" class="btn-primary"/>
+                    <button string="Close" name="action_apply_forced_dates" type="object" class="btn-primary" invisible="not is_accounting_admin"/>
+                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
