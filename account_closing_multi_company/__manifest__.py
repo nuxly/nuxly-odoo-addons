@@ -4,15 +4,14 @@
 {
     "name": "Account closing multi company",
     "summary": "Review and update accounting lock dates across several companies at once",
-    "version": "19.0.1.1.2",
+    "version": "19.0.2.1.1",
     "category": "Accounting",
     "website": "https://github.com/nuxly/nuxly-odoo-addons",
     "author": "Nuxly",
     "license": "AGPL-3",
-    "depends": ["base", "account"],
+    "depends": ["base", "account", "account_accountant"],
     "data": [
-        "security/ir.model.access.csv",
-        "views/account_closing_multi_wizard_views.xml",
+        "views/account_change_lock_date_views.xml",
         "views/res_company_views.xml",
     ],
     "installable": True,

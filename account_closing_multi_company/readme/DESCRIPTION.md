@@ -1,15 +1,19 @@
-This module adds a "Period closing" screen to review, at a glance, the
-accounting lock dates (sales, purchase, tax, lock everything) of every
-company the current user has access to, and update several companies at
-once from a single wizard instead of opening each company's settings form
-individually.
+This module extends Odoo's own "Lock Journal Entries" wizard
+(`account.change.lock.date`, from Odoo Accounting) to target several
+companies at once instead of only the current one.
 
-Any user can preview the next monthly period: the four lock dates shown
-in the wizard are replaced by their own next month-end, for review. This
-only updates the wizard, nothing is written to the companies yet.
+Most of the native wizard is kept as-is: the draft-entries warning and
+the lock exception automatism (moving a lock date backward never
+rewrites a company's official lock date — a temporary exception is
+granted instead, for the current user or for everyone, for a limited
+time or indefinitely). A handful of methods were adapted so they apply
+to every selected company instead of a single one.
 
-Only an accounting manager can apply the dates shown in the wizard,
-identically, on all selected companies at once — either the previewed
-next period, or dates entered manually.
+Two differences from the native wizard: the irreversible hard lock is
+out of scope for this module (removed from the form entirely), and a
+"Next monthly period" button lets any user preview the four lock dates
+advanced to their own next month-end before applying them.
 
-A lock date can never be set in the future.
+**This module requires Odoo Enterprise** (it depends on
+`account_accountant`, licensed under OEEL-1), since that is where the
+lock date wizard it extends lives.
