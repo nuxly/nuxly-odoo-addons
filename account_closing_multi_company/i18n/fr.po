@@ -1,0 +1,122 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* account_closing_multi_company
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: account_closing_multi_company
+#: model:ir.actions.act_window,name:account_closing_multi_company.action_account_closing_multi_company_list
+#: model:ir.ui.menu,name:account_closing_multi_company.menu_account_closing_multi_company_period
+msgid "Period closing"
+msgstr "Clôture périodique"
+
+#. module: account_closing_multi_company
+#. odoo-python
+#: code:addons/account_closing_multi_company/models/res_company.py:0
+msgid "Lock journal entries"
+msgstr "Verrouiller les pièces comptables"
+
+#. module: account_closing_multi_company
+#: model:ir.actions.server,name:account_closing_multi_company.action_open_closing_multi_wizard_server
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_tree_closing_button
+msgid "Close period"
+msgstr "Clôture période"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
+msgid "Company"
+msgstr "Société"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
+msgid "Sales lock"
+msgstr "Verrou des ventes"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
+msgid "Purchase lock"
+msgstr "Verrou des achats"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
+msgid "Tax lock"
+msgstr "Verrou déclaration TVA"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
+msgid "Lock everything"
+msgstr "Tout verrouiller"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
+msgid "Close"
+msgstr "Clôturer"
+
+#. module: account_closing_multi_company
+#: model:ir.model.fields,field_description:account_closing_multi_company.field_account_change_lock_date__company_ids
+msgid "Companies"
+msgstr "Sociétés"
+
+#. module: account_closing_multi_company
+#. odoo-python
+#: code:addons/account_closing_multi_company/wizards/account_change_lock_date.py:0
+msgid "You need to select who the exception applies to."
+msgstr "Vous devez choisir à qui s'applique l'exception."
+
+#. module: account_closing_multi_company
+#. odoo-python
+#: code:addons/account_closing_multi_company/wizards/account_change_lock_date.py:0
+msgid "You need to select a duration for the exception."
+msgstr "Vous devez choisir une durée pour l'exception."
+
+#. module: account_closing_multi_company
+#. odoo-python
+#: code:addons/account_closing_multi_company/wizards/account_change_lock_date.py:0
+msgid "You cannot set a lock date in the future."
+msgstr "Impossible de définir une date de verrouillage dans le futur."
+
+#. module: account_closing_multi_company
+#. odoo-python
+#: code:addons/account_closing_multi_company/wizards/account_change_lock_date.py:0
+msgid "Only an accounting administrator is allowed to change lock dates."
+msgstr "Seul un administrateur comptable est autorisé à modifier les dates de verrouillage."
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
+msgid "Apply"
+msgstr "Appliquer"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
+msgid "Next monthly period"
+msgstr "Prochaine période mensuelle"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
+msgid "Increment period"
+msgstr "Incrémenter période"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
+msgid "Multi-company closing impossible because dates differ."
+msgstr "Clôture multi-sociétés impossible car dates différentes."
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
+msgid "None of the lock dates are common to the selected companies. Close them one company at a time."
+msgstr "Aucune date de verrouillage n'est commune aux sociétés sélectionnées. Clôturez-les société par société."
+
+#. module: account_closing_multi_company
+#. odoo-python
+#: code:addons/account_closing_multi_company/wizards/account_change_lock_date.py:0
+msgid "None of the lock dates are common to the selected companies; close them one at a time."
+msgstr "Aucune date de verrouillage n'est commune aux sociétés sélectionnées ; clôturez-les une par une."
