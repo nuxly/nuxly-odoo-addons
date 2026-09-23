@@ -9,10 +9,21 @@ granted instead, for the current user or for everyone, for a limited
 time or indefinitely). A handful of methods were adapted so they apply
 to every selected company instead of a single one.
 
-Two differences from the native wizard: the irreversible hard lock is
-out of scope for this module (removed from the form entirely), and a
-"Next monthly period" button lets any user preview the four lock dates
-advanced to their own next month-end before applying them.
+Differences from the native wizard:
+
+- The irreversible hard lock is out of scope for this module (removed
+  from the form entirely).
+- Each of the four dates has its own "Increment period" button next to
+  it, advancing only that date to its own next month-end for preview
+  (nothing is applied until "Apply" is pressed). Incrementing "Lock
+  everything" also raises any of the other three dates that would
+  otherwise end up earlier than it.
+- With several companies selected, a date can only be edited here if
+  every selected company already shares the exact same value for it —
+  a date that differs between companies is hidden, with a message,
+  rather than silently forced to one company's value. If none of the
+  four dates are common at all, the whole form is replaced by a message
+  suggesting to close the companies one at a time instead.
 
 **This module requires Odoo Enterprise** (it depends on
 `account_accountant`, licensed under OEEL-1), since that is where the

@@ -91,10 +91,26 @@ msgstr "Seul un administrateur comptable est autorisé à modifier les dates de 
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
-msgid "Next monthly period"
-msgstr "Prochaine période mensuelle"
+msgid "Apply"
+msgstr "Appliquer"
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
-msgid "Apply"
-msgstr "Appliquer"
+msgid "Increment period"
+msgstr "Incrémenter période"
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
+msgid "Multi-company closing impossible because dates differ."
+msgstr "Clôture multi-sociétés impossible car dates différentes."
+
+#. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
+msgid "None of the lock dates are common to the selected companies. Close them one company at a time."
+msgstr "Aucune date de verrouillage n'est commune aux sociétés sélectionnées. Clôturez-les société par société."
+
+#. module: account_closing_multi_company
+#. odoo-python
+#: code:addons/account_closing_multi_company/wizards/account_change_lock_date.py:0
+msgid "None of the lock dates are common to the selected companies; close them one at a time."
+msgstr "Aucune date de verrouillage n'est commune aux sociétés sélectionnées ; clôturez-les une par une."

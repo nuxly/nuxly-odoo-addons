@@ -8,14 +8,60 @@
         <field name="arch" type="xml">
             <field name="company_id" invisible="True" position="after">
                 <field name="company_ids" widget="many2many_tags" readonly="1"/>
+                <field name="divergent_fields" invisible="True"/>
+                <field name="show_close_per_company_warning" invisible="True"/>
+                <div class="alert alert-warning mb-0" role="alert" colspan="2"
+                     invisible="not show_close_per_company_warning">None of the lock dates are common to the selected companies. Close them one company at a time.</div>
             </field>
+
             <!-- Out of scope for this module: the irreversible hard lock. -->
             <xpath expr="//div[hasclass('justify-content-start')]" position="replace"/>
-            <xpath expr="//button[@name='change_lock_date']" position="before">
-                <button string="Next monthly period" name="action_set_next_period_dates" type="object" class="btn-primary"/>
+
+            <!-- One "Increment period" button per date, and a message instead of the field/badges
+                 when that date isn't identical across every selected company. -->
+            <xpath expr="//field[@name='sale_lock_date']" position="after">
+                <button string="Increment period" name="action_increment_sale_lock_date" type="object" class="btn-secondary btn-sm ms-2"/>
             </xpath>
+            <xpath expr="//field[@name='sale_lock_date']/parent::div" position="attributes">
+                <attribute name="invisible">divergent_fields and 'sale_lock_date' in divergent_fields</attribute>
+            </xpath>
+            <xpath expr="//field[@name='sale_lock_date']/parent::div" position="after">
+                <div class="text-danger" invisible="not divergent_fields or 'sale_lock_date' not in divergent_fields">Multi-company closing impossible because dates differ.</div>
+            </xpath>
+
+            <xpath expr="//field[@name='purchase_lock_date']" position="after">
+                <button string="Increment period" name="action_increment_purchase_lock_date" type="object" class="btn-secondary btn-sm ms-2"/>
+            </xpath>
+            <xpath expr="//field[@name='purchase_lock_date']/parent::div" position="attributes">
+                <attribute name="invisible">divergent_fields and 'purchase_lock_date' in divergent_fields</attribute>
+            </xpath>
+            <xpath expr="//field[@name='purchase_lock_date']/parent::div" position="after">
+                <div class="text-danger" invisible="not divergent_fields or 'purchase_lock_date' not in divergent_fields">Multi-company closing impossible because dates differ.</div>
+            </xpath>
+
+            <xpath expr="//field[@name='tax_lock_date']" position="after">
+                <button string="Increment period" name="action_increment_tax_lock_date" type="object" class="btn-secondary btn-sm ms-2"/>
+            </xpath>
+            <xpath expr="//field[@name='tax_lock_date']/parent::div" position="attributes">
+                <attribute name="invisible">divergent_fields and 'tax_lock_date' in divergent_fields</attribute>
+            </xpath>
+            <xpath expr="//field[@name='tax_lock_date']/parent::div" position="after">
+                <div class="text-danger" invisible="not divergent_fields or 'tax_lock_date' not in divergent_fields">Multi-company closing impossible because dates differ.</div>
+            </xpath>
+
+            <xpath expr="//field[@name='fiscalyear_lock_date']" position="after">
+                <button string="Increment period" name="action_increment_fiscalyear_lock_date" type="object" class="btn-secondary btn-sm ms-2"/>
+            </xpath>
+            <xpath expr="//field[@name='fiscalyear_lock_date']/parent::div" position="attributes">
+                <attribute name="invisible">divergent_fields and 'fiscalyear_lock_date' in divergent_fields</attribute>
+            </xpath>
+            <xpath expr="//field[@name='fiscalyear_lock_date']/parent::div" position="after">
+                <div class="text-danger" invisible="not divergent_fields or 'fiscalyear_lock_date' not in divergent_fields">Multi-company closing impossible because dates differ.</div>
+            </xpath>
+
             <xpath expr="//button[@name='change_lock_date']" position="attributes">
                 <attribute name="string">Apply</attribute>
+                <attribute name="invisible">show_close_per_company_warning</attribute>
             </xpath>
         </field>
     </record>

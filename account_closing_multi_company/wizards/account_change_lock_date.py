@@ -20,7 +20,11 @@ class AccountChangeLockDate(models.TransientModel):
     """Extends Odoo's own lock date wizard to target several companies at once, instead of only the
     current one. The exception/warning automatisms and the form itself stay Odoo's own; only the
     handful of methods that assumed a single company are adapted here. The irreversible hard lock is
-    out of scope for this module (removed from the view, never touched by these overrides)."""
+    out of scope for this module (removed from the view, never touched by these overrides).
+
+    Multi-company editing is only offered for a lock date field when every selected company already
+    shares the exact same value for it; a field that differs between companies is hidden (with an
+    explanatory message) rather than silently forced to one company's value."""
 
     _inherit = "account.change.lock.date"
 
@@ -33,6 +37,9 @@ class AccountChangeLockDate(models.TransientModel):
     tax_lock_date = fields.Date(default=lambda self: self._get_target_companies()[:1].tax_lock_date)
     fiscalyear_lock_date = fields.Date(default=lambda self: self._get_target_companies()[:1].fiscalyear_lock_date)
 
+    divergent_fields = fields.Char(compute="_compute_divergent_fields")
+    show_close_per_company_warning = fields.Boolean(compute="_compute_divergent_fields")
+
     def _get_target_companies(self):
         """Companies targeted by the closing: the action's active_ids, or the current company."""
         active_ids = self.env.context.get("active_ids") or (
@@ -41,8 +48,32 @@ class AccountChangeLockDate(models.TransientModel):
         return self.env["res.company"].browse(active_ids).exists() if active_ids else self.env.company
 
     def _get_companies(self):
+        """Real, persisted company records - never NewId-wrapped ones. Before its first save, this
+        wizard is a virtual record, and so is anything in its own company_ids; searching with a NewId
+        in a domain silently matches nothing (see the "Domains don't support NewId" warning), which
+        made every exception/warning compute return empty right when the popup is first opened."""
         self.ensure_one()
-        return self.company_ids or self.env.company
+        return (self.company_ids or self.env.company)._origin
+
+    @api.depends("company_ids")
+    def _compute_divergent_fields(self):
+        for wizard in self:
+            companies = wizard._get_companies()
+            if len(companies) <= 1:
+                wizard.divergent_fields = False
+                wizard.show_close_per_company_warning = False
+                continue
+            divergent = [field for field in SOFT_LOCK_DATE_FIELDS if len(set(companies.mapped(field))) > 1]
+            wizard.divergent_fields = ",".join(divergent)
+            wizard.show_close_per_company_warning = len(divergent) == len(SOFT_LOCK_DATE_FIELDS)
+
+    def _get_editable_fields(self):
+        """Soft lock date fields eligible for multi-company editing through this wizard: all of them
+        in single-company mode, only the ones with an identical value across every selected company
+        otherwise."""
+        self.ensure_one()
+        divergent = set(self.divergent_fields.split(",")) if self.divergent_fields else set()
+        return [field for field in SOFT_LOCK_DATE_FIELDS if field not in divergent]
 
     def _check_not_future(self, lock_date):
         if lock_date and lock_date > fields.Date.context_today(self):
@@ -55,15 +86,19 @@ class AccountChangeLockDate(models.TransientModel):
         month, year = (current_date.month % 12) + 1, current_date.year + (current_date.month // 12)
         return date(year, month, calendar.monthrange(year, month)[1])
 
-    def action_set_next_period_dates(self):
-        """Preview only: replace the four lock dates shown in the wizard by their own next month-end.
-        Nothing is written to the companies until "Apply" is pressed. Reopens the same wizard instead
-        of returning a falsy value, otherwise the dialog framework would close this footer button's
-        dialog instead of just refreshing it."""
+    def _increment_field(self, field_name):
+        """Preview only: advance one lock date field to its own next month-end. Nothing is written to
+        the companies until "Apply" is pressed. Incrementing "Lock everything" also raises any of the
+        other three dates that would otherwise end up earlier than it, since nothing should ever be
+        locked less than the everything-lock floor."""
         self.ensure_one()
-        values = {field: self._next_month_end(self[field]) for field in SOFT_LOCK_DATE_FIELDS}
-        for lock_date in values.values():
-            self._check_not_future(lock_date)
+        new_value = self._next_month_end(self[field_name])
+        self._check_not_future(new_value)
+        values = {field_name: new_value}
+        if field_name == "fiscalyear_lock_date":
+            for other_field in self._get_editable_fields():
+                if other_field != field_name and (not self[other_field] or self[other_field] < new_value):
+                    values[other_field] = new_value
         self.write(values)
         return {
             "type": "ir.actions.act_window",
@@ -72,6 +107,18 @@ class AccountChangeLockDate(models.TransientModel):
             "view_mode": "form",
             "target": "new",
         }
+
+    def action_increment_sale_lock_date(self):
+        return self._increment_field("sale_lock_date")
+
+    def action_increment_purchase_lock_date(self):
+        return self._increment_field("purchase_lock_date")
+
+    def action_increment_tax_lock_date(self):
+        return self._increment_field("tax_lock_date")
+
+    def action_increment_fiscalyear_lock_date(self):
+        return self._increment_field("fiscalyear_lock_date")
 
     def _get_draft_moves_in_locked_period_domain(self):
         """Same as Odoo's own method, combined across every selected company instead of only the
@@ -112,10 +159,11 @@ class AccountChangeLockDate(models.TransientModel):
 
     def _get_changes_needing_exception(self):
         """A field needs an exception if it would move at least one selected company's lock date
-        backward instead of advancing it."""
+        backward instead of advancing it. Divergent fields are excluded: they aren't editable through
+        this wizard in the first place."""
         self.ensure_one()
         changes = {}
-        for field in SOFT_LOCK_DATE_FIELDS:
+        for field in self._get_editable_fields():
             for company in self._get_companies():
                 if company[field] and (not self[field] or self[field] < company[field]):
                     changes[field] = self[field]
@@ -147,16 +195,18 @@ class AccountChangeLockDate(models.TransientModel):
 
         exception_vals_list = []
         for company in self._get_companies():
-            for field in SOFT_LOCK_DATE_FIELDS:
+            for field in self._get_editable_fields():
                 if company[field] and (not self[field] or self[field] < company[field]):
                     exception_vals_list.append({**base_vals, "company_id": company.id, field: self[field]})
         return exception_vals_list or False
 
     def _prepare_lock_date_values(self, company, exception_vals_list=None):
         """Same guards as Odoo's own method, for one of the selected companies (soft lock dates only;
-        the hard lock date is out of scope for this module)."""
+        the hard lock date is out of scope for this module). Divergent fields are never written."""
         self.ensure_one()
-        lock_date_values = {field: self[field] for field in SOFT_LOCK_DATE_FIELDS if self[field] != company[field]}
+        lock_date_values = {
+            field: self[field] for field in self._get_editable_fields() if self[field] != company[field]
+        }
         for lock_date in lock_date_values.values():
             self._check_not_future(lock_date)
 
@@ -191,6 +241,8 @@ class AccountChangeLockDate(models.TransientModel):
         self.ensure_one()
         if not self.env.user.has_group("account.group_account_manager"):
             raise UserError(_("Only an accounting administrator is allowed to change lock dates."))
+        if self.show_close_per_company_warning:
+            raise UserError(_("None of the lock dates are common to the selected companies; close them one at a time."))
 
         exception_vals_list = self._prepare_exception_values()
         if exception_vals_list:
