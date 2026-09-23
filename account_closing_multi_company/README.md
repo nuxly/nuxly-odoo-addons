@@ -1,4 +1,4 @@
-# Account Multi-Company Closing
+# Account closing multi company
 
 [![License: AGPL-3](https://img.shields.io/badge/license-AGPL--3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
 
@@ -6,34 +6,33 @@ Technical name: `account_closing_multi_company`
 
 ## Description
 
-This module adds a "Period Closing" screen to review, at a glance, the
-accounting lock dates (Sales, Purchase, Tax, Lock Everything) of every
+This module adds a "Period closing" screen to review, at a glance, the
+accounting lock dates (sales, purchase, tax, lock everything) of every
 company the current user has access to, and update several companies at
 once from a single wizard instead of opening each company's settings form
 individually.
 
-Two distinct actions are available, depending on the user's role:
+Any user can preview the next monthly period: the four lock dates shown
+in the wizard are replaced by their own next month-end, for review. This
+only updates the wizard, nothing is written to the companies yet.
 
-- Any accounting user can close the next monthly period: each selected
-  company is advanced, independently, to the end of the month following
-  its own current lock date. The tax lock date is never touched by this
-  action.
-- An accounting manager can additionally force arbitrary lock dates,
-  identically, on all selected companies at once.
+Only an accounting manager can apply the dates shown in the wizard,
+identically, on all selected companies at once — either the previewed
+next period, or dates entered manually.
 
 A lock date can never be set in the future.
 
 ## Usage
 
-Open Accounting ▸ Accounting ▸ Closing ▸ Period Closing to see the lock
+Open Accounting ▸ Accounting ▸ Closing ▸ Period closing to see the lock
 dates of every company, then:
 
 1. Select one or more companies in the list and click **Close** (or use
    the row button) to open the wizard.
-2. Click **Close Next Monthly Period** to advance the selected companies
-   to the end of the following month, or, as an accounting manager, edit
-   the four lock date fields and click **Close** to force those exact
-   dates on all selected companies.
+2. Click **Next monthly period** to fill the four lock date fields with
+   their next month-end (nothing is applied yet), or edit them manually.
+3. As an accounting manager, click **Apply** to write those dates,
+   identically, on all selected companies.
 
 ## Roadmap
 

@@ -7,7 +7,7 @@ class ResCompany(models.Model):
     def action_open_closing_multi_wizard(self):
         return {
             "type": "ir.actions.act_window",
-            "name": _("Period Closing"),
+            "name": _("Period closing"),
             "res_model": "account.closing.multi.wizard",
             "view_mode": "form",
             "target": "new",

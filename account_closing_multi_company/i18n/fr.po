@@ -14,16 +14,16 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: account_closing_multi_company
+#. odoo-python
 #: code:addons/account_closing_multi_company/models/res_company.py:0
 #: model:ir.actions.act_window,name:account_closing_multi_company.action_account_closing_multi_company_list
 #: model:ir.ui.menu,name:account_closing_multi_company.menu_account_closing_multi_company_period
-#, python-format
-msgid "Period Closing"
+msgid "Period closing"
 msgstr "Clôture périodique"
 
 #. module: account_closing_multi_company
 #: model:ir.actions.server,name:account_closing_multi_company.action_open_closing_multi_wizard_server
-msgid "Close Period"
+msgid "Close period"
 msgstr "Clôture période"
 
 #. module: account_closing_multi_company
@@ -38,36 +38,48 @@ msgstr "Sociétés"
 
 #. module: account_closing_multi_company
 #: model:ir.model.fields,field_description:account_closing_multi_company.field_account_closing_multi_wizard__is_multi_company
-msgid "Multi-Company"
+msgid "Multi-company"
 msgstr "Multi-société"
 
 #. module: account_closing_multi_company
 #: model:ir.model.fields,field_description:account_closing_multi_company.field_account_closing_multi_wizard__is_accounting_admin
-msgid "Accounting Administrator"
+msgid "Accounting administrator"
 msgstr "Administrateur comptable"
 
 #. module: account_closing_multi_company
 #: model:ir.model.fields,field_description:account_closing_multi_company.field_account_closing_multi_wizard__sale_lock_date
+msgid "Sales lock date"
+msgstr "Verrou des ventes"
+
+#. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
-msgid "Sales Lock"
-msgstr "Verrou Vente"
+msgid "Sales lock"
+msgstr "Verrou des ventes"
 
 #. module: account_closing_multi_company
 #: model:ir.model.fields,field_description:account_closing_multi_company.field_account_closing_multi_wizard__purchase_lock_date
+msgid "Purchase lock date"
+msgstr "Verrou des achats"
+
+#. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
-msgid "Purchase Lock"
-msgstr "Verrou Achat"
+msgid "Purchase lock"
+msgstr "Verrou des achats"
 
 #. module: account_closing_multi_company
 #: model:ir.model.fields,field_description:account_closing_multi_company.field_account_closing_multi_wizard__tax_lock_date
+msgid "Tax return lock date"
+msgstr "Verrou déclaration TVA"
+
+#. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
-msgid "Tax Lock"
-msgstr "Verrou TVA"
+msgid "Tax lock"
+msgstr "Verrou déclaration TVA"
 
 #. module: account_closing_multi_company
 #: model:ir.model.fields,field_description:account_closing_multi_company.field_account_closing_multi_wizard__fiscalyear_lock_date
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
-msgid "Lock Everything"
+msgid "Lock everything"
 msgstr "Tout verrouiller"
 
 #. module: account_closing_multi_company
@@ -77,19 +89,18 @@ msgstr "Non verrouillé"
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_closing_multi_wizard_form
-msgid "Lock Dates"
+msgid "Lock dates"
 msgstr "Dates de verrouillage"
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_closing_multi_wizard_form
-msgid "Close Next Monthly Period"
-msgstr "Clôturer la prochaine période mensuelle"
+msgid "Next monthly period"
+msgstr "Prochaine période mensuelle"
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_closing_multi_wizard_form
-#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
-msgid "Close"
-msgstr "Clôturer"
+msgid "Apply"
+msgstr "Appliquer"
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_closing_multi_wizard_form
@@ -97,13 +108,18 @@ msgid "Cancel"
 msgstr "Annuler"
 
 #. module: account_closing_multi_company
+#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_list_closing_multi
+msgid "Close"
+msgstr "Clôturer"
+
+#. module: account_closing_multi_company
+#. odoo-python
 #: code:addons/account_closing_multi_company/wizards/account_closing_multi_wizard.py:0
-#, python-format
 msgid "You cannot set a lock date in the future."
 msgstr "Impossible de définir une date de verrouillage dans le futur."
 
 #. module: account_closing_multi_company
+#. odoo-python
 #: code:addons/account_closing_multi_company/wizards/account_closing_multi_wizard.py:0
-#, python-format
-msgid "Only an accounting administrator can force a lock date on several companies."
-msgstr "Seul un administrateur comptable peut forcer une date de verrouillage sur plusieurs sociétés."
+msgid "Only an accounting administrator can apply a lock date on several companies."
+msgstr "Seul un administrateur comptable peut appliquer une date de verrouillage sur plusieurs sociétés."
