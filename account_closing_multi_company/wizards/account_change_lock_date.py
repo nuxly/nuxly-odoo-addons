@@ -108,22 +108,6 @@ class AccountChangeLockDate(models.TransientModel):
             "target": "new",
         }
 
-    def action_increment_all(self):
-        """Preview only: advance every editable lock date field to its own next month-end. Nothing is
-        written to the companies until "Apply" is pressed."""
-        self.ensure_one()
-        values = {field: self._next_month_end(self[field]) for field in self._get_editable_fields()}
-        for lock_date in values.values():
-            self._check_not_future(lock_date)
-        self.write(values)
-        return {
-            "type": "ir.actions.act_window",
-            "res_model": self._name,
-            "res_id": self.id,
-            "view_mode": "form",
-            "target": "new",
-        }
-
     def action_increment_sale_lock_date(self):
         return self._increment_field("sale_lock_date")
 

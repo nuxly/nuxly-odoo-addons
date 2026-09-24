@@ -16,8 +16,8 @@ msgstr ""
 #. module: account_closing_multi_company
 #: model:ir.actions.act_window,name:account_closing_multi_company.action_account_closing_multi_company_list
 #: model:ir.ui.menu,name:account_closing_multi_company.menu_account_closing_multi_company_period
-msgid "Period closing"
-msgstr "Clôture périodique"
+msgid "Lock dates"
+msgstr "Dates de verrouillage"
 
 #. module: account_closing_multi_company
 #. odoo-python
@@ -27,7 +27,6 @@ msgstr "Verrouiller les pièces comptables"
 
 #. module: account_closing_multi_company
 #: model:ir.actions.server,name:account_closing_multi_company.action_open_closing_multi_wizard_server
-#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_company_tree_closing_button
 msgid "Close period"
 msgstr "Clôture période"
 
@@ -94,11 +93,6 @@ msgstr "Seul un administrateur comptable est autorisé à modifier les dates de 
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
 msgid "Apply"
 msgstr "Appliquer"
-
-#. module: account_closing_multi_company
-#: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
-msgid "Next monthly period"
-msgstr "Prochaine période mensuelle"
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
