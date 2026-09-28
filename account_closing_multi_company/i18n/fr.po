@@ -17,7 +17,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:account_closing_multi_company.action_account_closing_multi_company_list
 #: model:ir.ui.menu,name:account_closing_multi_company.menu_account_closing_multi_company_period
 msgid "Lock dates"
-msgstr "Dates de verrouillage"
+msgstr "Clôture sociétés"
 
 #. module: account_closing_multi_company
 #. odoo-python
