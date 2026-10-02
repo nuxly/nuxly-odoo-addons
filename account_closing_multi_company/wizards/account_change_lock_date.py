@@ -235,12 +235,16 @@ class AccountChangeLockDate(models.TransientModel):
         company.sudo().write(lock_date_values)
 
     def change_lock_date(self):
-        """Same permission check and flow as Odoo's own method, applied to every selected company:
-        exceptions are created once for all companies that need one, then each company gets its own
-        direct lock date write for the fields that don't need an exception."""
+        """Same flow as Odoo's own method, applied to every selected company: exceptions are created
+        once for all companies that need one, then each company gets its own direct lock date write for
+        the fields that don't need an exception. Unlike Odoo's own wizard (accounting administrators
+        only), accountants ("Show Full Accounting Features", account.group_account_user) are allowed to
+        close periods too: the menu, the "Close period" action and the wizard access are already granted
+        to that group. The manager group is checked explicitly as well, since it does not imply
+        account.group_account_user in every configuration."""
         self.ensure_one()
-        if not self.env.user.has_group("account.group_account_manager"):
-            raise UserError(_("Only an accounting administrator is allowed to change lock dates."))
+        if not (self.env.user.has_group("account.group_account_user") or self.env.user.has_group("account.group_account_manager")):
+            raise UserError(_("Only an accountant is allowed to change lock dates."))
         if self.show_close_per_company_warning:
             raise UserError(_("None of the lock dates are common to the selected companies; close them one at a time."))
 
@@ -248,7 +252,11 @@ class AccountChangeLockDate(models.TransientModel):
         if exception_vals_list:
             # account.lock_exception.create() pops the lock-date field key out of each vals dict it
             # receives; pass copies so exception_vals_list still has it for _prepare_lock_date_values.
-            self.env["account.lock_exception"].create([dict(vals) for vals in exception_vals_list])
+            # sudo(): Odoo only grants create on account.lock_exception to accounting administrators, while
+            # accountants may close periods through this wizard too (see the permission check above). The
+            # exceptions still record the current user as author (sudo keeps the uid) and as beneficiary
+            # when "for me" was chosen (user_id is set explicitly in the values).
+            self.env["account.lock_exception"].sudo().create([dict(vals) for vals in exception_vals_list])
 
         for company in self._get_companies():
             lock_date_values = self._prepare_lock_date_values(company, exception_vals_list=exception_vals_list)

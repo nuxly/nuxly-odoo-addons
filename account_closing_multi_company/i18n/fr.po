@@ -86,8 +86,8 @@ msgstr "Impossible de définir une date de verrouillage dans le futur."
 #. module: account_closing_multi_company
 #. odoo-python
 #: code:addons/account_closing_multi_company/wizards/account_change_lock_date.py:0
-msgid "Only an accounting administrator is allowed to change lock dates."
-msgstr "Seul un administrateur comptable est autorisé à modifier les dates de verrouillage."
+msgid "Only an accountant is allowed to change lock dates."
+msgstr "Seul un comptable est autorisé à modifier les dates de verrouillage."
 
 #. module: account_closing_multi_company
 #: model_terms:ir.ui.view,arch_db:account_closing_multi_company.view_account_change_lock_date_multi_company
