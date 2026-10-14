@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- The native checkbox click handler takes no event parameter, so toggleCompany()
+         has no way to see the shift key. Forward the click event through instead. -->
+    <t t-inherit="web.SwitchCompanyItem" t-inherit-mode="extension">
+        <xpath expr="//div[@role='menuitemcheckbox']" position="attributes">
+            <attribute name="t-on-click.stop">(ev) => this.toggleCompany(ev)</attribute>
+        </xpath>
+    </t>
+</templates>
