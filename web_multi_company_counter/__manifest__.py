@@ -1,10 +1,10 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
 
 {
-    "name": "Multi-Company Selection Counter",
+    "name": "Multi-company selection counter",
     "summary": "Systray badge showing how many companies are currently selected, "
     "plus shift+click range selection in the company switcher",
-    "version": "19.0.1.3.0",
+    "version": "19.0.1.3.1",
     "category": "Extra Tools",
     "author": "Nuxly",
     "license": "LGPL-3",

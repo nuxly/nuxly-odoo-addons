@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multi-Company Selection Counter</title>
+  <title>Multi-company selection counter</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <style>
@@ -80,18 +80,18 @@
 <body>
 
   <div class="container text-center my-5">
-    <img src="banner.gif" alt="Multi-Company Selection Counter" class="img-fluid mb-4" style="max-width: 100%;"/>
-    <h1 class="hero-title">Multi-Company Selection Counter</h1>
+    <img src="banner.gif" alt="Multi-company selection counter" class="img-fluid mb-4" style="max-width: 100%;"/>
+    <h1 class="hero-title">Multi-company selection counter</h1>
     <p class="subtitle mb-4">Know at a glance how many companies you have selected</p>
     <p style="font-size:16px; color:#555; max-width:700px; margin:0 auto;">
       Adds a small badge directly on the company switcher button, showing how many
-      companies are currently selected — so multi-company users stop getting
-      confused about which companies' data they are actually looking at.
+      companies are currently selected, and lets you select a whole range of
+      companies with a single shift+click.
     </p>
   </div>
 
   <div class="container">
-    <h2 class="text-center mb-4 section-title">Key Features</h2>
+    <h2 class="text-center mb-4 section-title">Key features</h2>
     <div class="row">
       <div class="col-md-6">
         <div class="feature-row">
@@ -102,7 +102,7 @@
       <div class="col-md-6">
         <div class="feature-row">
           <div class="feature-icon"><i class="fa fa-eye-slash"></i></div>
-          <span class="feature-text">Only appears once 2 or more companies are selected — no clutter for single-company users</span>
+          <span class="feature-text">Only appears once 2 or more companies are selected: no clutter for single-company users</span>
         </div>
       </div>
       <div class="col-md-6">
@@ -113,43 +113,83 @@
       </div>
       <div class="col-md-6">
         <div class="feature-row">
-          <div class="feature-icon"><i class="fa fa-plug"></i></div>
-          <span class="feature-text">Lightweight standalone module, only depends on Web — no configuration needed</span>
+          <div class="feature-icon"><i class="fa fa-list"></i></div>
+          <span class="feature-text">Shift+click range selection: select every company between two clicks at once</span>
         </div>
       </div>
       <div class="col-md-6">
         <div class="feature-row">
-          <div class="feature-icon"><i class="fa fa-list"></i></div>
-          <span class="feature-text">Shift+click range selection: click a company, then shift+click another one further down to select every company in between</span>
+          <div class="feature-icon"><i class="fa fa-search"></i></div>
+          <span class="feature-text">Range follows the list as displayed, including the switcher's search filter</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-plug"></i></div>
+          <span class="feature-text">Lightweight: only depends on Web, no configuration, Community and Enterprise</span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="container mt-5">
-    <h2 class="text-center mb-4 section-title">Setup Steps</h2>
+    <h2 class="text-center mb-4 section-title">Setup steps</h2>
     <ol class="list-group list-group-numbered">
       <li class="list-group-item">Install the module: <code style="color: #be1727;">web_multi_company_counter</code></li>
-      <li class="list-group-item">Nothing else to configure — the badge appears automatically for any user who selects 2 or more companies</li>
+      <li class="list-group-item">Nothing else to configure: both features are available right away for every user with access to several companies</li>
     </ol>
   </div>
 
   <div class="container mt-5">
-    <h2 class="text-center mb-4 section-title">Why this Module?</h2>
+    <h2 class="text-center mb-4 section-title">How to use</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <h4 class="section-title">Selection counter</h4>
+        <p style="font-size: 16px; color: #555;">
+          Tick 2 or more companies in the company switcher: the badge shows their
+          number on the switcher button. Go back to a single company and the badge
+          disappears.
+        </p>
+      </div>
+      <div class="col-md-6">
+        <h4 class="section-title">Shift+click range selection</h4>
+        <ol style="font-size: 16px; color: #555;">
+          <li>Open the company switcher</li>
+          <li>Click the checkbox of a first company</li>
+          <li>Hold <strong>Shift</strong> and click the checkbox of another company, above or below</li>
+        </ol>
+        <p style="font-size: 16px; color: #555;">
+          Every company in between (both included) is added to the selection.
+          Companies you are not allowed to select are skipped. A click without
+          Shift keeps Odoo's standard behaviour.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Why this module?</h2>
     <div class="alert alert-info" style="font-size: 16px;">
       <p>
         In multi-company setups, it is easy to lose track of how many companies are
-        currently selected. Clicking on a record tied to a specific company can
-        silently switch the active company, and conversely, users sometimes think
-        they are scoped to a single company while another one is still selected —
-        leading to confusion about which records they are actually seeing.
+        currently selected. Users sometimes think they are scoped to a single
+        company while another one is still selected, leading to confusion about
+        which records they are actually seeing.
       </p>
       <p class="mb-0">
-        This module adds a simple visual reminder, right where users already look
-        (the company switcher itself), so the current multi-company state is never
-        a surprise.
+        This module adds a simple visual reminder right where users already look
+        (the company switcher itself), and makes selecting many companies at once
+        a matter of two clicks instead of one click per company.
       </p>
     </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Known limitations</h2>
+    <ul class="list-group">
+      <li class="list-group-item">A shift+click range only adds companies to the selection, it never unticks any</li>
+      <li class="list-group-item">The starting point of a range is the last company clicked, remembered until the page is reloaded</li>
+    </ul>
   </div>
 
   <div class="container mt-5">
@@ -165,11 +205,11 @@
   </div>
 
   <div class="container mt-5">
-    <h2 class="text-center mb-4 section-title">Support &amp; Contact</h2>
+    <h2 class="text-center mb-4 section-title">Support &amp; contact</h2>
     <div class="text-center">
       <a href="mailto:bonjour@nuxly.com" class="btn btn-lg" style="background-color:#be1727; color:white; border:none; border-radius:6px; padding: 10px 10px 15px;">
         <i class="fa fa-envelope" style="margin-right: 2px;"></i>
-        Contact Support
+        Contact support
       </a>
     </div>
   </div>
