@@ -166,35 +166,52 @@ class HrExpenseMaTripWizard(models.TransientModel):
         The method keeps the external API handling isolated from the button
         action so the parsing and error management can be reused or replaced
         later if another distance provider is introduced.
+
+        Any API failure (network, HTTP, Google status such as REQUEST_DENIED
+        on a billing issue, address not found...) shows the same readable
+        message to the user, since the raw status means nothing to them; the
+        technical details are only written in the server logs for the
+        administrator.
         """
         _logger.info(
             "IK get_google_distance - request origin=%r destination=%r",
             origin_address, destination_address,
         )
-        response = requests.get(
-            "https://maps.googleapis.com/maps/api/distancematrix/json",
-            params={
-                "origins": origin_address,
-                "destinations": destination_address,
-                "key": api_key,
-                "units": "metric",
-                "language": "fr",
-                "region": "fr",
-            },
-            timeout=15,
-        )
-        response.raise_for_status()
-        result = response.json()
+        api_error = UserError(_(
+            "An error occurred with the Google Maps service while computing the distance. "
+            "Please contact your administrator."
+        ))
+        try:
+            response = requests.get(
+                "https://maps.googleapis.com/maps/api/distancematrix/json",
+                params={
+                    "origins": origin_address,
+                    "destinations": destination_address,
+                    "key": api_key,
+                    "units": "metric",
+                    "language": "fr",
+                    "region": "fr",
+                },
+                timeout=15,
+            )
+            response.raise_for_status()
+            result = response.json()
+        except (requests.RequestException, ValueError):
+            _logger.exception("IK get_google_distance - Google Maps API request failed")
+            raise api_error
         _logger.info("IK get_google_distance - response status=%s raw=%s", result.get("status"), result)
 
         if result.get("status") != "OK":
-            _logger.warning("IK get_google_distance - Google Maps API error: %s", result.get("status"))
-            raise UserError(_("Google Maps API error: %s") % result.get("status"))
+            _logger.error(
+                "IK get_google_distance - Google Maps API error: status=%s error_message=%s",
+                result.get("status"), result.get("error_message"),
+            )
+            raise api_error
 
         element = result["rows"][0]["elements"][0]
         if element.get("status") != "OK":
-            _logger.warning("IK get_google_distance - element status not OK: %s", element.get("status"))
-            raise UserError(_("Unable to compute the distance for this trip: %s") % element.get("status"))
+            _logger.error("IK get_google_distance - element status not OK: %s", element.get("status"))
+            raise api_error
 
         data = {
             "distance_km": element["distance"]["value"] / 1000,
@@ -236,14 +253,19 @@ class HrExpenseMaTripWizard(models.TransientModel):
         self._compute_ik_trip_distance()
         _logger.info("IK action_apply - start wizard=%s distance=%s", self.id, self.distance)
 
+        # The address type label is appended so the trip note shows where each
+        # address comes from, e.g. "12 rue X, Paris (Home)".
+        address_type_labels = dict(self._fields["origin_type"]._description_selection(self.env))
+        origin_address = self._format_ik_trip_address(
+            self.origin_type, self._get_ik_trip_address_parts(self.origin_type, self._get_ik_wizard_address_parts("origin"))
+        )
+        destination_address = self._format_ik_trip_address(
+            self.destination_type, self._get_ik_trip_address_parts(self.destination_type, self._get_ik_wizard_address_parts("destination"))
+        )
         vals = {
             "ik_vehicle_id": self.vehicle_id.id,
-            "ik_origin_address": self._format_ik_trip_address(
-                self.origin_type, self._get_ik_trip_address_parts(self.origin_type, self._get_ik_wizard_address_parts("origin"))
-            ),
-            "ik_destination_address": self._format_ik_trip_address(
-                self.destination_type, self._get_ik_trip_address_parts(self.destination_type, self._get_ik_wizard_address_parts("destination"))
-            ),
+            "ik_origin_address": f"{origin_address} ({address_type_labels[self.origin_type]})",
+            "ik_destination_address": f"{destination_address} ({address_type_labels[self.destination_type]})",
             "ik_google_origin_address": self.google_origin_address,
             "ik_google_destination_address": self.google_destination_address,
             "ik_trip_type": self.trip_type,

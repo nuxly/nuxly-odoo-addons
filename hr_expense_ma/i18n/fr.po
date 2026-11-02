@@ -353,8 +353,12 @@ msgstr "Types de carburant"
 #. module: hr_expense_ma
 #. odoo-python
 #: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
-msgid "Google Maps API error: %s"
-msgstr "Erreur de l'API Google Maps : %s"
+msgid ""
+"An error occurred with the Google Maps service while computing the "
+"distance. Please contact your administrator."
+msgstr ""
+"Une erreur du service Google Maps est survenue lors du calcul de la "
+"distance. Veuillez vous rapprocher de votre administrateur."
 
 #. module: hr_expense_ma
 #: model:ir.model.fields,field_description:hr_expense_ma.field_hr_expense__ik_google_destination_address
@@ -855,12 +859,6 @@ msgstr "Type de trajet"
 #: model:ir.model.fields,help:hr_expense_ma.field_hr_expense_ma_scale__activity_exception_decoration
 msgid "Type of the exception activity on record."
 msgstr "Type de l'activité d'exception enregistrée."
-
-#. module: hr_expense_ma
-#. odoo-python
-#: code:addons/hr_expense_ma/wizards/hr_expense_ma_trip_wizard.py:0
-msgid "Unable to compute the distance for this trip: %s"
-msgstr "Impossible de calculer la distance pour ce trajet : %s"
 
 #. module: hr_expense_ma
 #: model:ir.model,name:hr_expense_ma.model_fleet_vehicle
