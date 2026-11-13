@@ -1,0 +1,62 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* account_report_ledger_navigation
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
+msgid "Next partner"
+msgstr "Partenaire suivant"
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_general_ledger.py:0
+msgid "Next account"
+msgstr "Compte suivant"
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
+msgid "Previous partner"
+msgstr "Partenaire précédent"
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_general_ledger.py:0
+msgid "Previous account"
+msgstr "Compte précédent"
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_general_ledger.py:0
+msgid "This is the first account."
+msgstr "Vous êtes sur le premier compte."
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
+msgid "This is the first partner."
+msgstr "Vous êtes sur le premier partenaire."
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_general_ledger.py:0
+msgid "This is the last account."
+msgstr "Vous êtes sur le dernier compte."
+
+#. module: account_report_ledger_navigation
+#. odoo-python
+#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
+msgid "This is the last partner."
+msgstr "Vous êtes sur le dernier partenaire."
