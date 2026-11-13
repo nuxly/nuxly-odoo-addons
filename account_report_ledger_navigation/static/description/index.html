@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account report ledger navigation</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <style>
+    .hero-title {
+      font-family: Montserrat, sans-serif;
+      font-size: 40px;
+      font-weight: 800;
+      color: #8aaebb;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #74788D;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 500;
+    }
+
+    .feature-row {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      margin-right: 15px;
+      border-radius: 50%;
+      background: #8aaebb;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .feature-text {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .section-title {
+      color: #3b3b3b;
+    }
+
+    .screenshot-card {
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .screenshot-card img {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .screenshot-caption {
+      margin-top: 8px;
+      color: #74788D;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container text-center my-5">
+    <h1 class="hero-title">Account report ledger navigation</h1>
+    <p class="subtitle mb-4">Review accounts and partners one after the other</p>
+    <p style="font-size:16px; color:#555; max-width:700px; margin:0 auto;">
+      Adds "Previous" and "Next" buttons to the general ledger and the partner ledger, so
+      accountants can go through every account (or partner) in one click, without going back
+      to the trial balance each time.
+    </p>
+  </div>
+
+  <div class="container">
+    <h2 class="text-center mb-4 section-title">Key features</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-book"></i></div>
+          <span class="feature-text">"Previous account" and "Next account" buttons on the general ledger, in account code order</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-users"></i></div>
+          <span class="feature-text">"Previous partner" and "Next partner" buttons on the partner ledger, in the ledger's own order</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-filter"></i></div>
+          <span class="feature-text">Only goes through the accounts (or partners) shown by the ledger with the current period, companies, journals and draft entries filters</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-level-down"></i></div>
+          <span class="feature-text">Each account (or partner) is opened alone and unfolded, ready to be reviewed</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-map-signs"></i></div>
+          <span class="feature-text">The next ledger replaces the current one: the breadcrumb does not grow at every click</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-row">
+          <div class="feature-icon"><i class="fa fa-plug"></i></div>
+          <span class="feature-text">No configuration needed, works with the standard Odoo Enterprise accounting reports</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Setup steps</h2>
+    <ol class="list-group list-group-numbered">
+      <li class="list-group-item">Install the module: <code style="color: #be1727;">account_report_ledger_navigation</code></li>
+      <li class="list-group-item">Open Accounting &gt; Reporting &gt; Trial balance, then open the general ledger of an account from the menu next to its name</li>
+      <li class="list-group-item">Click <strong>Next account</strong> or <strong>Previous account</strong> to review the following or preceding account</li>
+      <li class="list-group-item">In Accounting &gt; Reporting &gt; Partner ledger, select a partner, then click <strong>Next partner</strong> or <strong>Previous partner</strong></li>
+    </ol>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Why this module?</h2>
+    <div class="alert alert-info" style="font-size: 16px;">
+      <p>
+        Reviewing accounts one by one from the trial balance means, for every account: unfolding
+        the account groups, opening the menu next to the account, choosing "General ledger", then
+        going back to the trial balance to start again with the next account.
+      </p>
+      <p class="mb-0">
+        This module turns that into a single click: once in the general ledger (or the partner
+        ledger), the previous and next buttons go straight to the adjacent account (or partner),
+        with the same filters.
+      </p>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Screenshots</h2>
+    <div class="screenshot-card">
+      <img src="general_ledger_navigation.jpg" alt="Previous and next account buttons on the general ledger">
+      <div class="screenshot-caption">General ledger opened from the trial balance, with the "Previous account" and "Next account" buttons</div>
+    </div>
+    <div class="screenshot-card">
+      <img src="partner_ledger_navigation.jpg" alt="Previous and next partner buttons on the partner ledger">
+      <div class="screenshot-caption">Partner ledger on a single partner, unfolded, with the "Previous partner" and "Next partner" buttons</div>
+    </div>
+  </div>
+
+  <div class="container mt-5">
+    <h2 class="text-center mb-4 section-title">Support &amp; contact</h2>
+    <div class="text-center">
+      <a href="mailto:bonjour@nuxly.com" class="btn btn-lg" style="background-color:#be1727; color:white; border:none; border-radius:6px; padding: 10px 10px 15px;">
+        <i class="fa fa-envelope" style="margin-right: 2px;"></i>
+        Contact support
+      </a>
+    </div>
+  </div>
+
+  <div class="container text-center my-5">
+    <p class="text-muted">
+      This module is maintained by <strong>Nuxly</strong>. Visit
+      <a href="https://nuxly.com" target="_blank" style="color: #be1727; text-decoration: underline;">nuxly.com</a>
+    </p>
+  </div>
+
+</body>
+</html>
