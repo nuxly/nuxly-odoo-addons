@@ -3,7 +3,7 @@
 
 {
     "name": "Account report ledger navigation",
-    "summary": "Previous / next account and partner buttons on the general and partner ledgers",
+    "summary": "Previous / next account buttons on the general ledger",
     "version": "19.0.1.1.0",
     "category": "Accounting",
     "website": "https://github.com/nuxly/nuxly-odoo-addons",

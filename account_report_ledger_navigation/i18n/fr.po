@@ -15,21 +15,9 @@ msgstr ""
 
 #. module: account_report_ledger_navigation
 #. odoo-python
-#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
-msgid "Next partner"
-msgstr "Partenaire suivant"
-
-#. module: account_report_ledger_navigation
-#. odoo-python
 #: code:addons/account_report_ledger_navigation/models/account_general_ledger.py:0
 msgid "Next account"
 msgstr "Compte suivant"
-
-#. module: account_report_ledger_navigation
-#. odoo-python
-#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
-msgid "Previous partner"
-msgstr "Partenaire précédent"
 
 #. module: account_report_ledger_navigation
 #. odoo-python
@@ -45,18 +33,6 @@ msgstr "Vous êtes sur le premier compte."
 
 #. module: account_report_ledger_navigation
 #. odoo-python
-#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
-msgid "This is the first partner."
-msgstr "Vous êtes sur le premier partenaire."
-
-#. module: account_report_ledger_navigation
-#. odoo-python
 #: code:addons/account_report_ledger_navigation/models/account_general_ledger.py:0
 msgid "This is the last account."
 msgstr "Vous êtes sur le dernier compte."
-
-#. module: account_report_ledger_navigation
-#. odoo-python
-#: code:addons/account_report_ledger_navigation/models/account_partner_ledger.py:0
-msgid "This is the last partner."
-msgstr "Vous êtes sur le dernier partenaire."
