@@ -9,6 +9,9 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
 
     def _custom_options_initializer(self, report, options, previous_options):
         super()._custom_options_initializer(report, options, previous_options=previous_options)
+        # Kept from one ledger to the next, see AccountReport.caret_option_open_general_ledger().
+        if previous_options.get("ledger_navigation_search"):
+            options["ledger_navigation_search"] = previous_options["ledger_navigation_search"]
         # "replace_current_action" makes the client open the next ledger in
         # place of the current one, instead of stacking a new breadcrumb at
         # every click (see account_report_controller.esm.js).
@@ -40,6 +43,12 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         Same scope as the ledger itself: every account with entries up to the
         end of the period, income and expense accounts being only taken from
         the start of the current fiscal year.
+
+        When the ledger was opened from a trial balance filtered by its search
+        bar, only the accounts this search shows in the trial balance are
+        kept, as long as the current account is one of them (otherwise the
+        user has searched another account since, and the trial balance search
+        no longer applies).
         """
         date_from = fields.Date.from_string(options["date"]["date_from"])
         fiscalyear_date_from = self.env.company.compute_fiscalyear_dates(date_from)["date_from"]
@@ -53,11 +62,34 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         # The account code depends on the company: read it with one of the
         # report companies the account belongs to.
         companies = self.env["res.company"].browse(report.get_report_company_ids(options))
-        codes = {
-            account.with_company((account.company_ids & companies)[:1] or account.company_ids[:1]).code
-            for account in accounts
-        }
-        return sorted(code for code in codes if code)
+        accounts_by_code = {}
+        for account in accounts:
+            account = account.with_company((account.company_ids & companies)[:1] or account.company_ids[:1])
+            if account.code:
+                accounts_by_code[account.code] = account
+        codes = sorted(accounts_by_code)
+
+        trial_balance_search = (options.get("ledger_navigation_search") or "").strip().lower()
+        if trial_balance_search:
+            matched_codes = [
+                code for code in codes
+                if self._is_account_shown_by_search(accounts_by_code[code], trial_balance_search)
+            ]
+            if (options.get("filter_search_bar") or "").strip() in matched_codes:
+                codes = matched_codes
+        return codes
+
+    def _is_account_shown_by_search(self, account, search):
+        """Whether the trial balance search bar shows this account: like on the
+        client side, the account line matches when its name contains the text,
+        or when one of its account group lines does (a matching line also
+        shows the lines below it)."""
+        names = [account.display_name]
+        group = account.group_id
+        while group:
+            names.append(group.display_name)
+            group = group.parent_id
+        return any(search in (name or "").lower() for name in names)
 
     def action_open_adjacent_account(self, options, direction):
         """Open the general ledger on the account before or after the one
@@ -93,4 +125,5 @@ class AccountGeneralLedgerReportHandler(models.AbstractModel):
         action["params"] = {"options": new_options, "ignore_session": True}
         # The search bar input is filled from this context key on load.
         action["context"] = dict(ast.literal_eval(action["context"]), default_filter_accounts=code)
+        action["name"] = action["display_name"] = f"{action['name']} - {code}"
         return action
