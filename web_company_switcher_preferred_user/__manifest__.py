@@ -12,6 +12,11 @@
     "data": [
         "views/res_company_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "web_company_switcher_preferred_user/static/src/xml/switch_company_item.xml",
+        ],
+    },
     "installable": True,
     "application": False,
 }

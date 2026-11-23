@@ -12,7 +12,7 @@ class IrHttp(models.AbstractModel):
 
         Only the sequence sent to the browser for this user is lowered: nothing is written in the
         database and the order stays the same for the other users. The companies keep their own
-        order among themselves.
+        order among themselves. They are flagged `is_preferred` to show a star in the switcher.
         """
         info = super().session_info()
         allowed = info.get("user_companies", {}).get("allowed_companies")
@@ -22,4 +22,5 @@ class IrHttp(models.AbstractModel):
             )
             for company in companies:
                 allowed[company.id]["sequence"] -= PREFERRED_OFFSET
+                allowed[company.id]["is_preferred"] = True
         return info
