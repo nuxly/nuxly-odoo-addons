@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Star on the right of the companies the user is a preferred user of. -->
+    <t t-inherit="web.SwitchCompanyItem" t-inherit-mode="extension">
+        <!-- The current company row has no "btn" class, hence no right padding: force the same
+             padding on every row so the star stays aligned. -->
+        <xpath expr="//div[hasclass('log_into')]" position="attributes">
+            <attribute name="class" add="pe-3" separator=" "/>
+        </xpath>
+        <xpath expr="//span[hasclass('company_label')]" position="after">
+            <i t-if="props.company.is_preferred"
+               class="fa fa-star text-warning ms-auto ps-2"
+               role="img"
+               aria-label="Preferred company"
+               title="Preferred company"/>
+        </xpath>
+    </t>
+</templates>

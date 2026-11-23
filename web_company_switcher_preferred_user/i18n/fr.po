@@ -36,3 +36,9 @@ msgstr ""
 #: model:ir.model.fields,field_description:web_company_switcher_preferred_user.field_res_company__preferred_user_ids
 msgid "Preferred users"
 msgstr "Utilisateurs préférentiels"
+
+#. module: web_company_switcher_preferred_user
+#. odoo-javascript
+#: code:addons/web_company_switcher_preferred_user/static/src/xml/switch_company_item.xml:0
+msgid "Preferred company"
+msgstr "Société préférentielle"

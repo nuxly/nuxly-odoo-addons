@@ -30,7 +30,8 @@ users** (right below the parent company).
 
 When one of these users opens the company switcher (after a page
 reload), the companies they are a preferred user of are listed first, in
-their usual order among themselves, followed by the other companies.
+their usual order among themselves and marked with a star, followed by
+the other companies.
 
 ## Technical notes
 
@@ -40,6 +41,9 @@ their usual order among themselves, followed by the other companies.
   browser of the companies the user is a preferred user of is lowered,
   for this user only. The native switcher sorts by sequence, so no
   JavaScript is needed.
+- These companies are also flagged `is_preferred` in the session, and
+  an extension of the `web.SwitchCompanyItem` template shows a star on
+  their right in the switcher.
 - Compatible with `web_multi_company_counter`.
 
 ## Credits
